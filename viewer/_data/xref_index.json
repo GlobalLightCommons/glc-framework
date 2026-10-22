@@ -1,0 +1,20 @@
+{
+  "study_schema.study_internal_id": [
+    {
+      "schema": "dataset_schema",
+      "field": "dataset_crossref.dataset_crossref_study_id"
+    }
+  ],
+  "participant_schema.participant_internal_id": [
+    {
+      "schema": "dataset_schema",
+      "field": "dataset_crossref.dataset_crossref_participant_id"
+    }
+  ],
+  "device_schema.device_internal_id": [
+    {
+      "schema": "dataset_schema",
+      "field": "dataset_crossref.dataset_crossref_device_id"
+    }
+  ]
+}

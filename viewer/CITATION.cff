@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use the GLC data-package viewer, please cite this software and the GLC metadata publication."
+type: software
+license: MIT
+title: Global Light Commons Data Package Viewer
+authors:
+  - name: GLC Development Team
+repository-code: https://github.com/globallightcommons/glc-dp-viewer
+url: https://docs.globallightcommons.org/
+keywords:
+  - light exposure
+  - optical radiation
+  - metadata
+  - data package
+  - frictionless data

@@ -1,0 +1,50 @@
+[
+  {
+    "schema_version": "3.0.2",
+    "device_internal_id": "IZTECH_AL03",
+    "device_manufacturer": "Condor Instruments",
+    "device_model": "ActLumus AL0101",
+    "device_serial_number": "4539",
+    "device_calibration_date": "2024-09-20",
+    "device_datasheet_id": "actlumus-al0101",
+    "device_sensors": [
+      {
+        "device_sensor_type": "spectral, photopic, and melanopic light sensor"
+      },
+      {
+        "device_sensor_type": "triaxial accelerometer"
+      },
+      {
+        "device_sensor_type": "skin and ambient temperature sensor"
+      },
+      {
+        "device_sensor_type": "capacitive off-wrist sensor"
+      }
+    ],
+    "device_firmware_version": "1.8"
+  },
+  {
+    "schema_version": "3.0.2",
+    "device_internal_id": "IZTECH_AL04",
+    "device_manufacturer": "Condor Instruments",
+    "device_model": "ActLumus AL0101",
+    "device_serial_number": "4536",
+    "device_calibration_date": "2024-09-20",
+    "device_datasheet_id": "actlumus-al0101",
+    "device_sensors": [
+      {
+        "device_sensor_type": "spectral, photopic, and melanopic light sensor"
+      },
+      {
+        "device_sensor_type": "triaxial accelerometer"
+      },
+      {
+        "device_sensor_type": "skin and ambient temperature sensor"
+      },
+      {
+        "device_sensor_type": "capacitive off-wrist sensor"
+      }
+    ],
+    "device_firmware_version": "1.8"
+  }
+]

@@ -1,0 +1,36 @@
+# Site settings
+title: Global Light Commons
+author: GLC Development Team
+email: johannes.zauner@tum.de
+url: "https://docs.globallightcommons.org"
+baseurl: ""
+
+# SOCIAL PROFILES
+social:
+  github: globallightcommons/glc-dp-viewer
+
+
+# Theme
+theme: minima
+remote_theme: tdwg/petridish
+github_edit: false
+logo: assets/GLC_Logo.png
+
+# Build settings
+repository: globallightcommons/glc-dp-viewer # Required so Jekyll on GitHub Actions can access repo metadata
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+
+exclude:
+   - .sass-cache/
+   - .jekyll-cache/
+   - gemfiles/
+   - Gemfile
+   - Gemfile.lock
+   - node_modules/
+   - vendor/bundle/
+   - vendor/cache/
+   - vendor/gems/
+   - vendor/ruby/

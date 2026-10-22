@@ -1,0 +1,358 @@
+---
+layout: default
+---
+
+<style>
+  /* Let tables size naturally (prevents vertical letter stacking) */
+  table {
+    width: 100%;
+    table-layout: auto;
+  }
+
+  th, td {
+    vertical-align: top;
+  }
+
+  /* First column: readable but not collapsing layout */
+  table td:first-child,
+  table th:first-child {
+    width: 280px;
+    padding-right: 0.75rem;
+    white-space: normal;
+  }
+
+  /* Always expose complete field names, including long underscore-delimited names. */
+  table td:first-child code {
+    display: inline;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    vertical-align: bottom;
+  }
+
+  /* Nested (collapsible) JSON schema rendering */
+  .schema-nested {
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(0,0,0,0.08);
+    container-type: inline-size;
+  }
+
+  .schema-nested-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 34%) minmax(0, 1fr) 80px;
+    column-gap: 1rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    align-items: start;
+  }
+
+  .schema-nested-row:first-child {
+    border-top: none;
+  }
+
+  .schema-nested-name code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    display: inline;
+    max-width: 100%;
+  }
+
+  .schema-nested-type {
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .schema-details summary {
+    cursor: pointer;
+    user-select: none;
+    margin-top: 0.25rem;
+  }
+
+  /* Prevent per-letter word breaking in nested definitions */
+  .schema-nested-def,
+  .schema-nested-def p,
+  .schema-nested-def li {
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: manual !important;
+  }
+
+  /* Nested schemas live inside the Definition column. Respond to that
+     container's width rather than the width of the browser window. */
+  @container (max-width: 560px) {
+    .schema-nested-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.4rem 0.75rem;
+    }
+
+    .schema-nested-def {
+      grid-column: 1 / -1;
+    }
+
+    .schema-nested-type {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
+
+  @container (max-width: 340px) {
+    .schema-nested-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .schema-nested-type {
+      grid-column: 1;
+      grid-row: auto;
+      text-align: left;
+    }
+  }
+
+  /* Resource-level badges (Required / Example) */
+  .badge-required {
+    display: inline-block;
+    font-weight: 700;
+    margin-left: 0.35rem;
+  }
+
+  .badge-example {
+    display: inline-block;
+    margin-left: 0.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.25rem;
+    background: rgba(0,0,0,0.08);
+    font-size: 0.8em;
+    vertical-align: middle;
+  }
+
+  /* Optional badge is off by default; enable per resource with optional_label: true */
+  .badge-optional {
+    display: inline-block;
+    margin-left: 0.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.25rem;
+    background: rgba(0,0,0,0.05);
+    font-size: 0.8em;
+    vertical-align: middle;
+  }
+
+  @media (max-width: 767.98px) {
+    .schema-nested-row {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+
+    .schema-nested-type {
+      text-align: left;
+    }
+  }
+</style>
+
+{{ content }}
+
+{% for entry in site.data["_tables"] %}
+
+  {%- comment -%}
+  Support both legacy strings and new objects in _tables.yml:
+  - legacy: "study_schema"
+  - new: { id: "study_schema", required: true, example: true, optional_label: true }
+  {%- endcomment -%}
+
+  {% if entry.id %}
+    {% assign table_schema_file = entry.id %}
+    {% assign resource_required = entry.required %}
+    {% assign resource_example = entry.example %}
+    {% assign resource_optional_label = entry.optional_label %}
+  {% else %}
+    {% assign table_schema_file = entry %}
+    {% assign resource_required = nil %}
+    {% assign resource_example = nil %}
+    {% assign resource_optional_label = nil %}
+  {% endif %}
+
+  {% assign table_schema = site.data[table_schema_file] %}
+  {% assign table_schema_id = table_schema_file %}
+  {% assign table_schema_title = entry.label | default: table_schema.title | default: table_schema_file %}
+
+  <h2 id="{{ table_schema_id }}">
+    {{ table_schema_title }}
+    {% if resource_required %}<span class="badge-required">*</span>{% endif %}
+    {% if resource_example %}<span class="badge-example">Example</span>{% endif %}
+    {% if resource_optional_label and resource_required != true and resource_example != true %}
+      <span class="badge-optional">Optional</span>
+    {% endif %}
+  </h2>
+
+  <p class="small">
+    Source:
+    <a href="{{ site.github.repository_url }}/blob/main/_data/{{ table_schema_file }}.json">
+      <code>{{ table_schema_file }}.json</code>
+    </a>
+    {% assign schema_download_filename = table_schema['$id'] | split: '/' | last %}
+    ·
+    <a
+      href="{{ '/example/schemas/3.0.2/' | append: schema_download_filename | relative_url }}"
+      download
+    >
+      Download schema
+    </a>
+  </p>
+
+{%- comment -%}
+Compute inbound references to this schema section (table_schema_id):
+- JSON Schema fields/properties with x-refersToSchema == table_schema_id
+- (Optional) Table Schema foreignKeys where fk.reference.resource == table_schema_id
+{%- endcomment -%}
+
+{% assign inbound_refs = "" | split: "" %}
+
+{% for other_entry in site.data["_tables"] %}
+
+  {% if other_entry.id %}
+    {% assign other_file = other_entry.id %}
+  {% else %}
+    {% assign other_file = other_entry %}
+  {% endif %}
+
+  {% assign other_schema = site.data[other_file] %}
+  {% assign other_id = other_schema.name | default: other_file %}
+
+  {%- comment -%} 1) JSON Schema-style references via x-refersToSchema {%- endcomment -%}
+  {% if other_schema.properties %}
+    {% for kv in other_schema.properties %}
+      {% assign prop_name = kv[0] %}
+      {% assign prop = kv[1] %}
+      {% if prop['x-refersToSchema'] == table_schema_id %}
+        {% assign entry_ref = other_id | append: "|" | append: prop_name %}
+        {% assign inbound_refs = inbound_refs | push: entry_ref %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {%- comment -%} 2) Table Schema FK references (only if you use them) {%- endcomment -%}
+  {% if other_schema.foreignKeys %}
+    {% for fk in other_schema.foreignKeys %}
+      {% if fk.reference and fk.reference.resource == table_schema_id %}
+        {% assign entry_ref = other_id | append: "|" | append: fk.fields %}
+        {% assign inbound_refs = inbound_refs | push: entry_ref %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+
+{% if inbound_refs.size > 0 %}
+  <p class="small text-muted">
+    Referenced by:
+    {% for ref in inbound_refs %}
+      {% assign parts = ref | split: "|" %}
+      {% assign src_schema = parts[0] %}
+      {% assign src_field = parts[1] %}
+      <a href="{{ site.baseurl }}/schemas/#{{ src_schema }}.{{ src_field }}">
+        <code>{{ src_schema }}</code>.<code>{{ src_field }}</code>
+      </a>{% if forloop.last == false %}, {% endif %}
+    {% endfor %}
+  </p>
+{% endif %}
+
+  {{ entry.description | default: table_schema.description | markdownify }}
+
+  {% if table_schema.fields %}
+    <!-- Frictionless Table Schema -->
+    <table class="schema-root-table">
+      <colgroup>
+        <col width="25%">
+        <col width="65%">
+        <col width="10%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Definition</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for field in table_schema.fields %}
+          <tr class="text-break">
+            <td id="{{ table_schema_id }}.{{ field.name }}">
+              <a href="#{{ table_schema_id }}.{{ field.name }}"><code>{{ field.name }}</code></a>
+              {% if field.constraints.required %}*{% endif %}
+            </td>
+            <td>
+              {{ field.description | markdownify }}
+              {% if field.constraints %}
+                {% assign has_visible_constraints = false %}
+                {% for constraint in field.constraints %}
+                  {% unless constraint[0] == "required" %}
+                    {% assign has_visible_constraints = true %}
+                  {% endunless %}
+                {% endfor %}
+                {% if has_visible_constraints %}
+                  <div class="schema-constraints">
+                    <strong>Constraints</strong>
+                    <ul>
+                  {% for constraint in field.constraints %}
+                    {% unless constraint[0] == "required" %}
+                      <li>{{ constraint[0] }}: <code>{{ constraint[1] | join: ", " }}</code></li>
+                    {% endunless %}
+                  {% endfor %}
+                    </ul>
+                  </div>
+                {% endif %}
+              {% endif %}
+
+              {% if field.example and field.example != "" %}
+                <p><strong>Example</strong>: <code>{{ field.example }}</code></p>
+              {% endif %}
+
+              {% if table_schema.foreignKeys %}
+                {% for fk in table_schema.foreignKeys %}
+                  {% if fk.fields == field.name %}
+                    <p class="small text-muted">
+                      References:
+                      <a href="{{ site.baseurl }}/schemas/#{{ fk.reference.resource }}.{{ fk.reference.fields }}">
+                        <code>{{ fk.reference.resource }}</code>.<code>{{ fk.reference.fields }}</code>
+                      </a>
+                    </p>
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+
+              {% assign field_key = table_schema_id | append: "." | append: field.name %}
+              {% assign inbound_refs = site.data.xref_index[field_key] %}
+
+              {% if inbound_refs %}
+                <p class="small text-muted">
+                  Referenced by:
+                  {% for ref in inbound_refs %}
+                    <a href="{{ site.baseurl }}/schemas/#{{ ref.schema }}.{{ ref.field }}">
+                      <code>{{ ref.schema }}</code>.<code>{{ ref.field }}</code>
+                    </a>{% if forloop.last == false %}, {% endif %}
+                  {% endfor %}
+                </p>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-secondary">
+                {% if field.type.first %}{{ field.type | join: " or " }}{% else %}{{ field.type }}{% endif %}
+              </span>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  {% elsif table_schema.properties %}
+    <!-- JSON Schema -->
+    {% include jsonschema_properties.html
+       properties=table_schema.properties
+       required=table_schema.required
+       schema_id=table_schema_id %}
+  {% else %}
+    <p class="small text-muted">
+      This schema has neither <code>fields</code> nor <code>properties</code> and cannot be rendered.
+    </p>
+  {% endif %}
+{% endfor %}

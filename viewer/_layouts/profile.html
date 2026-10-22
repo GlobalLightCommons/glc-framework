@@ -1,0 +1,199 @@
+---
+layout: default
+---
+<style>
+  /* Let tables size naturally (prevents vertical letter stacking) */
+  table {
+    width: 100%;
+    table-layout: auto;
+  }
+
+  th, td {
+    vertical-align: top;
+  }
+
+  /* First column: readable but not collapsing layout */
+  table td:first-child,
+  table th:first-child {
+    width: 280px;
+    padding-right: 0.75rem;
+    white-space: normal;
+  }
+
+  /* Always expose complete field names, including long underscore-delimited names. */
+  table td:first-child code {
+    display: inline;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    vertical-align: bottom;
+  }
+
+  /* Nested (collapsible) JSON schema rendering */
+  .schema-nested {
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid rgba(0,0,0,0.08);
+  }
+
+  .schema-nested-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 34%) minmax(0, 1fr) 80px;
+    column-gap: 1rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    align-items: start;
+  }
+
+  .schema-nested-row:first-child {
+    border-top: none;
+  }
+
+  .schema-nested-name code {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    display: inline;
+    max-width: 100%;
+  }
+
+  .schema-nested-type {
+    white-space: nowrap;
+    text-align: right;
+  }
+
+  .schema-details summary {
+    cursor: pointer;
+    user-select: none;
+    margin-top: 0.25rem;
+  }
+
+/* Prevent per-letter word breaking in nested definitions */
+.schema-nested-def,
+.schema-nested-def p,
+.schema-nested-def li {
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: manual !important;
+}
+
+@media (max-width: 767.98px) {
+  .schema-nested-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .schema-nested-type {
+    text-align: left;
+  }
+}
+</style>
+
+{{ content }}
+
+{% assign profile_file = "glc-dp-profile" %}
+{% assign properties1 = site.data[profile_file].allOf[1].properties %}
+{% assign required1 = site.data[profile_file].allOf[1].required %}
+
+<p class="small">
+  Source:
+  <a href="{{ site.github.repository_url }}/blob/main/_data/{{ profile_file }}.json"><code>{{ profile_file }}.json</code></a>
+  ·
+  <a href="{{ '/example/schemas/3.0.2/glc-dp-profile.json' | relative_url }}" download>Download schema</a>
+</p>
+
+{% for p1_raw in properties1 %}
+  {% assign p1_name = p1_raw[0] %}
+  {% assign p1 = p1_raw[1] %}
+  {% assign p1_id = p1_name %}
+  
+  <h2 id="{{ p1_id }}">
+    {{ p1_name }}
+    {% if required1 contains p1_name %}*{% endif %}
+  </h2>
+
+  {{ p1.description | markdownify }}
+  {% include schema_constraints.html field=p1 %}
+  {% if p1.examples and p1.examples.size > 0 %}
+    <p class="schema-example"><strong>Example</strong>: <code>{{ p1.examples.first | jsonify }}</code></p>
+  {% endif %}
+
+  {% if p1['skos:exactMatch'] %}
+    <p class="small text-muted">Same as {% for term in p1['skos:exactMatch'] %}<a href="{{ term }}">{{ term }}</a> {% endfor %}</p>
+  {% elsif p1['skos:narrowMatch'] %}
+    <p class="small text-muted">Broader than {% for term in p1['skos:narrowMatch'] %}<a href="{{ term }}">{{ term }}</a> {% endfor %}</p>
+  {% elsif p1['skos:broadMatch'] %}
+    <p class="small text-muted">Narrower than {% for term in p1['skos:broadMatch'] %}<a href="{{ term }}">{{ term }}</a> {% endfor %}</p>
+  {% endif %}
+
+  {% if p1.properties %}
+    {% assign properties2 = p1.properties %}
+    {% assign required2 = p1.required %}
+  {% elsif p1.items.properties %}
+    {% assign properties2 = p1.items.properties %}
+    {% assign required2 = p1.items.required %}
+  {% elsif p1.items.oneOf[0].properties %}
+    {% assign properties2 = p1.items.oneOf[0].properties %}
+    {% assign required2 = p1.items.oneOf[0].required %}
+  {% else %}
+    {% assign properties2 = false %}
+  {% endif %}
+
+  {% if properties2 %}
+  <table class="schema-root-table">
+    <colgroup>
+      <col width="25%">
+      <col width="65%">
+      <col width="10%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Definition</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p2_raw in properties2 %}
+        {% assign p2_name = p2_raw[0] %}
+        {% assign p2 = p2_raw[1] %}
+        {% assign p2_id = p2_name %}
+
+        <tr class="text-break">
+          <td id="{{ p1_id }}.{{ p2_id }}">
+            <a href="#{{ p1_id }}.{{ p2_id }}"><code>{{ p2_name }}</code></a>
+            {% if required2 contains p2_name %}*{% endif %}
+          </td>
+          <td>
+            {{ p2.description | markdownify }}
+            {% include schema_constraints.html field=p2 %}
+            {% if p2.example and p2.example != "" %}
+              <p>
+                <strong>Example</strong>: <code>{{ p2.example }}</code>
+              </p>
+            {% endif %}
+            {% if p2.examples and p2.examples.size > 0 %}
+              <p class="schema-example">
+                <strong>Example</strong>: <code>{{ p2.examples.first | jsonify }}</code>
+              </p>
+            {% endif %}
+            {% if p2['skos:exactMatch'] %}
+              <span class="small text-muted">Same as {% for term in p2['skos:exactMatch'] %}<a href="{{ term }}">{{ term }}</a> {% endfor %}</span>
+            {% elsif p2['skos:narrowMatch'] %}
+              <span class="small text-muted">Broader than {% for term in p2['skos:narrowMatch'] %}<a href="{{ term }}">{{ term }}</a> {% endfor %}</span>
+            {% elsif p2['skos:broadMatch'] %}
+              <span class="small text-muted">Narrower than {% for term in p2['skos:broadMatch'] %}<a href="{{ term }}">{{ term }}</a> {% endfor %}</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge bg-secondary">
+              {% if p2.type.first %}{{ p2.type | join: " or " }}{% else %}{{ p2.type }}{% endif %}
+            </span>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+{% endfor %}

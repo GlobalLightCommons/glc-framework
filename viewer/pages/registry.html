@@ -1,0 +1,303 @@
+---
+layout: default
+title: GLC Registry
+permalink: /registry/
+---
+
+<div class="registry-page">
+<h1>GLC Registry</h1>
+
+<p>
+  The GLC registry lists dataset repositories that have run the trusted GLC
+  validation workflow. A passing entry conforms to the displayed GLC schema
+  version at the specified commit; it does not imply conformance to later
+  schema versions.
+</p>
+
+<p class="small">
+  Registry data:
+  <a href="https://registry.globallightcommons.org/registry.json"><code>registry.json</code></a>
+  · Dataset list:
+  <a href="https://github.com/globallightcommons/glc-registry/blob/main/datasets.yml"><code>datasets.yml</code></a>
+  in the
+  <a href="https://github.com/globallightcommons/glc-registry">GLC Registry GitHub repository</a>.
+  Changes to the dataset list are submitted for maintainer review through a pull request.
+</p>
+
+<div id="app" class="small">Loading…</div>
+</div>
+
+<style>
+  .registry-page {
+    position: relative;
+    left: 50%;
+    width: min(1400px, calc(100vw - 48px));
+    max-width: none;
+    transform: translateX(-50%);
+  }
+  table { width: 100%; border-collapse: collapse; table-layout: auto; }
+  th, td { padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,0.08); vertical-align: top; }
+  th { text-align: left; font-weight: 700; }
+
+  /* Column sizing */
+  th.name-col { width: 360px; }
+  td.name-col { font-weight: 700; white-space: nowrap; }
+  th.llw-col, td.llw-col { width: 130px; text-align: center; }
+  td.llw-col { vertical-align: top; }
+  .llw-button {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 1px solid #8bd4cf;
+    background: #def7f5;
+    color: #087f78;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .llw-button:hover, .llw-button:focus {
+    background: #c9efec;
+    color: #066961;
+  }
+  .llw-disabled {
+    display: inline-block;
+    color: #777;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  th.when-col { width: 240px; }
+  td.when-col code { white-space: nowrap; }
+
+  /* Grouping (two-row blocks) */
+  tr.group-start td { border-top: 2px solid rgba(0,0,0,0.10); }
+  tr.group-start td { padding-top: 14px; }
+  tr.group-end td { padding-bottom: 14px; }
+
+  /* Row label chips */
+  .rowtag {
+    display: inline-block;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(0,0,0,0.06);
+  }
+
+  .pill { display:inline-block; padding:2px 10px; border-radius:999px; font-weight:700; font-size:12px; }
+  .pass { background:#e7f7ef; color:#137a3a; }
+  .fail { background:#fdecec; color:#b42318; }
+  .unknown { background:#f2f2f2; color:#555; }
+  .unavailable { background:#fff1d6; color:#8a5700; }
+  .unverified { background:#fff1d6; color:#8a5700; }
+  .legacy { background:#fff1d6; color:#8a5700; }
+  .current-schema { background:#e7f7ef; color:#137a3a; }
+  .unrecognized-schema { background:#f2f2f2; color:#555; }
+  .rename-warning { display:block; margin-top:6px; color:#8a5700; }
+  .schema-note { display:block; margin-top:6px; color:#8a5700; max-width:260px; }
+
+  .muted { opacity: 0.75; }
+
+  @media (max-width: 600px) {
+    .registry-page { width: calc(100vw - 24px); }
+  }
+</style>
+
+<script>
+(function () {
+  const REGISTRY_URL = "https://registry.globallightcommons.org/registry.json";
+  const LIGHTLOGWEB_URL = "https://tscnlab-lightlogweb.share.connect.posit.cloud";
+  const SHOW_LIGHTLOGWEB = false;
+
+  function lightLogWebUrl(repo) {
+    return `${LIGHTLOGWEB_URL}?repo=${encodeURIComponent(String(repo))}`;
+  }
+
+  function pill(status) {
+    const s = (status || "unknown").toLowerCase();
+    const cls = s === "pass" ? "pass"
+      : s === "fail" ? "fail"
+      : s === "repository unavailable" ? "unavailable"
+      : s === "unverified" ? "unverified"
+      : "unknown";
+    return `<span class="pill ${cls}">${s}</span>`;
+  }
+
+  function schemaVersion(validation, currentVersion) {
+    if (!validation) return `<span class="muted">—</span>`;
+    const version = validation.schema_version || "";
+    if (!version) return `<span class="pill unknown">not reported</span>`;
+    if (validation.schema_lifecycle === "legacy" || validation.upgrade_recommended) {
+      return `
+        <span class="pill legacy">${version} — legacy</span>
+        <span class="schema-note">Upgrade recommended; not validated against ${currentVersion || "the current GLC schema"}.</span>
+      `;
+    }
+    if (validation.schema_lifecycle === "unrecognized") {
+      return `
+        <span class="pill unrecognized-schema">unrecognized ${version}</span>
+        <span class="schema-note">Update the registry’s current schema-version configuration before interpreting this result.</span>
+      `;
+    }
+    return `<span class="pill current-schema">${version} — current</span>`;
+  }
+
+  function repositoryUnavailable(dataset) {
+    if (dataset.repository_status) {
+      return dataset.repository_status === "unavailable";
+    }
+    const errors = dataset.fetch_errors || [];
+    return errors.some(entry => {
+      const message = typeof entry === "string" ? entry : entry && entry.error;
+      return /(?:\b404\b|not found)/i.test(message || "");
+    });
+  }
+
+  function validationNeedsRerun(dataset) {
+    const errors = dataset.fetch_errors || [];
+    return errors.some(entry => {
+      const message = typeof entry === "string" ? entry : entry && entry.error;
+      return /SourceRepositoryURI|report repo .* does not match/i.test(message || "");
+    });
+  }
+
+  function fmtUtc(ts) {
+    if (!ts) return "";
+    return ts
+      .replace("T", " ")
+      .replace(/\.\d+/, "")   // remove fractional seconds
+      .replace("+00:00", " UTC");
+  }
+
+  function sha7(sha) {
+    return sha ? String(sha).slice(0, 7) : "";
+  }
+
+  async function main() {
+    const app = document.getElementById("app");
+    const url = REGISTRY_URL + "?t=" + Date.now(); // cache-bust
+
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status} fetching registry.json`);
+    const data = await res.json();
+
+    const rows = data.datasets || [];
+    const updated = data.generated_at_utc || "";
+    const currentSchemaVersion = data.current_schema_version || "";
+
+    const html = `
+      <p class="small">Registry updated: <code>${fmtUtc(updated)}</code> · Datasets: <code>${rows.length}</code></p>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="name-col">Dataset</th>
+            <th>State</th>
+            <th>Status</th>
+            <th>Schema</th>
+            <th>Commit</th>
+            <th class="when-col">Validated at</th>
+            ${SHOW_LIGHTLOGWEB ? `<th class="llw-col">LightLogWeb</th>` : ""}
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((d, idx) => {
+            const repo = d.repo || d.id || "";
+            const datasetName = d.name || d.title || d.id || repo;
+            const configuredRepo = d.configured_repo || repo;
+            const repoRenamed = d.repository_status === "renamed" && configuredRepo !== repo;
+            const repoUrl = d.repo ? `https://github.com/${d.repo}` : "#";
+            const llwUrl = repo ? lightLogWebUrl(repo) : "";
+            const repoUnavailable = repositoryUnavailable(d);
+            const needsValidationRerun = validationNeedsRerun(d);
+
+            const lp = d.latest_pass || null;   // latest passing snapshot
+            const cur = d.current || null;      // most recent run
+            const canSendToLlw = !repoUnavailable && lp && String(lp.status).toLowerCase() === "pass";
+
+            const unverified = !repoUnavailable && d.attestation_verified === false && (d.fetch_errors || []).length > 0;
+            const lpStatus = repoUnavailable ? "repository unavailable"
+              : lp && lp.status ? lp.status
+              : unverified ? "unverified"
+              : "unknown";
+            const curStatus = repoUnavailable ? "repository unavailable"
+              : cur && cur.status ? cur.status
+              : unverified ? "unverified"
+              : "unknown";
+
+            const lpSha = lp && lp.commit_sha ? lp.commit_sha : "";
+            const curSha = cur && cur.commit_sha ? cur.commit_sha : "";
+
+            const lpShaUrl = (d.repo && lpSha) ? `https://github.com/${d.repo}/commit/${lpSha}` : repoUrl;
+            const curShaUrl = (d.repo && curSha) ? `https://github.com/${d.repo}/commit/${curSha}` : repoUrl;
+
+            const lpWhen = lp && lp.timestamp_utc ? fmtUtc(lp.timestamp_utc) : "";
+            const curWhen = cur && cur.timestamp_utc ? fmtUtc(cur.timestamp_utc) : "";
+
+            // If there is no latest_pass (shouldn't happen if you're enforcing membership),
+            // still render both rows as unknown rather than breaking.
+            return `
+                <tr class="group-start">
+                    <td class="name-col" rowspan="2">
+                    <a href="${repoUrl}" title="Open ${repo} on GitHub">${datasetName}</a>
+                    ${repoRenamed ? `<span class="rename-warning"><b>Repository renamed</b><br><code>${configuredRepo}</code> → <code>${repo}</code><br>Registry update pending.<br>Rerun the dataset validation workflow to refresh its trusted validation status.</span>` : ""}
+                    ${!repoRenamed && needsValidationRerun ? `<span class="rename-warning"><b>Validation refresh required</b><br>Rerun the dataset validation workflow after the repository rename.</span>` : ""}
+                    </td>
+
+                    <td><span class="rowtag">Latest pass</span></td>
+
+                    <td>${pill(lpStatus)}</td>
+
+                    <td>${schemaVersion(lp, currentSchemaVersion)}</td>
+
+                    <td>
+                    ${lpSha ? `<a href="${lpShaUrl}"><code>${sha7(lpSha)}</code></a>` : `<span class="muted">—</span>`}
+                    </td>
+
+                    <td class="when-col">
+                    ${lpWhen ? `<code>${lpWhen}</code>` : `<span class="muted">—</span>`}
+                    </td>
+
+                    ${SHOW_LIGHTLOGWEB ? `<td class="llw-col" rowspan="2">
+                    ${repoUnavailable
+                      ? `<span class="llw-disabled">Unavailable</span>`
+                      : canSendToLlw && llwUrl
+                        ? `<a class="llw-button" href="${llwUrl}" target="_blank" rel="noopener noreferrer">Send to LLW</a>`
+                        : `<span class="llw-disabled">No passing validation</span>`}
+                    </td>` : ""}
+                </tr>
+
+                <tr class="group-end">
+                    <td><span class="rowtag">Current</span></td>
+
+                    <td>${pill(curStatus)}</td>
+
+                    <td>${schemaVersion(cur, currentSchemaVersion)}</td>
+
+                    <td>
+                    ${curSha ? `<a href="${curShaUrl}"><code>${sha7(curSha)}</code></a>` : `<span class="muted">—</span>`}
+                    </td>
+
+                    <td class="when-col">
+                    ${curWhen ? `<code>${curWhen}</code>` : `<span class="muted">—</span>`}
+                    </td>
+
+                </tr>
+                `;
+          }).join("")}
+        </tbody>
+      </table>
+
+    `;
+
+    app.innerHTML = html;
+  }
+
+  main().catch(err => {
+    console.error(err);
+    document.getElementById("app").innerHTML =
+      `<p style="color:#b42318;"><b>Failed to load registry</b><br/><code>${String(err)}</code></p>`;
+  });
+})();
+</script>

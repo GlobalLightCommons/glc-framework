@@ -1,0 +1,30 @@
+# Links listed below will be included in your site's navbar (navigation at the top)
+
+- text: Overview
+  href: /
+- text: Standard
+  menu:
+  - text: Package profile
+    href: /profile/
+  - text: Resource schemas
+    href: /schemas/
+  - text: Example package
+    href: /example-package/
+- text: Registry
+  href: /registry/
+- text: Tools
+  href: /tools/
+  menu:
+  - text: Tools overview
+    href: /tools/
+  - text: Metadata builder
+    href: https://globallightcommons.github.io/glc-metadata-builder/
+    new_window: true
+  - text: Validate a dataset
+    href: /validate/
+  - text: GLC-dp
+    href: https://tscnlab.github.io/glc-dp-r/
+    new_window: true
+  - text: LightLogR
+    href: https://tscnlab.github.io/LightLogR/
+    new_window: true

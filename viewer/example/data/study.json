@@ -1,0 +1,123 @@
+[
+  {
+    "schema_version": "3.0.2",
+    "study_internal_id": "MELIDOS_IZTECH_2025",
+    "study_title": "Personal light exposure dataset for Izmir, Türkiye",
+    "study_preregistration": "The study was not preregistered. Analyses were preregistered at https://aspredicted.org/te3zw2.pdf and https://osf.io/7bshp/.",
+    "study_ethics": "Izmir Institute of Technology Science and Engineering Scientific Research and Publication Ethics Committee, E-41752998-050.04-2400027343",
+    "study_short_description": "MeLiDos field study data collected by Izmir Institute of Technology (IZTECH).",
+    "study_sample": "One-participant subset of the MeLiDos IZTECH package for viewer and validation testing.",
+    "study_groups": [
+      {
+        "study_group_name": "IZTECH participants",
+        "study_group_description": "Participants enrolled at the MeLiDos Izmir field site under the study-wide eligibility criteria reported in the MeLiDos preprint (https://doi.org/10.64898/2026.06.04.730226).",
+        "study_group_size": 1,
+        "study_group_inclusion": [
+          "Adults between 18 and 65 years of age",
+          "Engaged in full-time employment or part-time employment exceeding 80% workload"
+        ],
+        "study_group_exclusion": [
+          "Diagnosed psychiatric disorders",
+          "Diagnosed sleep disorders",
+          "Regular tobacco use",
+          "Regular recreational drug use",
+          "Shift work within the preceding two months",
+          "Use of medication known to affect photosensitivity",
+          "Visual impairments incompatible with the wearable light-monitoring devices",
+          "Residence outside the predefined local study region during the recording period"
+        ],
+        "study_group_datasets": [
+          "MELIDOS_IZTECH_S004"
+        ]
+      }
+    ],
+    "study_setting": "Field study",
+    "study_geographical_location": "Izmir-Türkiye, city",
+    "study_contributors": [
+      {
+        "contributor_full_name": "Altug Didikoglu",
+        "contributor_roles": [
+          "Conceptualization",
+          "Data curation",
+          "Formal analysis",
+          "Funding acquisition",
+          "Methodology",
+          "Project administration",
+          "Resources",
+          "Software",
+          "Supervision",
+          "Writing – original draft"
+        ],
+        "contributor_email": "altugdidikoglu@iyte.edu.tr",
+        "contributor_orcid": "https://orcid.org/0000-0002-5582-6956",
+        "contributor_institution": {
+          "contributor_institution_name": "Izmir Institute of Technology",
+          "contributor_institution_city": "Izmir",
+          "contributor_institution_country": "Türkiye"
+        }
+      },
+      {
+        "contributor_full_name": "Zeynep Kayar",
+        "contributor_roles": [
+          "Data curation",
+          "Validation",
+          "Writing – review & editing"
+        ],
+        "contributor_institution": {
+          "contributor_institution_name": "Izmir Institute of Technology",
+          "contributor_institution_city": "Izmir",
+          "contributor_institution_country": "Türkiye"
+        }
+      },
+      {
+        "contributor_full_name": "Sema Nur Aydin",
+        "contributor_roles": [
+          "Data curation",
+          "Investigation",
+          "Validation",
+          "Visualization",
+          "Project administration",
+          "Writing – review & editing"
+        ],
+        "contributor_institution": {
+          "contributor_institution_name": "Izmir Institute of Technology",
+          "contributor_institution_city": "Izmir",
+          "contributor_institution_country": "Türkiye"
+        }
+      },
+      {
+        "contributor_full_name": "Sena Gulsum Akgun",
+        "contributor_roles": [
+          "Data curation",
+          "Formal analysis",
+          "Investigation",
+          "Software",
+          "Validation",
+          "Project administration",
+          "Visualization",
+          "Writing – review & editing"
+        ],
+        "contributor_institution": {
+          "contributor_institution_name": "Izmir Institute of Technology",
+          "contributor_institution_city": "Izmir",
+          "contributor_institution_country": "Türkiye"
+        }
+      }
+    ],
+    "study_datasets": [
+      "MELIDOS_IZTECH_S004"
+    ],
+    "study_type": "field study",
+    "study_funding_sources": [
+      "The project MeLiDos (22NRM05 MeLiDos) received funding from the European Partnership on Metrology, co-financed by the European Union's Horizon Europe Research and Innovation Programme and by the Participating States. Views and opinions expressed are those of the authors only and do not necessarily reflect those of the European Union or EURAMET; neither the European Union nor the granting authority can be held responsible for them.",
+      "IZTECH was also supported by TÜBİTAK – Scientific and Technological Research Council of Türkiye (Project No. 224S740)."
+    ],
+    "study_keywords": [
+      "light exposure",
+      "circadian",
+      "wearable sensor",
+      "MeLiDos",
+      "Izmir"
+    ]
+  }
+]

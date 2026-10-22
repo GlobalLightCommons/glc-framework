@@ -1,0 +1,237 @@
+<section class="example-browser" aria-labelledby="example-browser-title">
+  <div class="example-browser-heading">
+    <div>
+      <h2 id="example-browser-title">Explore the populated example</h2>
+      <p>Select a metadata resource or data file to view its populated contents.</p>
+    </div>
+    <label>
+      Resource
+      <select id="example-resource-select">
+        <optgroup label="Package and metadata">
+          <option value="datapackage">datapackage.json</option>
+          <option value="study">study.json</option>
+          <option value="datasets">datasets.json</option>
+          <option value="devices">devices.json</option>
+          <option value="datasheets">device_datasheets.json</option>
+          <option value="participants">participants.csv</option>
+          <option value="characteristics">participant_characteristics.csv</option>
+        </optgroup>
+        <optgroup label="Example data files">
+          <option value="light-al03">IZTECH_S004_light_glasses_example.csv</option>
+          <option value="acceptability">IZTECH_S004_acceptability.csv</option>
+          <option value="experience-al03">IZTECH_S004_experiencelog_AL03.csv</option>
+          <option value="experience-al04">IZTECH_S004_experiencelog_AL04.csv</option>
+        </optgroup>
+      </select>
+    </label>
+  </div>
+  <div id="example-resource-meta" class="example-resource-meta"></div>
+  <div id="example-resource-view" class="example-resource-view" aria-live="polite">
+    Loading example…
+  </div>
+</section>
+
+<script>
+(() => {
+  const base = "{{ site.baseurl }}";
+  const resources = {
+    datapackage: {
+      path: "/example/datapackage.json",
+      schema: "/example/schemas/3.0.2/glc-dp-profile.json",
+      format: "json"
+    },
+    study: {
+      path: "/example/data/study.json",
+      schema: "/example/schemas/3.0.2/study.schema.json",
+      format: "json"
+    },
+    datasets: {
+      path: "/example/data/datasets.json",
+      schema: "/example/schemas/3.0.2/dataset.schema.json",
+      format: "json"
+    },
+    devices: {
+      path: "/example/data/devices.json",
+      schema: "/example/schemas/3.0.2/device.schema.json",
+      format: "json"
+    },
+    datasheets: {
+      path: "/example/data/device_datasheets.json",
+      schema: "/example/schemas/3.0.2/device_datasheet.schema.json",
+      format: "json"
+    },
+    participants: {
+      path: "/example/data/participants.csv",
+      schema: "/example/schemas/3.0.2/participants.schema.json",
+      format: "csv"
+    },
+    characteristics: {
+      path: "/example/data/participant_characteristics.csv",
+      schema: "/example/schemas/3.0.2/participant_characteristics.schema.json",
+      format: "csv"
+    },
+    "light-al03": {
+      path: "/example/data/files/light/IZTECH_S004_light_glasses_example.csv",
+      format: "csv"
+    },
+    acceptability: {
+      path: "/example/data/files/questionnaires/IZTECH_S004_acceptability.csv",
+      format: "csv"
+    },
+    "experience-al03": {
+      path: "/example/data/files/longitudinal-reports/IZTECH_S004_experiencelog_AL03.csv",
+      format: "csv"
+    },
+    "experience-al04": {
+      path: "/example/data/files/longitudinal-reports/IZTECH_S004_experiencelog_AL04.csv",
+      format: "csv"
+    }
+  };
+
+  const select = document.getElementById("example-resource-select");
+  const view = document.getElementById("example-resource-view");
+  const meta = document.getElementById("example-resource-meta");
+
+  const escapeHtml = value => String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+  function propertiesFor(schema) {
+    const properties = Object.assign({}, schema && schema.properties);
+    for (const part of (schema && schema.allOf) || []) {
+      Object.assign(properties, part.properties || {});
+    }
+    return properties;
+  }
+
+  function childSchema(schema, key, value) {
+    if (!schema) return null;
+    const property = propertiesFor(schema)[key];
+    if (!property) return null;
+    if (Array.isArray(value)) return property.items || property;
+    return property;
+  }
+
+  function renderJson(value, schema, depth = 0) {
+    if (value === null) return '<span class="example-null">null</span>';
+    if (Array.isArray(value)) {
+      const items = value.map((item, index) => `
+        <details class="example-node" ${depth < 1 ? "open" : ""}>
+          <summary>Item ${index + 1}</summary>
+          ${renderJson(item, schema && schema.items ? schema.items : schema, depth + 1)}
+        </details>
+      `).join("");
+      return `<div class="example-array">${items || "<em>Empty array</em>"}</div>`;
+    }
+    if (typeof value === "object") {
+      return `<dl class="example-object">${Object.entries(value).map(([key, child]) => {
+        const fieldSchema = childSchema(schema, key, child);
+        const description = fieldSchema && fieldSchema.description
+          ? `<span class="example-field-description">${escapeHtml(fieldSchema.description)}</span>`
+          : "";
+        return `
+          <div class="example-field">
+            <dt><code>${escapeHtml(key)}</code>${description}</dt>
+            <dd>${renderJson(child, fieldSchema, depth + 1)}</dd>
+          </div>
+        `;
+      }).join("")}</dl>`;
+    }
+    return `<code class="example-value">${escapeHtml(value)}</code>`;
+  }
+
+  function parseCsv(text) {
+    const rows = [];
+    let row = [], field = "", quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (quoted) {
+        if (char === '"' && text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else if (char === '"') {
+          quoted = false;
+        } else {
+          field += char;
+        }
+      } else if (char === '"') {
+        quoted = true;
+      } else if (char === ",") {
+        row.push(field);
+        field = "";
+      } else if (char === "\n") {
+        row.push(field.replace(/\r$/, ""));
+        rows.push(row);
+        row = [];
+        field = "";
+      } else {
+        field += char;
+      }
+    }
+    if (field || row.length) {
+      row.push(field.replace(/\r$/, ""));
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function renderCsv(text, schema) {
+    const rows = parseCsv(text);
+    if (!rows.length) return "<p>Empty file.</p>";
+    const headers = rows[0];
+    const fieldSchemas = new Map(((schema && schema.fields) || []).map(field => [field.name, field]));
+    return `
+      <div class="example-table-wrap">
+        <table class="example-table">
+          <thead><tr>${headers.map(header => {
+            const field = fieldSchemas.get(header);
+            const description = field && field.description
+              ? `<small>${escapeHtml(field.description)}</small>`
+              : "";
+            return `<th><code>${escapeHtml(header)}</code>${description}</th>`;
+          }).join("")}</tr></thead>
+          <tbody>${rows.slice(1).map(row => `
+            <tr>${headers.map((_, index) => `<td>${row[index] === "" || row[index] === undefined
+              ? '<span class="example-empty">empty</span>'
+              : escapeHtml(row[index])}</td>`).join("")}</tr>
+          `).join("")}</tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  async function loadResource(key) {
+    const resource = resources[key];
+    view.textContent = "Loading…";
+    meta.innerHTML = "";
+    try {
+      const [response, schemaResponse] = await Promise.all([
+        fetch(base + resource.path),
+        resource.schema ? fetch(base + resource.schema) : Promise.resolve(null)
+      ]);
+      if (!response.ok) throw new Error(`Unable to load ${resource.path}`);
+      const schema = schemaResponse && schemaResponse.ok ? await schemaResponse.json() : null;
+      const rawUrl = base + resource.path;
+      meta.innerHTML = `
+        <a href="${rawUrl}" target="_blank" rel="noopener">Open raw file</a>
+        <span aria-hidden="true">·</span>
+        <a href="${rawUrl}" download>Download</a>
+      `;
+      if (resource.format === "json") {
+        const data = await response.json();
+        view.innerHTML = renderJson(data, schema);
+      } else {
+        view.innerHTML = renderCsv(await response.text(), schema);
+      }
+    } catch (error) {
+      view.innerHTML = `<p class="example-error">${escapeHtml(error.message)}</p>`;
+    }
+  }
+
+  select.addEventListener("change", () => loadResource(select.value));
+  loadResource(select.value);
+})();
+</script>

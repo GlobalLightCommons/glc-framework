@@ -1,0 +1,75 @@
+{% assign field = include.field %}
+{% assign has_constraints = false %}
+{% if field.const != nil or field.enum or field.items.enum or field.format or field.pattern or field.minimum != nil or field.maximum != nil or field.exclusiveMinimum != nil or field.exclusiveMaximum != nil or field.minLength != nil or field.maxLength != nil or field.minItems != nil or field.maxItems != nil or field.uniqueItems == true or field.not.enum or field.anyOf or field.oneOf or field['x-glc-validation'] %}
+  {% assign has_constraints = true %}
+{% endif %}
+
+{% if has_constraints %}
+  <div class="schema-constraints">
+    <strong>Constraints</strong>
+    <ul>
+      {% if field.const != nil %}
+        <li>Fixed value: <code>{{ field.const | jsonify }}</code></li>
+      {% endif %}
+      {% if field.enum %}
+        <li>Allowed values: <code>{{ field.enum | join: ", " }}</code></li>
+      {% elsif field.items.enum %}
+        <li>Allowed item values: <code>{{ field.items.enum | join: ", " }}</code></li>
+      {% endif %}
+      {% if field.format %}
+        <li>Format: <code>{{ field.format }}</code></li>
+      {% endif %}
+      {% if field.pattern %}
+        <li>Pattern: <code>{{ field.pattern }}</code></li>
+      {% endif %}
+      {% if field.minimum != nil %}
+        <li>Minimum: <code>{{ field.minimum }}</code></li>
+      {% endif %}
+      {% if field.maximum != nil %}
+        <li>Maximum: <code>{{ field.maximum }}</code></li>
+      {% endif %}
+      {% if field.exclusiveMinimum != nil %}
+        <li>Must be greater than <code>{{ field.exclusiveMinimum }}</code></li>
+      {% endif %}
+      {% if field.exclusiveMaximum != nil %}
+        <li>Must be less than <code>{{ field.exclusiveMaximum }}</code></li>
+      {% endif %}
+      {% if field.minLength != nil %}
+        <li>Minimum length: <code>{{ field.minLength }}</code></li>
+      {% endif %}
+      {% if field.maxLength != nil %}
+        <li>Maximum length: <code>{{ field.maxLength }}</code></li>
+      {% endif %}
+      {% if field.minItems != nil %}
+        <li>Minimum items: <code>{{ field.minItems }}</code></li>
+      {% endif %}
+      {% if field.maxItems != nil %}
+        <li>Maximum items: <code>{{ field.maxItems }}</code></li>
+      {% endif %}
+      {% if field.uniqueItems == true %}
+        <li>Items must be unique.</li>
+      {% endif %}
+      {% if field.not.enum %}
+        <li>Disallowed values: <code>{{ field.not.enum | join: ", " }}</code></li>
+      {% endif %}
+      {% assign alternatives = field.anyOf | default: field.oneOf %}
+      {% for alternative in alternatives %}
+        {% if alternative.const != nil %}
+          <li>Accepted fixed value: <code>{{ alternative.const | jsonify }}</code></li>
+        {% endif %}
+        {% if alternative.enum %}
+          <li>Accepted values: <code>{{ alternative.enum | join: ", " }}</code></li>
+        {% endif %}
+        {% if alternative.format %}
+          <li>Accepted format: <code>{{ alternative.format }}</code></li>
+        {% endif %}
+        {% if alternative.pattern %}
+          <li>Accepted pattern: <code>{{ alternative.pattern }}</code></li>
+        {% endif %}
+      {% endfor %}
+      {% for rule in field['x-glc-validation'] %}
+        <li>{{ rule }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}

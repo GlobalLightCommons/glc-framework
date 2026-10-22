@@ -1,0 +1,24 @@
+participant_internal_id,participant_characteristic_name,participant_characteristic_value,participant_characteristic_unit,participant_characteristic_description
+IZTECH_S004,VLSQ8,19,,Source: vlsq8.RData; original column: VLSQ8.
+IZTECH_S004,meq_type,Moderately evening type,,Derived phenotype measure calculated during source-data preprocessing. Derived MEQ chronotype category. Source: chronotype.RData; original column: meq_type.
+IZTECH_S004,meq,40,score,Derived phenotype measure calculated during source-data preprocessing. Calculated Morningness-Eveningness Questionnaire score. Source: chronotype.RData; original column: meq.
+IZTECH_S004,msf_sc,24300,seconds after midnight,Derived phenotype measure calculated during source-data preprocessing. Calculated sleep-corrected midpoint of sleep on free days. Source: chronotype.RData; original column: msf_sc.
+IZTECH_S004,sjl,1.875,hours,Derived phenotype measure calculated during source-data preprocessing. Calculated social jetlag. Source: chronotype.RData; original column: sjl.
+IZTECH_S004,so_w,3600,seconds after midnight,Derived phenotype measure calculated during source-data preprocessing. Calculated sleep onset on working days. Source: chronotype.RData; original column: so_w.
+IZTECH_S004,so_f,10800,seconds after midnight,Derived phenotype measure calculated during source-data preprocessing. Calculated sleep onset on free days. Source: chronotype.RData; original column: so_f.
+IZTECH_S004,sd_w,7.75,hours,Derived phenotype measure calculated during source-data preprocessing. Calculated sleep duration on working days. Source: chronotype.RData; original column: sd_w.
+IZTECH_S004,sd_f,7.5,hours,Derived phenotype measure calculated during source-data preprocessing. Calculated sleep duration on free days. Source: chronotype.RData; original column: sd_f.
+IZTECH_S004,msw,17550,seconds after midnight,Derived phenotype measure calculated during source-data preprocessing. Calculated midpoint of sleep on working days. Source: chronotype.RData; original column: msw.
+IZTECH_S004,msf,24300,seconds after midnight,Derived phenotype measure calculated during source-data preprocessing. Calculated midpoint of sleep on free days. Source: chronotype.RData; original column: msf.
+IZTECH_S004,sd_week,7.67857142857143,hours,Derived phenotype measure calculated during source-data preprocessing. Calculated average weekly sleep duration. Source: chronotype.RData; original column: sd_week.
+IZTECH_S004,outdoor,180,minutes,Derived phenotype measure calculated during source-data preprocessing. Calculated average time spent outside. Source: chronotype.RData; original column: outdoor.
+IZTECH_S004,native_language,TRUE,,Source: demographics.RData; original column: native_language.
+IZTECH_S004,employment_status,Studying and employed,,Source: demographics.RData; original column: employment_status.
+IZTECH_S004,medication,FALSE,,Source: health.RData; original column: medication.
+IZTECH_S004,tobacco,FALSE,,Source: health.RData; original column: tobacco.
+IZTECH_S004,drugs,FALSE,,Source: health.RData; original column: drugs.
+IZTECH_S004,disorder,FALSE,,Source: health.RData; original column: disorder.
+IZTECH_S004,gen_health,Good,,Source: health.RData; original column: gen_health.
+IZTECH_S004,visual_acuity,I do not require prescription glasses and/or contact lenses,,Source: health.RData; original column: visual_acuity.
+IZTECH_S004,glasses_use,FALSE,,Source: evaluation.RData; original column: glasses_use.
+IZTECH_S004,ASE,25,,Source: ase.RData; original column: ASE.

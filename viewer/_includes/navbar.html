@@ -1,0 +1,188 @@
+<nav class="glc-navbar">
+  <div class="glc-navbar-inner">
+
+    <a
+      href="https://globallightcommons.org/"
+      class="glc-brand"
+    >
+      <img
+        src="{{ '/assets/GLC_Logo.png' | relative_url }}"
+        alt="Global Light Commons"
+      >
+    </a>
+
+    <div class="glc-nav-area">
+
+      <div class="glc-nav-links">
+        <a href="https://globallightcommons.org/about/">
+          About
+        </a>
+
+        <a href="https://globallightcommons.org/research/">
+          Research
+        </a>
+
+        <a href="https://globallightcommons.org/team/">
+          Team
+        </a>
+
+        <a href="https://globallightcommons.org/advisory-board/">
+          Advisory Board
+        </a>
+
+        <a href="https://globallightcommons.org/news/">
+          News
+        </a>
+
+        <a href="https://globallightcommons.org/resources/">
+          Resources
+        </a>
+
+        <a href="https://globallightcommons.org/acknowledgements/">
+          Acknowledgements
+        </a>
+
+        <a href="https://globallightcommons.org/contact/">
+          Contact
+        </a>
+      </div>
+
+      <div class="glc-ecosystem-nav">
+
+        <span class="glc-ecosystem-label">
+          Ecosystem
+        </span>
+
+        <div class="glc-ecosystem-links">
+
+          <a
+            class="glc-ecosystem-link"
+            href="{{ '/' | relative_url }}"
+          >
+            Overview
+          </a>
+
+
+          <div class="glc-ecosystem-dropdown">
+
+            <div class="glc-ecosystem-parent">
+
+              <a
+                class="glc-ecosystem-link glc-ecosystem-parent-link"
+                href="{{ '/profile/' | relative_url }}"
+              >
+                Standard
+              </a>
+
+              <button
+                class="glc-ecosystem-trigger"
+                type="button"
+                aria-label="Open Standard menu"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <svg
+                  viewBox="0 0 10 6"
+                  aria-hidden="true"
+                >
+                  <path d="M1 1l4 4 4-4"></path>
+                </svg>
+              </button>
+
+            </div>
+
+            <div class="glc-ecosystem-menu">
+
+              <a href="{{ '/profile/' | relative_url }}">
+                Package profile
+              </a>
+
+              <a href="{{ '/schemas/' | relative_url }}">
+                Resource schemas
+              </a>
+
+              <a href="{{ '/example-package/' | relative_url }}">
+                Example package
+              </a>
+
+            </div>
+
+          </div>
+
+
+          <a
+            class="glc-ecosystem-link"
+            href="{{ '/registry/' | relative_url }}"
+          >
+            Registry
+          </a>
+
+
+          <div class="glc-ecosystem-dropdown">
+
+            <div class="glc-ecosystem-parent">
+
+              <a
+                class="glc-ecosystem-link glc-ecosystem-parent-link"
+                href="{{ '/tools/' | relative_url }}"
+              >
+                Tools
+              </a>
+
+              <button
+                class="glc-ecosystem-trigger"
+                type="button"
+                aria-label="Open Tools menu"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <svg
+                  viewBox="0 0 10 6"
+                  aria-hidden="true"
+                >
+                  <path d="M1 1l4 4 4-4"></path>
+                </svg>
+              </button>
+
+            </div>
+
+            <div class="glc-ecosystem-menu glc-tools-menu">
+
+              <a href="{{ '/tools/' | relative_url }}">
+                Tools overview
+              </a>
+
+              <a
+                href="https://builder.globallightcommons.org/"
+              >
+                Metadata builder
+              </a>
+
+              <a href="{{ '/validate/' | relative_url }}">
+                Validate a dataset
+              </a>
+
+              <a
+                href="https://tscnlab.github.io/glc-dp-r/"
+              >
+                GLC-dp
+              </a>
+
+              <a
+                href="https://tscnlab.github.io/LightLogR/"
+              >
+                LightLogR
+              </a>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</nav>

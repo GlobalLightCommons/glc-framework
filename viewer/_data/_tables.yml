@@ -1,0 +1,27 @@
+- id: study_schema
+  required: true
+
+- id: contributor_schema
+  required: false
+
+- id: dataset_schema
+  required: true
+
+- id: device_schema
+  required: true
+
+- id: device_datasheet_schema
+  label: Device/sensor datasheet schema
+  description: Metadata schema for device and sensor datasheets.
+  required: true
+
+- id: participant_schema
+  label: Participant schema
+  required: true
+
+- id: participant_characteristics_schema
+  label: Participant characteristics schema
+  required: false
+
+#- id: light_data_schema
+#  example: true

@@ -1,0 +1,1304 @@
+[
+  {
+    "schema_version": "3.0.2",
+    "dataset_internal_id": "MELIDOS_IZTECH_S004",
+    "dataset_participant_associated": true,
+    "dataset_crossref": {
+      "dataset_crossref_study_id": "MELIDOS_IZTECH_2025",
+      "dataset_crossref_participant_id": "IZTECH_S004"
+    },
+    "dataset_timezone": "Europe/Istanbul",
+    "dataset_location": [
+      38.32,
+      26.63
+    ],
+    "dataset_variable_terms": [
+      {
+        "term": "acceptability",
+        "label": "Acceptability"
+      },
+      {
+        "term": "activity_context",
+        "label": "Activity Context"
+      },
+      {
+        "term": "activity_metric",
+        "label": "Activity Metric"
+      },
+      {
+        "term": "age",
+        "label": "Age"
+      },
+      {
+        "term": "ase_score",
+        "label": "ASE Score"
+      },
+      {
+        "term": "bedtime",
+        "label": "Bedtime"
+      },
+      {
+        "term": "blue_light",
+        "label": "Blue Light"
+      },
+      {
+        "term": "capacitive_sensor",
+        "label": "Capacitive Sensor"
+      },
+      {
+        "term": "chronotype_category",
+        "label": "Chronotype Category"
+      },
+      {
+        "term": "date",
+        "label": "Date"
+      },
+      {
+        "term": "datetime",
+        "label": "Datetime"
+      },
+      {
+        "term": "device_event",
+        "label": "Device Event"
+      },
+      {
+        "term": "device_orientation",
+        "label": "Device Orientation"
+      },
+      {
+        "term": "device_placement",
+        "label": "Device Placement"
+      },
+      {
+        "term": "device_position",
+        "label": "Device Position"
+      },
+      {
+        "term": "device_state",
+        "label": "Device State"
+      },
+      {
+        "term": "diagnosed_disorder",
+        "label": "Diagnosed Disorder"
+      },
+      {
+        "term": "employment_status",
+        "label": "Employment Status"
+      },
+      {
+        "term": "exercise_duration",
+        "label": "Exercise Duration"
+      },
+      {
+        "term": "experience_report",
+        "label": "Experience Report"
+      },
+      {
+        "term": "free_text_response",
+        "label": "Free Text Response"
+      },
+      {
+        "term": "gender",
+        "label": "Gender"
+      },
+      {
+        "term": "general_health",
+        "label": "General Health"
+      },
+      {
+        "term": "green_light",
+        "label": "Green Light"
+      },
+      {
+        "term": "implicit_record_indicator",
+        "label": "Implicit Record Indicator"
+      },
+      {
+        "term": "infrared_light",
+        "label": "Infrared Light"
+      },
+      {
+        "term": "leba_score",
+        "label": "Leba Score"
+      },
+      {
+        "term": "light_source_context",
+        "label": "Light Source Context"
+      },
+      {
+        "term": "location_context",
+        "label": "Location Context"
+      },
+      {
+        "term": "medication_use",
+        "label": "Medication Use"
+      },
+      {
+        "term": "melanopic_edi",
+        "label": "Melanopic EDI"
+      },
+      {
+        "term": "meq_score",
+        "label": "MEQ Score"
+      },
+      {
+        "term": "native_language",
+        "label": "Native Language"
+      },
+      {
+        "term": "nonwear_reason",
+        "label": "Nonwear Reason"
+      },
+      {
+        "term": "other",
+        "label": "Other"
+      },
+      {
+        "term": "participant_id",
+        "label": "Participant Id"
+      },
+      {
+        "term": "photopic_illuminance",
+        "label": "Photopic Illuminance"
+      },
+      {
+        "term": "questionnaire_item_response",
+        "label": "Questionnaire Item Response"
+      },
+      {
+        "term": "recreational_drug_use",
+        "label": "Recreational Drug Use"
+      },
+      {
+        "term": "red_light",
+        "label": "Red Light"
+      },
+      {
+        "term": "sedentary_duration",
+        "label": "Sedentary Duration"
+      },
+      {
+        "term": "sex",
+        "label": "Sex"
+      },
+      {
+        "term": "sleep_duration",
+        "label": "Sleep Duration"
+      },
+      {
+        "term": "sleep_environment",
+        "label": "Sleep Environment"
+      },
+      {
+        "term": "sleep_midpoint",
+        "label": "Sleep Midpoint"
+      },
+      {
+        "term": "sleep_onset",
+        "label": "Sleep Onset"
+      },
+      {
+        "term": "sleep_quality",
+        "label": "Sleep Quality"
+      },
+      {
+        "term": "social_jetlag",
+        "label": "Social Jetlag"
+      },
+      {
+        "term": "source_file",
+        "label": "Source File"
+      },
+      {
+        "term": "spectral_channel",
+        "label": "Spectral Channel"
+      },
+      {
+        "term": "temperature",
+        "label": "Temperature"
+      },
+      {
+        "term": "time_outdoors",
+        "label": "Time Outdoors"
+      },
+      {
+        "term": "tobacco_use",
+        "label": "Tobacco Use"
+      },
+      {
+        "term": "translated_free_text",
+        "label": "Translated Free Text"
+      },
+      {
+        "term": "uva_light",
+        "label": "Uva Light"
+      },
+      {
+        "term": "uvb_light",
+        "label": "Uvb Light"
+      },
+      {
+        "term": "visual_acuity",
+        "label": "Visual Acuity"
+      },
+      {
+        "term": "visual_light_sensitivity",
+        "label": "Visual Light Sensitivity"
+      },
+      {
+        "term": "vlsq8_score",
+        "label": "VLSQ-8 Score"
+      },
+      {
+        "term": "wake_time",
+        "label": "Wake Time"
+      },
+      {
+        "term": "wear_state",
+        "label": "Wear State"
+      },
+      {
+        "term": "wellbeing_score",
+        "label": "Wellbeing Score"
+      }
+    ],
+    "dataset_file": [
+      {
+        "dataset_file_modality": [
+          "questionnaire"
+        ],
+        "dataset_file_temporal_resolution": {
+          "resolution_type": "event_based"
+        },
+        "dataset_file_instructions": "Complete the light-glasses acceptability questionnaire at the end of the study.",
+        "dataset_file_names": [
+          "data/files/questionnaires/IZTECH_S004_acceptability.csv"
+        ],
+        "dataset_file_format": "csv",
+        "dataset_file_encoding": [
+          "UTF-8"
+        ],
+        "dataset_file_timezone": "Europe/Istanbul",
+        "dataset_file_role": "primary",
+        "dataset_file_data_state": "processed",
+        "dataset_file_header_row": 1,
+        "dataset_file_preprocessing": {
+          "dataset_file_preprocessing_bol": true,
+          "dataset_file_preprocessing_desc": [
+            "Converted from the repository RData table to UTF-8 CSV and split by participant without changing rows or columns."
+          ]
+        },
+        "dataset_file_variables": [
+          {
+            "dataset_file_variables_name": "Id",
+            "dataset_file_variables_labels": "Participant ID",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "participant_id"
+            }
+          },
+          {
+            "dataset_file_variables_name": "affective_attitude",
+            "dataset_file_variables_labels": "Comfort while wearing light glasses",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "acceptability"
+            },
+            "dataset_file_variables_description": "How comfortable did you feel while wearing the light glasses?",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Very uncomfortable",
+                "label": "Very uncomfortable"
+              },
+              {
+                "value": "Uncomfortable",
+                "label": "Uncomfortable"
+              },
+              {
+                "value": "No opinion",
+                "label": "No opinion"
+              },
+              {
+                "value": "Comfortable",
+                "label": "Comfortable"
+              },
+              {
+                "value": "Very comfortable",
+                "label": "Very comfortable"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "burden",
+            "dataset_file_variables_labels": "Effort of wearing light glasses",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "acceptability"
+            },
+            "dataset_file_variables_description": "How much effort did it take to wear and use the light glasses during the 7 days?",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "No effort at all",
+                "label": "No effort at all"
+              },
+              {
+                "value": "A little effort",
+                "label": "A little effort"
+              },
+              {
+                "value": "No opinion",
+                "label": "No opinion"
+              },
+              {
+                "value": "A lot of effort",
+                "label": "A lot of effort"
+              },
+              {
+                "value": "Huge effort",
+                "label": "Huge effort"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "ethicality",
+            "dataset_file_variables_labels": "Perceived ethical consequences",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "acceptability"
+            },
+            "dataset_file_variables_description": "There are moral or ethical consequences to wearing the light glasses",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Strongly disagree",
+                "label": "Strongly disagree"
+              },
+              {
+                "value": "Disagree",
+                "label": "Disagree"
+              },
+              {
+                "value": "No opinion",
+                "label": "No opinion"
+              },
+              {
+                "value": "Agree",
+                "label": "Agree"
+              },
+              {
+                "value": "Strongly agree",
+                "label": "Strongly agree"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "perceived_effectiveness",
+            "dataset_file_variables_labels": "Perceived measurement effectiveness",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "acceptability"
+            },
+            "dataset_file_variables_description": "Wearing light glasses can measure individuals' light exposure in their daily life",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Strongly disagree",
+                "label": "Strongly disagree"
+              },
+              {
+                "value": "Disagree",
+                "label": "Disagree"
+              },
+              {
+                "value": "No opinion",
+                "label": "No opinion"
+              },
+              {
+                "value": "Agree",
+                "label": "Agree"
+              },
+              {
+                "value": "Strongly agree",
+                "label": "Strongly agree"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "intervention_coherence",
+            "dataset_file_variables_labels": "Understanding of measurement purpose",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "acceptability"
+            },
+            "dataset_file_variables_description": "It is clear to me how wearing the light glasses will help inform my light exposure",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Strongly disagree",
+                "label": "Strongly disagree"
+              },
+              {
+                "value": "Disagree",
+                "label": "Disagree"
+              },
+              {
+                "value": "No opinion",
+                "label": "No opinion"
+              },
+              {
+                "value": "Agree",
+                "label": "Agree"
+              },
+              {
+                "value": "Strongly agree",
+                "label": "Strongly agree"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "self_efficacy",
+            "dataset_file_variables_labels": "Confidence while wearing light glasses",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "acceptability"
+            },
+            "dataset_file_variables_description": "How confident did you feel while wearing the light glasses?",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Very unconfident",
+                "label": "Very unconfident"
+              },
+              {
+                "value": "Unconfident",
+                "label": "Unconfident"
+              },
+              {
+                "value": "No opinion",
+                "label": "No opinion"
+              },
+              {
+                "value": "Confident",
+                "label": "Confident"
+              },
+              {
+                "value": "Very confident",
+                "label": "Very confident"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "opportunity_costs",
+            "dataset_file_variables_labels": "Interference with other priorities",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "acceptability"
+            },
+            "dataset_file_variables_description": "Wearing the light glasses interfered with my other priorities",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Strongly disagree",
+                "label": "Strongly disagree"
+              },
+              {
+                "value": "Disagree",
+                "label": "Disagree"
+              },
+              {
+                "value": "No opinion",
+                "label": "No opinion"
+              },
+              {
+                "value": "Agree",
+                "label": "Agree"
+              },
+              {
+                "value": "Strongly agree",
+                "label": "Strongly agree"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "general_acceptability",
+            "dataset_file_variables_labels": "Overall light-glasses acceptability",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "acceptability"
+            },
+            "dataset_file_variables_description": "How acceptable was wearing the light glasses during the 7 days for you?",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Completely unacceptable",
+                "label": "Completely unacceptable"
+              },
+              {
+                "value": "Unacceptable",
+                "label": "Unacceptable"
+              },
+              {
+                "value": "No opinion",
+                "label": "No opinion"
+              },
+              {
+                "value": "Acceptable",
+                "label": "Acceptable"
+              },
+              {
+                "value": "Completely acceptable",
+                "label": "Completely acceptable"
+              }
+            ]
+          }
+        ],
+        "primary_variables": [
+          "affective_attitude"
+        ],
+        "dataset_file_instrument": {
+          "instrument_type": "questionnaire",
+          "instrument_name": "Acceptability questionnaire",
+          "collection_method": "software",
+          "recorded_by": "participant",
+          "software_name": "MyCap integrated with REDCap"
+        },
+        "dataset_file_datetime": {
+          "dataset_file_datetime_source": "collection",
+          "dataset_file_datetime_date": "2025-01-27 12:06:29",
+          "dataset_file_datetime_dateformat": "YYYY-MM-DD HH:mm:ss"
+        },
+        "dataset_file_crossref_device_id": "IZTECH_AL04",
+        "dataset_file_device_location": "eye level",
+        "dataset_file_device_location_type": "body_worn",
+        "dataset_file_description": "End-of-study acceptability questionnaire about the head/light-glasses device type. The participant used IZTECH_AL03 initially and IZTECH_AL04 after replacement; the file group is linked to IZTECH_AL04 because it was worn for the majority of the study period."
+      },
+      {
+        "dataset_file_modality": [
+          "diary"
+        ],
+        "dataset_file_temporal_resolution": {
+          "resolution_type": "event_based"
+        },
+        "dataset_file_instructions": "Use the smartphone application throughout monitoring to report experiences with the light loggers.",
+        "dataset_file_names": [
+          "data/files/longitudinal-reports/IZTECH_S004_experiencelog_AL03.csv"
+        ],
+        "dataset_file_format": "csv",
+        "dataset_file_encoding": [
+          "UTF-8"
+        ],
+        "dataset_file_timezone": "Europe/Istanbul",
+        "dataset_file_role": "primary",
+        "dataset_file_data_state": "processed",
+        "dataset_file_header_row": 1,
+        "dataset_file_preprocessing": {
+          "dataset_file_preprocessing_bol": true,
+          "dataset_file_preprocessing_desc": [
+            "Converted from the repository RData table to UTF-8 CSV and split by participant.",
+            "Experience-log entries were separated at the replacement head-device recording start (2025-01-21 15:27:20): earlier entries were assigned to IZTECH_AL03 and later entries to IZTECH_AL04."
+          ]
+        },
+        "dataset_file_variables": [
+          {
+            "dataset_file_variables_name": "Id",
+            "dataset_file_variables_labels": "Participant ID",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "participant_id"
+            }
+          },
+          {
+            "dataset_file_variables_name": "Datetime",
+            "dataset_file_variables_labels": "Date and time",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "datetime"
+            }
+          },
+          {
+            "dataset_file_variables_name": "is_past",
+            "dataset_file_variables_labels": "Is past",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            }
+          },
+          {
+            "dataset_file_variables_name": "exp_time",
+            "dataset_file_variables_labels": "Experience time",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "datetime"
+            },
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Current (happened in the last 10 minutes)",
+                "label": "Current (happened in the last 10 minutes)"
+              },
+              {
+                "value": "Past (happened in the past and I forgot to report it)",
+                "label": "Past (happened in the past and I forgot to report it)"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "type",
+            "dataset_file_variables_labels": "Experience type",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Positive",
+                "label": "Positive"
+              },
+              {
+                "value": "Neutral",
+                "label": "Neutral"
+              },
+              {
+                "value": "Negative",
+                "label": "Negative"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "location",
+            "dataset_file_variables_labels": "Experience location",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "location_context"
+            },
+            "dataset_file_variables_description": "Please select the option which describes the location where you made the experience",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Home",
+                "label": "Home"
+              },
+              {
+                "value": "Office or work-related space (e.g.: canteen)",
+                "label": "Office or work-related space (e.g.: canteen)"
+              },
+              {
+                "value": "Public spaces (e.g.: supermarket, restaurant, shop, park etc.)",
+                "label": "Public spaces (e.g.: supermarket, restaurant, shop, park etc.)"
+              },
+              {
+                "value": "Other",
+                "label": "Other"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "loc_spec",
+            "dataset_file_variables_labels": "Location specification",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "location_context"
+            },
+            "dataset_file_variables_description": "Please specifiy"
+          },
+          {
+            "dataset_file_variables_name": "descr",
+            "dataset_file_variables_labels": "Experience description",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Please provide a brief description of your experience, including the location, the activity you were performing and what feelings it triggered for you"
+          },
+          {
+            "dataset_file_variables_name": "feedback",
+            "dataset_file_variables_labels": "Feedback from others",
+            "dataset_file_variables_type": "boolean",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Did this experience involve verbal or non-verbal feedback from others?\n\nExample: comments or questions from people"
+          },
+          {
+            "dataset_file_variables_name": "identity",
+            "dataset_file_variables_labels": "Feedback provider",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Who provided this feedback?",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Friend or family member",
+                "label": "Friend or family member"
+              },
+              {
+                "value": "Colleague",
+                "label": "Colleague"
+              },
+              {
+                "value": "Acquaintance",
+                "label": "Acquaintance"
+              },
+              {
+                "value": "Stranger",
+                "label": "Stranger"
+              },
+              {
+                "value": "Other",
+                "label": "Other"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "identity_spec",
+            "dataset_file_variables_labels": "Feedback-provider specification",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Please specify"
+          },
+          {
+            "dataset_file_variables_name": "social_type",
+            "dataset_file_variables_labels": "Feedback type",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Please select the options that best describes the type feedback you received about the light glasses",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Comments about the light glasses",
+                "label": "Comments about the light glasses"
+              },
+              {
+                "value": "Questions about the light glasses",
+                "label": "Questions about the light glasses"
+              },
+              {
+                "value": "Looks due to the light glasses",
+                "label": "Looks due to the light glasses"
+              },
+              {
+                "value": "Concerns about the light glasses",
+                "label": "Concerns about the light glasses"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "removal",
+            "dataset_file_variables_labels": "Light-glasses removal prompted",
+            "dataset_file_variables_type": "boolean",
+            "dataset_file_variables_term": {
+              "variable_term": "nonwear_reason"
+            },
+            "dataset_file_variables_description": "Did this experience prompt you to remove the light glasses?"
+          },
+          {
+            "dataset_file_variables_name": "future_use",
+            "dataset_file_variables_labels": "Effect on future light-glasses use",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Explain how this experience will influence your future use of the light glasses, if at all"
+          },
+          {
+            "dataset_file_variables_name": "loc_spec_english",
+            "dataset_file_variables_labels": "Location specification (English translation)",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "location_context"
+            }
+          },
+          {
+            "dataset_file_variables_name": "descr_english",
+            "dataset_file_variables_labels": "Experience description (English translation)",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "translated_free_text"
+            }
+          },
+          {
+            "dataset_file_variables_name": "identity_spec_english",
+            "dataset_file_variables_labels": "Feedback-provider specification (English translation)",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "translated_free_text"
+            }
+          },
+          {
+            "dataset_file_variables_name": "future_use_english",
+            "dataset_file_variables_labels": "Effect on future light-glasses use (English translation)",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "translated_free_text"
+            }
+          }
+        ],
+        "primary_variables": [
+          "Datetime"
+        ],
+        "dataset_file_instrument": {
+          "instrument_type": "diary",
+          "instrument_name": "Experience log",
+          "collection_method": "software",
+          "recorded_by": "participant",
+          "software_name": "MyCap integrated with REDCap"
+        },
+        "dataset_file_datetime": {
+          "dataset_file_datetime_source": "column",
+          "dataset_file_datetime_date": "Datetime",
+          "dataset_file_datetime_dateformat": "YYYY-MM-DD HH:mm:ss"
+        },
+        "dataset_file_crossref_device_id": "IZTECH_AL03",
+        "dataset_file_device_location": "eye level",
+        "dataset_file_device_location_type": "body_worn"
+      },
+      {
+        "dataset_file_modality": [
+          "diary"
+        ],
+        "dataset_file_temporal_resolution": {
+          "resolution_type": "event_based"
+        },
+        "dataset_file_instructions": "Use the smartphone application throughout monitoring to report experiences with the light loggers.",
+        "dataset_file_names": [
+          "data/files/longitudinal-reports/IZTECH_S004_experiencelog_AL04.csv"
+        ],
+        "dataset_file_format": "csv",
+        "dataset_file_encoding": [
+          "UTF-8"
+        ],
+        "dataset_file_timezone": "Europe/Istanbul",
+        "dataset_file_role": "primary",
+        "dataset_file_data_state": "processed",
+        "dataset_file_header_row": 1,
+        "dataset_file_preprocessing": {
+          "dataset_file_preprocessing_bol": true,
+          "dataset_file_preprocessing_desc": [
+            "Converted from the repository RData table to UTF-8 CSV and split by participant.",
+            "Experience-log entries were separated at the replacement head-device recording start (2025-01-21 15:27:20): earlier entries were assigned to IZTECH_AL03 and later entries to IZTECH_AL04."
+          ]
+        },
+        "dataset_file_variables": [
+          {
+            "dataset_file_variables_name": "Id",
+            "dataset_file_variables_labels": "Participant ID",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "participant_id"
+            }
+          },
+          {
+            "dataset_file_variables_name": "Datetime",
+            "dataset_file_variables_labels": "Date and time",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "datetime"
+            }
+          },
+          {
+            "dataset_file_variables_name": "is_past",
+            "dataset_file_variables_labels": "Is past",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            }
+          },
+          {
+            "dataset_file_variables_name": "exp_time",
+            "dataset_file_variables_labels": "Experience time",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "datetime"
+            },
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Current (happened in the last 10 minutes)",
+                "label": "Current (happened in the last 10 minutes)"
+              },
+              {
+                "value": "Past (happened in the past and I forgot to report it)",
+                "label": "Past (happened in the past and I forgot to report it)"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "type",
+            "dataset_file_variables_labels": "Experience type",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Positive",
+                "label": "Positive"
+              },
+              {
+                "value": "Neutral",
+                "label": "Neutral"
+              },
+              {
+                "value": "Negative",
+                "label": "Negative"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "location",
+            "dataset_file_variables_labels": "Experience location",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "location_context"
+            },
+            "dataset_file_variables_description": "Please select the option which describes the location where you made the experience",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Home",
+                "label": "Home"
+              },
+              {
+                "value": "Office or work-related space (e.g.: canteen)",
+                "label": "Office or work-related space (e.g.: canteen)"
+              },
+              {
+                "value": "Public spaces (e.g.: supermarket, restaurant, shop, park etc.)",
+                "label": "Public spaces (e.g.: supermarket, restaurant, shop, park etc.)"
+              },
+              {
+                "value": "Other",
+                "label": "Other"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "loc_spec",
+            "dataset_file_variables_labels": "Location specification",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "location_context"
+            },
+            "dataset_file_variables_description": "Please specifiy"
+          },
+          {
+            "dataset_file_variables_name": "descr",
+            "dataset_file_variables_labels": "Experience description",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Please provide a brief description of your experience, including the location, the activity you were performing and what feelings it triggered for you"
+          },
+          {
+            "dataset_file_variables_name": "feedback",
+            "dataset_file_variables_labels": "Feedback from others",
+            "dataset_file_variables_type": "boolean",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Did this experience involve verbal or non-verbal feedback from others?\n\nExample: comments or questions from people"
+          },
+          {
+            "dataset_file_variables_name": "identity",
+            "dataset_file_variables_labels": "Feedback provider",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Who provided this feedback?",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Friend or family member",
+                "label": "Friend or family member"
+              },
+              {
+                "value": "Colleague",
+                "label": "Colleague"
+              },
+              {
+                "value": "Acquaintance",
+                "label": "Acquaintance"
+              },
+              {
+                "value": "Stranger",
+                "label": "Stranger"
+              },
+              {
+                "value": "Other",
+                "label": "Other"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "identity_spec",
+            "dataset_file_variables_labels": "Feedback-provider specification",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Please specify"
+          },
+          {
+            "dataset_file_variables_name": "social_type",
+            "dataset_file_variables_labels": "Feedback type",
+            "dataset_file_variables_type": "factor",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Please select the options that best describes the type feedback you received about the light glasses",
+            "dataset_file_variables_factor_levels": [
+              {
+                "value": "Comments about the light glasses",
+                "label": "Comments about the light glasses"
+              },
+              {
+                "value": "Questions about the light glasses",
+                "label": "Questions about the light glasses"
+              },
+              {
+                "value": "Looks due to the light glasses",
+                "label": "Looks due to the light glasses"
+              },
+              {
+                "value": "Concerns about the light glasses",
+                "label": "Concerns about the light glasses"
+              }
+            ]
+          },
+          {
+            "dataset_file_variables_name": "removal",
+            "dataset_file_variables_labels": "Light-glasses removal prompted",
+            "dataset_file_variables_type": "boolean",
+            "dataset_file_variables_term": {
+              "variable_term": "nonwear_reason"
+            },
+            "dataset_file_variables_description": "Did this experience prompt you to remove the light glasses?"
+          },
+          {
+            "dataset_file_variables_name": "future_use",
+            "dataset_file_variables_labels": "Effect on future light-glasses use",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "experience_report"
+            },
+            "dataset_file_variables_description": "Explain how this experience will influence your future use of the light glasses, if at all"
+          },
+          {
+            "dataset_file_variables_name": "loc_spec_english",
+            "dataset_file_variables_labels": "Location specification (English translation)",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "location_context"
+            }
+          },
+          {
+            "dataset_file_variables_name": "descr_english",
+            "dataset_file_variables_labels": "Experience description (English translation)",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "translated_free_text"
+            }
+          },
+          {
+            "dataset_file_variables_name": "identity_spec_english",
+            "dataset_file_variables_labels": "Feedback-provider specification (English translation)",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "translated_free_text"
+            }
+          },
+          {
+            "dataset_file_variables_name": "future_use_english",
+            "dataset_file_variables_labels": "Effect on future light-glasses use (English translation)",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "translated_free_text"
+            }
+          }
+        ],
+        "primary_variables": [
+          "Datetime"
+        ],
+        "dataset_file_instrument": {
+          "instrument_type": "diary",
+          "instrument_name": "Experience log",
+          "collection_method": "software",
+          "recorded_by": "participant",
+          "software_name": "MyCap integrated with REDCap"
+        },
+        "dataset_file_datetime": {
+          "dataset_file_datetime_source": "column",
+          "dataset_file_datetime_date": "Datetime",
+          "dataset_file_datetime_dateformat": "YYYY-MM-DD HH:mm:ss"
+        },
+        "dataset_file_crossref_device_id": "IZTECH_AL04",
+        "dataset_file_device_location": "eye level",
+        "dataset_file_device_location_type": "body_worn"
+      },
+      {
+        "dataset_file_modality": [
+          "light",
+          "temperature"
+        ],
+        "dataset_file_temporal_resolution": {
+          "resolution_type": "fixed_interval",
+          "value": 10,
+          "unit": "second"
+        },
+        "dataset_file_instructions": "Wear the assigned light-monitoring device continuously during waking hours. During sleep, place it facing upward on a bedside surface near head level.",
+        "dataset_file_names": [
+          "data/files/light/IZTECH_S004_light_glasses_example.csv"
+        ],
+        "dataset_file_format": "csv",
+        "dataset_file_encoding": [
+          "UTF-8"
+        ],
+        "dataset_file_timezone": "Europe/Istanbul",
+        "dataset_file_role": "primary",
+        "dataset_file_data_state": "processed",
+        "dataset_file_header_row": 1,
+        "dataset_file_preprocessing": {
+          "dataset_file_preprocessing_bol": true,
+          "dataset_file_preprocessing_desc": [
+            "Selected twelve consecutive observed records and the principal light, spectral, and temperature columns to create a compact documentation example."
+          ]
+        },
+        "dataset_file_variables": [
+          {
+            "dataset_file_variables_name": "Datetime",
+            "dataset_file_variables_labels": "Date and time",
+            "dataset_file_variables_type": "string",
+            "dataset_file_variables_term": {
+              "variable_term": "datetime"
+            }
+          },
+          {
+            "dataset_file_variables_name": "TEMPERATURE",
+            "dataset_file_variables_labels": "Temperature",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "Cel",
+            "dataset_file_variables_term": {
+              "variable_term": "temperature"
+            }
+          },
+          {
+            "dataset_file_variables_name": "LIGHT",
+            "dataset_file_variables_labels": "Photopic illuminance",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "lx",
+            "dataset_file_variables_term": {
+              "variable_term": "photopic_illuminance"
+            }
+          },
+          {
+            "dataset_file_variables_name": "IR.LIGHT",
+            "dataset_file_variables_labels": "Infrared light",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "infrared_light"
+            }
+          },
+          {
+            "dataset_file_variables_name": "F1",
+            "dataset_file_variables_labels": "Spectral channel F1",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          },
+          {
+            "dataset_file_variables_name": "F2",
+            "dataset_file_variables_labels": "Spectral channel F2",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          },
+          {
+            "dataset_file_variables_name": "F3",
+            "dataset_file_variables_labels": "Spectral channel F3",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          },
+          {
+            "dataset_file_variables_name": "F4",
+            "dataset_file_variables_labels": "Spectral channel F4",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          },
+          {
+            "dataset_file_variables_name": "F5",
+            "dataset_file_variables_labels": "Spectral channel F5",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          },
+          {
+            "dataset_file_variables_name": "F6",
+            "dataset_file_variables_labels": "Spectral channel F6",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          },
+          {
+            "dataset_file_variables_name": "F7",
+            "dataset_file_variables_labels": "Spectral channel F7",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          },
+          {
+            "dataset_file_variables_name": "F8",
+            "dataset_file_variables_labels": "Spectral channel F8",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          },
+          {
+            "dataset_file_variables_name": "MEDI",
+            "dataset_file_variables_labels": "Melanopic equivalent daylight illuminance",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "lx",
+            "dataset_file_variables_term": {
+              "variable_term": "melanopic_edi"
+            }
+          },
+          {
+            "dataset_file_variables_name": "CLEAR",
+            "dataset_file_variables_labels": "Broadband clear spectral channel",
+            "dataset_file_variables_type": "numeric",
+            "dataset_file_variables_units": "{normalized_sensor_count}",
+            "dataset_file_variables_term": {
+              "variable_term": "spectral_channel"
+            }
+          }
+        ],
+        "primary_variables": [
+          "LIGHT",
+          "MEDI"
+        ],
+        "dataset_file_datetime": {
+          "dataset_file_datetime_source": "column",
+          "dataset_file_datetime_date": "Datetime",
+          "dataset_file_datetime_dateformat": "YYYY-MM-DD HH:mm:ss"
+        },
+        "dataset_file_crossref_device_id": "IZTECH_AL03",
+        "dataset_file_device_location": "eye level",
+        "dataset_file_device_location_type": "body_worn",
+        "dataset_file_description": "Compact extract of head-worn ActLumus light measurements from the first device period."
+      }
+    ]
+  }
+]

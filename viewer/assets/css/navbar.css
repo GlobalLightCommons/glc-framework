@@ -1,0 +1,582 @@
+/* ========================================
+   NAVBAR
+   ======================================== */
+
+   .glc-navbar {
+    position: relative;
+    z-index: 100;
+  
+    border-bottom: 1px solid var(--glc-line);
+  
+    background: rgba(255, 255, 255, 0.97);
+  }
+  
+  
+  /* ========================================
+     NAVBAR INNER
+     ======================================== */
+  
+  .glc-navbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    column-gap: 2rem;
+  
+    align-items: center;
+  }
+  
+  
+  /* ========================================
+     BRAND
+     ======================================== */
+  
+  .glc-brand {
+    display: flex;
+    align-items: center;
+    align-self: center;
+  
+    text-decoration: none;
+  }
+  
+  .glc-brand img {
+    display: block;
+  
+    width: 220px;
+    height: 72px;
+  
+    object-fit: contain;
+  }
+  
+  
+  /* ========================================
+     NAVIGATION AREA
+     ======================================== */
+  
+  .glc-nav-area {
+    width: fit-content;
+    max-width: 100%;
+  
+    justify-self: end;
+  }
+  
+  
+  /* ========================================
+     PRIMARY NAVIGATION
+     ======================================== */
+  
+  .glc-nav-links {
+    min-height: 0;
+  
+    width: max-content;
+    max-width: 100%;
+
+    padding-top: 0.7rem;
+    padding-bottom: 0.2rem;
+  
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  
+    gap: 20px;
+  }
+  
+  .glc-nav-links a {
+    padding: 0.6rem 0;
+  
+    color: #374151;
+  
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.2;
+  
+    text-decoration: none;
+    white-space: nowrap;
+  
+    transition: color 0.15s ease;
+  }
+  
+  .glc-nav-links a:hover,
+  .glc-nav-links a:focus,
+  .glc-nav-links a.active {
+    color: var(--glc-accent-dark);
+  }
+  
+  
+  /* ========================================
+     ECOSYSTEM NAVIGATION
+     ======================================== */
+  
+  .glc-ecosystem-nav {
+    min-height: 0;
+    width: fit-content;
+
+    margin-bottom: 0.5rem;
+    margin-left: auto;
+    padding: 0;
+  
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  
+    gap: 0.4rem;
+  }
+  
+  .glc-ecosystem-label {
+    flex: 0 0 auto;
+
+    padding: 0.5rem 0.85rem;
+
+    border-radius: 999px;
+
+    background: linear-gradient(
+      110deg,
+      rgba(235, 190, 99, 0.4) 0%,
+      rgba(240, 112, 74, 0.29) 52%,
+      rgba(145, 190, 174, 0.42) 100%
+    );
+  
+    color: #374151;
+  
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+  
+    white-space: nowrap;
+  }
+  
+  
+  /* ========================================
+     ECOSYSTEM LINKS CONTAINER
+     ======================================== */
+  
+  .glc-ecosystem-links {
+    display: flex;
+    align-items: center;
+  
+    gap: 0.1rem;
+  }
+  
+  
+  /* ========================================
+     ECOSYSTEM DIRECT LINKS
+     ======================================== */
+  
+  .glc-ecosystem-link {
+    display: inline-flex;
+    align-items: center;
+  
+    padding: 0.55rem 0.7rem;
+
+    border-radius: 0.45rem;
+  
+    color: #374151;
+  
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.2;
+  
+    text-decoration: none;
+    white-space: nowrap;
+  
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+  
+  .glc-ecosystem-link:hover,
+  .glc-ecosystem-link:focus,
+  .glc-ecosystem-link.active {
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--glc-accent-dark);
+  }
+  
+  
+  /* ========================================
+     ECOSYSTEM DROPDOWN
+     ======================================== */
+  
+  .glc-ecosystem-dropdown {
+    position: relative;
+  }
+  
+  
+  /* ========================================
+     DROPDOWN PARENT ROW
+     ======================================== */
+  
+  .glc-ecosystem-parent {
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .glc-ecosystem-parent-link {
+    padding-right: 0.2rem;
+  }
+  
+  
+  /* ========================================
+     DROPDOWN TRIGGER
+     ======================================== */
+  
+  .glc-ecosystem-trigger {
+    appearance: none;
+  
+    margin: 0;
+    padding: 0.65rem 0.65rem 0.65rem 0.2rem;
+  
+    border: 0;
+  
+    background: transparent;
+    color: #374151;
+  
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  
+    cursor: pointer;
+  
+    transition: color 0.15s ease;
+  }
+
+  .glc-ecosystem-dropdown:last-child .glc-ecosystem-trigger {
+    padding-right: 0;
+  }
+  
+  .glc-ecosystem-trigger:hover,
+  .glc-ecosystem-trigger:focus {
+    color: var(--glc-accent-dark);
+  }
+  
+  .glc-ecosystem-trigger:focus-visible {
+    outline: 2px solid var(--glc-accent);
+    outline-offset: 2px;
+  
+    border-radius: 0.25rem;
+  }
+  
+  
+  /* ========================================
+     DROPDOWN CHEVRON
+     ======================================== */
+  
+  .glc-ecosystem-trigger svg {
+    display: block;
+  
+    width: 9px;
+    height: 6px;
+  
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  
+    transition: transform 0.15s ease;
+  }
+  
+  
+  /* ========================================
+     DROPDOWN MENU
+     ======================================== */
+  
+  .glc-ecosystem-menu {
+    position: absolute;
+    z-index: 200;
+  
+    top: calc(100% - 1px);
+    left: 0;
+  
+    min-width: 190px;
+  
+    padding: 0.45rem 0;
+  
+    border: 1px solid var(--glc-line);
+    border-radius: 0.7rem;
+  
+    background: #fff;
+  
+    box-shadow:
+      0 14px 35px rgba(24, 37, 34, 0.12);
+  
+    opacity: 0;
+    visibility: hidden;
+  
+    transform: translateY(6px);
+  
+    pointer-events: none;
+  
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease,
+      visibility 0.15s ease;
+  }
+  
+  .glc-tools-menu {
+    min-width: 205px;
+  }
+  
+  
+  /* ========================================
+     DROPDOWN MENU LINKS
+     ======================================== */
+  
+  .glc-ecosystem-menu a {
+    display: block;
+  
+    width: 100%;
+  
+    padding: 0.6rem 1rem;
+  
+    color: #374151;
+  
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.25;
+  
+    text-decoration: none;
+    white-space: nowrap;
+  
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+  
+  .glc-ecosystem-menu a:hover,
+  .glc-ecosystem-menu a:focus {
+    background: var(--glc-accent-soft);
+    color: var(--glc-accent-dark);
+  
+    outline: none;
+  }
+  
+  
+  /* ========================================
+     SHOW DROPDOWN
+     ======================================== */
+  
+  .glc-ecosystem-dropdown:hover .glc-ecosystem-menu,
+  .glc-ecosystem-dropdown:focus-within .glc-ecosystem-menu {
+    opacity: 1;
+    visibility: visible;
+  
+    transform: translateY(0);
+  
+    pointer-events: auto;
+  }
+  
+  .glc-ecosystem-dropdown:hover .glc-ecosystem-parent-link,
+  .glc-ecosystem-dropdown:focus-within .glc-ecosystem-parent-link,
+  .glc-ecosystem-dropdown:hover .glc-ecosystem-trigger,
+  .glc-ecosystem-dropdown:focus-within .glc-ecosystem-trigger {
+    color: var(--glc-accent-dark);
+  }
+  
+  .glc-ecosystem-dropdown:hover .glc-ecosystem-trigger svg,
+  .glc-ecosystem-dropdown:focus-within .glc-ecosystem-trigger svg {
+    transform: rotate(180deg);
+  }
+  
+  
+  /* ========================================
+     TABLET
+     ======================================== */
+  
+  @media (max-width: 1000px) {
+  
+    .glc-navbar-inner {
+      grid-template-columns: 180px minmax(0, 1fr);
+  
+      column-gap: 1.5rem;
+    }
+  
+    .glc-brand img {
+      width: 180px;
+      height: 60px;
+    }
+  
+    .glc-nav-links {
+      min-height: 0;
+  
+      gap: 14px;
+    }
+  }
+  
+  
+  /* ========================================
+     SMALL TABLET
+     ======================================== */
+  
+  @media (max-width: 850px) {
+  
+    .glc-navbar-inner {
+      display: block;
+  
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+  
+    .glc-brand {
+      min-height: 0;
+  
+      margin-bottom: 0.75rem;
+    }
+  
+    .glc-nav-area {
+      width: 100%;
+    }
+  
+    .glc-nav-links {
+      min-height: 0;
+      width: 100%;
+  
+      padding-bottom: 0.8rem;
+  
+      justify-content: flex-start;
+      flex-wrap: wrap;
+  
+      gap: 0.25rem 1.25rem;
+    }
+  
+    .glc-ecosystem-nav {
+      min-height: 0;
+      width: 100%;
+  
+      padding: 0.55rem;
+
+      margin-bottom: 0;
+      margin-left: 0;
+  
+      align-items: flex-start;
+    }
+
+    .glc-ecosystem-label {
+      padding: 0.5rem 0.85rem;
+    }
+  
+    .glc-ecosystem-links {
+      flex-wrap: wrap;
+    }
+  }
+  
+  
+  /* ========================================
+     MOBILE
+     ======================================== */
+  
+  @media (max-width: 600px) {
+  
+    .glc-navbar-inner {
+      padding-right: 1.25rem;
+      padding-left: 1.25rem;
+    }
+  
+    .glc-brand img {
+      width: 180px;
+      height: 60px;
+    }
+  
+    .glc-nav-links {
+      width: 100%;
+  
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+  
+      gap: 0;
+    }
+  
+    .glc-nav-links a {
+      padding: 0.45rem 0;
+  
+      white-space: normal;
+    }
+  
+    .glc-ecosystem-nav {
+      width: 100%;
+  
+      padding-top: 0.85rem;
+  
+      flex-direction: column;
+      align-items: flex-start;
+  
+      gap: 0.45rem;
+    }
+  
+    .glc-ecosystem-links {
+      width: 100%;
+  
+      align-items: flex-start;
+      flex-wrap: wrap;
+  
+      gap: 0.15rem;
+    }
+  
+    .glc-ecosystem-link {
+      padding-right: 0.65rem;
+      padding-left: 0.65rem;
+    }
+  
+    .glc-ecosystem-link:first-child {
+      padding-left: 0;
+    }
+  
+    .glc-ecosystem-parent-link {
+      padding-right: 0.15rem;
+    }
+  
+    .glc-ecosystem-trigger {
+      padding-right: 0.55rem;
+      padding-left: 0.15rem;
+    }
+  
+    .glc-ecosystem-menu {
+      left: 0;
+    }
+  }
+  
+  
+  /* ========================================
+     VERY SMALL MOBILE
+     ======================================== */
+  
+  @media (max-width: 420px) {
+  
+    .glc-nav-links {
+      grid-template-columns: 1fr;
+    }
+  
+    .glc-ecosystem-links {
+      width: 100%;
+  
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, auto));
+  
+      justify-content: start;
+  
+      gap: 0.2rem 0.75rem;
+    }
+  
+    .glc-ecosystem-link {
+      padding-top: 0.45rem;
+      padding-bottom: 0.45rem;
+    }
+  
+    .glc-ecosystem-parent-link {
+      padding-right: 0.15rem;
+    }
+  
+    .glc-ecosystem-trigger {
+      padding-top: 0.45rem;
+      padding-right: 0.45rem;
+      padding-bottom: 0.45rem;
+      padding-left: 0.15rem;
+    }
+  
+    .glc-ecosystem-menu {
+      top: 100%;
+  
+      min-width: 180px;
+    }
+  }

@@ -1,0 +1,2 @@
+"Id","Datetime","is_past","exp_time","type","location","loc_spec","descr","feedback","identity","identity_spec","social_type","removal","future_use","loc_spec_english","descr_english","identity_spec_english","future_use_english"
+"IZTECH_S004","2025-01-21 07:00:00","past","Past (happened in the past and I forgot to report it)","Negative","Home",,"cihaz arıza durumu",FALSE,,,,TRUE,"ani pil bitmesi nedeni ile deneyin ilerleyememesi",,"Device malfunction state.",,"Experiment could not continue due to sudden battery depletion."

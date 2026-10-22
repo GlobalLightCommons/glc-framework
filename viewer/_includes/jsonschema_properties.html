@@ -1,0 +1,238 @@
+{% assign prefix = include.prefix | default: include.schema_id %}
+
+{% comment %}
+  Root call (top-level): render a real table (3 columns).
+  Recursive calls (nested objects/arrays): render a DIV "grid" (not a nested table) + collapsible <details>.
+{% endcomment %}
+
+{% if include.render_mode == "nested" %}
+
+  <div class="schema-nested">
+    {% for kv in include.properties %}
+      {% assign name = kv[0] %}
+      {% assign field = kv[1] %}
+      {% assign field_anchor = prefix | append: "." | append: name %}
+
+      {% assign is_required = false %}
+      {% if include.required %}
+        {% for r in include.required %}
+          {% if r == name %}{% assign is_required = true %}{% endif %}
+        {% endfor %}
+      {% endif %}
+
+      <div class="schema-nested-row" id="{{ field_anchor }}">
+        <div class="schema-nested-name">
+          <a href="#{{ field_anchor }}"><code title="{{ name }}">{{ name }}</code></a>{% if is_required %}*{% endif %}
+        </div>
+
+        <div class="schema-nested-def">
+          {{ field.description | markdownify }}
+
+          {% include schema_constraints.html field=field %}
+          {% if field.examples and field.examples.size > 0 %}
+            <p class="schema-example">
+              <strong>Example</strong>:
+              <code>{{ field.examples.first | jsonify }}</code>
+            </p>
+          {% endif %}
+
+          {% if field['x-refersToSchema'] %}
+            {% assign target_key = field['x-refersToSchema'] %}
+            {% assign target_schema = site.data[target_key] %}
+            <p class="small text-muted">
+              References schema:
+              <a href="{{ site.baseurl }}/schemas/#{{ target_key }}">
+                <code>{{ target_schema.title | default: target_key }}</code>
+              </a>
+            </p>
+          {% endif %}
+
+          {% if field['x-refersToField'] %}
+            {% assign ref = field['x-refersToField'] | split: "." %}
+            <p class="small text-muted">
+              References:
+              <a href="{{ site.baseurl }}/schemas/#{{ ref[0] }}.{{ ref[1] }}">
+                <code>{{ ref[0] }}</code>.<code>{{ ref[1] }}</code>
+              </a>
+            </p>
+          {% endif %}
+
+          {% assign field_key = include.schema_id | append: "." | append: name %}
+          {% assign inbound_refs = site.data.xref_index[field_key] %}
+          
+          {% if inbound_refs %}
+            <p class="small text-muted">
+              Referenced by:
+              {% for ref in inbound_refs %}
+                <a href="{{ site.baseurl }}/schemas/#{{ ref.schema }}.{{ ref.field }}">
+                  <code>{{ ref.schema }}</code>.<code>{{ ref.field }}</code>
+                </a>{% if forloop.last == false %}, {% endif %}
+              {% endfor %}
+            </p>
+          {% endif %}
+
+          {% if field.type contains "object" and field.properties %}
+            <details class="schema-details">
+              <summary class="small text-muted">
+                Properties ({{ field.properties | size }})
+              </summary>
+              {% include jsonschema_properties.html
+                 properties=field.properties
+                 required=field.required
+                 schema_id=include.schema_id
+                 prefix=field_anchor
+                 render_mode="nested" %}
+            </details>
+          {% endif %}
+
+          {% if field.type contains "array" and field.items and field.items.type contains "object" and field.items.properties %}
+            {% assign item_prefix = field_anchor | append: "[]" %}
+            <details class="schema-details">
+              <summary class="small text-muted">
+                Item properties ({{ field.items.properties | size }})
+              </summary>
+              {% include jsonschema_properties.html
+                 properties=field.items.properties
+                 required=field.items.required
+                 schema_id=include.schema_id
+                 prefix=item_prefix
+                 render_mode="nested" %}
+            </details>
+          {% endif %}
+
+        </div>
+
+        <div class="schema-nested-type">
+          <span class="badge bg-secondary">
+            {% if field.type.first %}{{ field.type | join: " or " }}{% else %}{{ field.type | default: "object" }}{% endif %}
+          </span>
+        </div>
+      </div>
+
+    {% endfor %}
+  </div>
+
+{% else %}
+
+  <table class="schema-root-table">
+    <colgroup>
+      <col width="25%">
+      <col width="65%">
+      <col width="10%">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Definition</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for kv in include.properties %}
+        {% assign name = kv[0] %}
+        {% assign field = kv[1] %}
+        {% assign field_anchor = prefix | append: "." | append: name %}
+
+        {% assign is_required = false %}
+        {% if include.required %}
+          {% for r in include.required %}
+            {% if r == name %}{% assign is_required = true %}{% endif %}
+          {% endfor %}
+        {% endif %}
+
+        <tr class="text-break" id="{{ field_anchor }}">
+          <td>
+            <a href="#{{ field_anchor }}"><code title="{{ name }}">{{ name }}</code></a>
+            {% if is_required %}*{% endif %}
+          </td>
+          <td>
+            {{ field.description | markdownify }}
+
+            {% include schema_constraints.html field=field %}
+            {% if field.examples and field.examples.size > 0 %}
+              <p class="schema-example">
+                <strong>Example</strong>:
+                <code>{{ field.examples.first | jsonify }}</code>
+              </p>
+            {% endif %}
+
+            {% if field['x-refersToSchema'] %}
+              {% assign target_key = field['x-refersToSchema'] %}
+              {% assign target_schema = site.data[target_key] %}
+              <p class="small text-muted">
+                References schema:
+                <a href="{{ site.baseurl }}/schemas/#{{ target_key }}">
+                  <code>{{ target_schema.title | default: target_key }}</code>
+                </a>
+              </p>
+            {% endif %}
+
+            {% if field['x-refersToField'] %}
+              {% assign ref = field['x-refersToField'] | split: "." %}
+              <p class="small text-muted">
+                References:
+                <a href="{{ site.baseurl }}/schemas/#{{ ref[0] }}.{{ ref[1] }}">
+                  <code>{{ ref[0] }}</code>.<code>{{ ref[1] }}</code>
+                </a>
+              </p>
+            {% endif %}
+
+            {% assign field_key = include.schema_id | append: "." | append: name %}
+            {% assign inbound_refs = site.data.xref_index[field_key] %}
+            
+            {% if inbound_refs %}
+              <p class="small text-muted">
+                Referenced by:
+                {% for ref in inbound_refs %}
+                  <a href="{{ site.baseurl }}/schemas/#{{ ref.schema }}.{{ ref.field }}">
+                    <code>{{ ref.schema }}</code>.<code>{{ ref.field }}</code>
+                  </a>{% if forloop.last == false %}, {% endif %}
+                {% endfor %}
+              </p>
+            {% endif %}
+
+            {% if field.type contains "object" and field.properties %}
+              <details class="schema-details">
+                <summary class="small text-muted">
+                  Properties ({{ field.properties | size }})
+                </summary>
+                {% include jsonschema_properties.html
+                   properties=field.properties
+                   required=field.required
+                   schema_id=include.schema_id
+                   prefix=field_anchor
+                   render_mode="nested" %}
+              </details>
+            {% endif %}
+
+            {% if field.type contains "array" and field.items and field.items.type contains "object" and field.items.properties %}
+              {% assign item_prefix = field_anchor | append: "[]" %}
+              <details class="schema-details">
+                <summary class="small text-muted">
+                  Item properties ({{ field.items.properties | size }})
+                </summary>
+                {% include jsonschema_properties.html
+                   properties=field.items.properties
+                   required=field.items.required
+                   schema_id=include.schema_id
+                   prefix=item_prefix
+                   render_mode="nested" %}
+              </details>
+            {% endif %}
+
+          </td>
+          <td>
+            <span class="badge bg-secondary">
+              {% if field.type.first %}{{ field.type | join: " or " }}{% else %}{{ field.type | default: "object" }}{% endif %}
+            </span>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if include.prefix == nil %}
+    <p class="small">Fields marked with * are required.</p>
+  {% endif %}
+
+{% endif %}
