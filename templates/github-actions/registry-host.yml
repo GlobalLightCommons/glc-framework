@@ -1,0 +1,19 @@
+name: Publish registry from GLC framework
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  push:
+    branches: [main]
+    paths: [".github/workflows/update-registry.yml"]
+  pull_request:
+    paths: [".github/workflows/update-registry.yml"]
+permissions:
+  contents: write
+  actions: read
+  attestations: read
+jobs:
+  framework:
+    uses: GlobalLightCommons/glc-framework/.github/workflows/host-registry.yml@main
+    with:
+      publish: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}

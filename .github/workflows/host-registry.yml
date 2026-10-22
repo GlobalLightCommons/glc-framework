@@ -1,0 +1,59 @@
+name: Publish registry from GLC framework
+on:
+  workflow_call:
+    inputs:
+      publish:
+        description: Publish from the hosting repository after review.
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  actions: read
+  attestations: read
+concurrency:
+  group: glc-registry
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: GlobalLightCommons/glc-framework
+          ref: main
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: GlobalLightCommons/glc-framework
+          ref: validation-archive
+          path: .validation-archive
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r registry/requirements.txt
+      - name: Verify current reports and archived evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_ARCHIVE_DIR: ${{ github.workspace }}/.validation-archive/evidence
+          VALIDATION_ARCHIVE_READ_ONLY: "true"
+        run: python registry/scripts/fetch_registry.py registry/datasets.yml registry_out
+      - name: Prepare dashboard
+        run: |
+          cp -R registry/site/. registry_out/
+          python - <<'PY'
+          import shutil
+          shutil.rmtree('registry_out/_validation_artifacts', ignore_errors=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registry-cutover-preview
+          path: registry_out/
+          retention-days: 7
+      - name: Publish existing registry domain
+        if: inputs.publish && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ github.token }}
+          publish_dir: registry_out
+          cname: registry.globallightcommons.org

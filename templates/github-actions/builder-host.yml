@@ -1,0 +1,17 @@
+name: Publish builder from GLC framework
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "2,17,32,47 * * * *"
+  push:
+    branches: [main]
+    paths: [".github/workflows/publish-framework.yml"]
+  pull_request:
+    paths: [".github/workflows/publish-framework.yml"]
+permissions:
+  contents: write
+jobs:
+  framework:
+    uses: GlobalLightCommons/glc-framework/.github/workflows/host-builder.yml@main
+    with:
+      publish: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}

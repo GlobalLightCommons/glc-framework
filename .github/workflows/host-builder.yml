@@ -1,0 +1,40 @@
+name: Publish builder from GLC framework
+on:
+  workflow_call:
+    inputs:
+      publish:
+        description: Publish from the hosting repository after review.
+        type: boolean
+        default: false
+permissions:
+  contents: write
+concurrency:
+  group: builder-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: GlobalLightCommons/glc-framework
+          ref: main
+          persist-credentials: false
+      - name: Prepare static builder site
+        run: |
+          mkdir -p builder_out
+          cp builder/index.html builder/app.js builder/datetime-metadata.js builder/styles.css builder/navbar.css builder/CNAME builder_out/
+          cp -R builder/assets builder/schemas builder_out/
+          touch builder_out/.nojekyll
+      - uses: actions/upload-artifact@v4
+        with:
+          name: builder-cutover-preview
+          path: builder_out/
+          retention-days: 7
+      - uses: peaceiris/actions-gh-pages@v4
+        if: inputs.publish && github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ github.token }}
+          publish_branch: gh-pages
+          publish_dir: builder_out
+          cname: builder.globallightcommons.org

@@ -31,4 +31,9 @@ and explicit stored bundle paths. All nine expired reports were regenerated.
 
 No original source branch, dataset caller, public domain, or workflow definition was changed.
 The original registry output was refreshed through its existing workflow.
-Production publication requires FRAMEWORK_LIVE=true and coordinated Pages settings.
+Production cutover requires reviewed hosting-caller PRs; only the builder needs
+its Pages source switched to the generated gh-pages branch. Existing domains stay
+in place. Shared deployment credentials are not required.
+
+PASS: reusable hosting workflows and all three caller templates passed actionlint.
+Hosting caller pull requests build previews without publishing.

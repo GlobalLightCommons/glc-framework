@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   update:
-    if: vars.FRAMEWORK_LIVE == 'true' || vars.FRAMEWORK_ARCHIVE_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    if: vars.FRAMEWORK_ARCHIVE_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,10 +56,8 @@ jobs:
           name: registry-preview
           path: registry_out/
       - name: Prepare canonical repository-name updates
-        if: vars.FRAMEWORK_LIVE == 'true'
         run: python registry/scripts/update_renamed_repositories.py registry/datasets.yml registry_out/registry.json
       - name: Propose canonical repository-name updates
-        if: vars.FRAMEWORK_LIVE == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           branch: bot/update-renamed-repositories
@@ -68,11 +66,3 @@ jobs:
           title: Update renamed dataset repositories
           body: GitHub redirected configured dataset repositories to new canonical names. Review these updates before merging.
           add-paths: registry/datasets.yml
-      - name: Publish existing registry URL
-        if: vars.FRAMEWORK_LIVE == 'true'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.FRAMEWORK_DEPLOY_TOKEN }}
-          external_repository: GlobalLightCommons/glc-registry
-          publish_branch: gh-pages
-          publish_dir: registry_out

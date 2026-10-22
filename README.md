@@ -67,10 +67,20 @@ Run **Initialize validation archive branch** once, then **Update registry and pr
 
 ## Deployment
 
-Set `FRAMEWORK_ARCHIVE_ENABLED=true` to collect signed evidence on the existing 15-minute schedule independently of production publication.
+The monorepo owns the application source, CI, archive collection, and reusable hosting workflows. The existing repositories keep their domains and serve as hosting entry points, while retaining their original source trees and histories for rollback.
 
-Production remains disabled until the repository variable `FRAMEWORK_LIVE` is set to `true`. CI and preview builds can run before that switch. Registry refresh can also be run manually to test verification and populate the archive without publishing.
+| Hosting repository | Monorepo workflow | Existing domain |
+| --- | --- | --- |
+| `glc-registry` | `.github/workflows/host-registry.yml` | `registry.globallightcommons.org` |
+| `glc-dp-viewer` | `.github/workflows/host-viewer.yml` | `docs.globallightcommons.org` |
+| `glc-metadata-builder` | `.github/workflows/host-builder.yml` | `builder.globallightcommons.org` |
 
-The documentation deploys through this repository's GitHub Pages site. The builder and registry retain their current domains by publishing generated output to the existing repositories' `gh-pages` branches with `FRAMEWORK_DEPLOY_TOKEN`. These repositories retain their original source and history. See the migration record before enabling publication: Pages settings and the old registry schedule need coordinated changes.
+The small caller workflows in `templates/github-actions/` belong in those existing hosting repositories. They call this repository's reusable workflows on `main`, so source and deployment logic remain centralized. Each caller grants its own GitHub token the permissions needed to publish its own site. No shared deployment credential or domain transfer is required.
+
+Cutover PRs build previews on pull requests; production publication is disabled for PR events and for refs other than the hosting repository's `main`. After review and merge, the hosting callers publish on a 15-minute schedule and on manual dispatch. The builder additionally needs its Pages source switched from `main:/` to `gh-pages:/` after its first generated branch is ready. Registry and documentation retain their existing Pages settings.
+
+`FRAMEWORK_ARCHIVE_ENABLED=true` enables scheduled evidence collection in the monorepo independently of hosting cutover. This is already enabled; all nine current reports and their 18 attestation bundles have been archived and verified.
+
+See [the migration record](docs/monorepo-migration.md) for the review order and rollback steps. Original dataset callers remain valid against their existing tagged validator workflows.
 
 Each component retains its existing license and attribution files; the migration does not introduce a new blanket license.

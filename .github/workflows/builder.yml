@@ -21,11 +21,3 @@ jobs:
         with:
           name: builder-preview
           path: builder_out/
-      - name: Publish existing builder URL
-        if: vars.FRAMEWORK_LIVE == 'true'
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          personal_token: ${{ secrets.FRAMEWORK_DEPLOY_TOKEN }}
-          external_repository: GlobalLightCommons/glc-metadata-builder
-          publish_branch: gh-pages
-          publish_dir: builder_out
