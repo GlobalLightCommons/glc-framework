@@ -10,12 +10,25 @@ PASS: generated documentation home, registry, tools, and validation-guide pages
 PASS: git diff --check
 PASS: source imports preserve original commit ancestry
 
-Not yet exercised: GitHub-hosted CI, actual signed-report archival, new monorepo
-signer pilot, Docker image build/publish, and production deployment cutover.
-The local Docker daemon was not running. Archive tests use attestation test doubles;
-real signatures remain delegated to gh attestation verify with the existing policy
-constraints and explicit bundle paths. Fresh validations are required because the
-nine existing validation-report artifacts have already expired.
+PASS: GitHub-hosted framework CI — run 39811922922
+PASS: GitHub-hosted documentation build — run 39811922811
+PASS: GitHub-hosted builder preview — run 39811922966
+PASS: real signed-evidence archive collection — run 39814921597
+PASS: nine reports and 18 attestation bundles preserved on validation-archive
+PASS: archive-only verification of all nine real reports, with live artifact
+      downloads and artifact API lookups blocked (eight in the first check,
+      MPI after its report became visible in GitHub's run listings)
 
-No original repository, dataset caller, public domain, or live workflow was changed.
+Dataset results: eight pass; UCR has a verified fail with 47 participant-reference
+errors concerning UCR_S001. These are fresh runs of the original pinned validator
+on unchanged dataset commits. No dataset source file was modified.
+
+Not yet exercised: new monorepo signer pilot, Docker image build/publish,
+and production deployment cutover.
+The local Docker daemon was not running. Unit tests use attestation test doubles; the subsequent archive round trip used
+real signatures through gh attestation verify with the existing policy constraints
+and explicit stored bundle paths. All nine expired reports were regenerated.
+
+No original source branch, dataset caller, public domain, or workflow definition was changed.
+The original registry output was refreshed through its existing workflow.
 Production publication requires FRAMEWORK_LIVE=true and coordinated Pages settings.

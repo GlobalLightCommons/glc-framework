@@ -53,4 +53,10 @@ This migration has not changed the dataset repositories' identities or commits. 
 
 ## Validation status
 
-Local verification results are recorded in `verification.txt`. Full real-signature verification and cross-repository publication must be exercised during the staged rollout; unit tests do not substitute for that integration check. Docker image publishing requires a running Docker daemon or the GitHub build workflow.
+Verification results are recorded in `verification.txt`. GitHub-hosted CI, the documentation build, and the builder preview passed. The evidence archive contains nine regenerated reports and 18 attestation bundles. Archive-only checks verified all nine real signed reports without fetching Actions artifacts.
+
+The dataset results are eight passes and one verified failure: UCR reports 47 participant-reference errors involving `UCR_S001`. The dataset commits and original validator image were unchanged; this migration did not modify dataset source.
+
+`FRAMEWORK_ARCHIVE_ENABLED=true` enables the 15-minute archive collection schedule independently of production publishing. `FRAMEWORK_LIVE` remains unset while hosting cutover is pending. Original source branches, dataset callers, and public domain settings remain in place. A routine refresh of the original registry was dispatched to consume the regenerated reports.
+
+The monorepo signer pilot, new image publication, and production hosting cutover remain rollout steps. Docker image publishing requires a running Docker daemon or the GitHub build workflow.

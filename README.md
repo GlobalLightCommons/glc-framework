@@ -67,6 +67,8 @@ Run **Initialize validation archive branch** once, then **Update registry and pr
 
 ## Deployment
 
+Set `FRAMEWORK_ARCHIVE_ENABLED=true` to collect signed evidence on the existing 15-minute schedule independently of production publication.
+
 Production remains disabled until the repository variable `FRAMEWORK_LIVE` is set to `true`. CI and preview builds can run before that switch. Registry refresh can also be run manually to test verification and populate the archive without publishing.
 
 The documentation deploys through this repository's GitHub Pages site. The builder and registry retain their current domains by publishing generated output to the existing repositories' `gh-pages` branches with `FRAMEWORK_DEPLOY_TOKEN`. These repositories retain their original source and history. See the migration record before enabling publication: Pages settings and the old registry schedule need coordinated changes.
