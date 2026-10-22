@@ -34,7 +34,7 @@ You do not need to install Python dependencies into each dataset repository. Add
 
 ## Build a metadata package
 
-Use the [GLC metadata builder](https://tscnlab.github.io/glc-metadata-builder/) to create a metadata package that follows this schema. The builder helps assemble the required `datapackage.json` and core metadata resources before you run validation.
+Use the [GLC metadata builder](https://builder.globallightcommons.org/) to create a metadata package that follows this schema. The builder helps assemble the required `datapackage.json` and core metadata resources before you run validation.
 
 After exporting or committing the generated metadata package, run this validator from the package repository to check the exported files against the canonical GLC schemas.
 

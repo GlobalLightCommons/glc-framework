@@ -1,0 +1,78 @@
+name: Update registry and preserve evidence
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  push:
+    branches: [main]
+    paths: ["registry/**", ".github/workflows/update-registry.yml"]
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  attestations: read
+concurrency:
+  group: framework-registry
+  cancel-in-progress: false
+jobs:
+  update:
+    if: vars.FRAMEWORK_LIVE == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: validation-archive
+          path: .validation-archive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r registry/requirements.txt
+      - name: Fetch and verify reports, exporting signed evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_ARCHIVE_DIR: ${{ github.workspace }}/.validation-archive/evidence
+        run: python registry/scripts/fetch_registry.py registry/datasets.yml registry_out
+      - name: Preserve evidence before publishing registry output
+        working-directory: .validation-archive
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          mkdir -p evidence
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m 'Archive verified dataset validation evidence'
+            git push origin HEAD:validation-archive
+          fi
+      - name: Prepare dashboard and remove temporary artifact downloads
+        run: |
+          cp -R registry/site/. registry_out/
+          python - <<'PY'
+          import shutil
+          shutil.rmtree('registry_out/_validation_artifacts', ignore_errors=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registry-preview
+          path: registry_out/
+      - name: Prepare canonical repository-name updates
+        if: vars.FRAMEWORK_LIVE == 'true'
+        run: python registry/scripts/update_renamed_repositories.py registry/datasets.yml registry_out/registry.json
+      - name: Propose canonical repository-name updates
+        if: vars.FRAMEWORK_LIVE == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: bot/update-renamed-repositories
+          delete-branch: true
+          commit-message: Update renamed dataset repositories
+          title: Update renamed dataset repositories
+          body: GitHub redirected configured dataset repositories to new canonical names. Review these updates before merging.
+          add-paths: registry/datasets.yml
+      - name: Publish existing registry URL
+        if: vars.FRAMEWORK_LIVE == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.FRAMEWORK_DEPLOY_TOKEN }}
+          external_repository: GlobalLightCommons/glc-registry
+          publish_branch: gh-pages
+          publish_dir: registry_out

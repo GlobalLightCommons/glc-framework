@@ -1,0 +1,48 @@
+name: Build documentation and viewer
+env:
+  LANG: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+on:
+  push:
+    branches: [main]
+    paths: ["viewer/**", ".github/workflows/docs.yml"]
+  pull_request:
+    paths: ["viewer/**", ".github/workflows/docs.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: framework-docs
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: viewer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@4a9ddd6f338a97768b8006bf671dfbad383215f4
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: viewer
+      - run: bundle exec jekyll build --baseurl ""
+        env:
+          JEKYLL_ENV: production
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: viewer/_site
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.FRAMEWORK_LIVE == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

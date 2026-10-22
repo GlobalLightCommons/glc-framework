@@ -28,7 +28,7 @@ Resource | Purpose
 
 This site documents GLC schema version **3.0.2**. The schema bundle is sourced
 from the canonical
-[GLC metadata validator](https://github.com/tscnlab/glc-metadata-validator),
+[GLC metadata validator](https://github.com/GlobalLightCommons/glc-framework/tree/main/validator),
 which also performs cross-resource, file-header, type, timestamp, and
 device-linkage checks that cannot be expressed fully in JSON Schema alone.
 

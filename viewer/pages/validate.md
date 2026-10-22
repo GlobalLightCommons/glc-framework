@@ -87,7 +87,7 @@ Commit and push the complete package to GitHub before configuring validation.
 Copy the contents of this one file from the validator repository:
 
 <p>
-  <a class="glc-action-link" href="https://github.com/tscnlab/glc-metadata-validator/blob/main/templates/github-actions/validate-glc-dataset.yml">
+  <a class="glc-action-link" href="https://github.com/GlobalLightCommons/glc-framework/blob/main/validator/templates/github-actions/validate-glc-dataset.yml">
     Open the validation workflow template
   </a>
 </p>
@@ -111,7 +111,7 @@ or the validator repository.
 3. Enter the complete filename `.github/workflows/validate-glc-dataset.yml`.
    GitHub creates the two folders automatically.
 4. Open the
-   [workflow template](https://github.com/tscnlab/glc-metadata-validator/blob/main/templates/github-actions/validate-glc-dataset.yml)
+   [workflow template](https://github.com/GlobalLightCommons/glc-framework/blob/main/validator/templates/github-actions/validate-glc-dataset.yml)
    in another tab.
 5. Copy its complete contents and paste them into the new file.
 6. Select **Commit changes**.
@@ -213,7 +213,7 @@ validation evidence, and a GLC maintainer reviews the request.
 </p>
 
 The registry repository maintains its list in
-[`datasets.yml`](https://github.com/globallightcommons/glc-registry/blob/main/datasets.yml).
+[`datasets.yml`](https://github.com/GlobalLightCommons/glc-framework/blob/main/registry/datasets.yml).
 Only submit a request after the dataset's `main` branch has a passing
 validation run for its current commit.
 
@@ -248,7 +248,7 @@ artifact for the exact dataset commit.
 If you can edit the registry repository:
 
 1. Open
-   [`datasets.yml`](https://github.com/globallightcommons/glc-registry/blob/main/datasets.yml).
+   [`datasets.yml`](https://github.com/GlobalLightCommons/glc-framework/blob/main/registry/datasets.yml).
 2. Select the pencil icon.
 3. Add the entry.
 4. Select **Commit changes**.

@@ -7,6 +7,7 @@ from pathlib import Path
 import yaml
 
 from validation_artifacts import (
+    archived_result,
     find_latest_verified_pass,
     find_validation_artifact,
     get_commit_sha,
@@ -51,6 +52,7 @@ def validation_summary(result, current_schema_version=CURRENT_GLC_SCHEMA_VERSION
     schema_version = report.get("schema_version")
     lifecycle = schema_lifecycle(schema_version, current_schema_version)
     return {
+        "verification_source": result.get("verification_source"),
         "status": report.get("status"),
         "repo": report.get("repo"),
         "commit_sha": report.get("commit_sha"),
@@ -153,6 +155,10 @@ def main():
                     artifact_info,
                     work_dir / repo.replace("/", "__") / expected_sha,
                 )
+            else:
+                current_result = archived_result(repo, expected_sha)
+
+            if current_result:
                 current_report = current_result["validation"]
 
                 item["current_status"] = current_report.get("status")
@@ -207,7 +213,7 @@ def main():
         "current_schema_version": current_schema_version,
         "dataset_count": len(datasets),
         "fetched_count": len(results),
-        "error_count": len(errors),
+        "error_count": sum(bool(item["fetch_errors"]) for item in results),
         "datasets": results,
         "fetch_errors": errors,
     }

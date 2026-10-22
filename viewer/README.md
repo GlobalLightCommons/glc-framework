@@ -11,4 +11,4 @@ See the [documentation website](https://docs.globallightcommons.org/).
 ## Contribute
 
 Questions and contributions are welcome in the
-[GLC data-package viewer repository](https://github.com/globallightcommons/glc-dp-viewer).
+[GLC data-package viewer repository](https://github.com/GlobalLightCommons/glc-framework/tree/main/viewer).

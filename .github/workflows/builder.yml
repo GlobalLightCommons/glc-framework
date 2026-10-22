@@ -1,0 +1,31 @@
+name: Prepare metadata builder site
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["builder/**", ".github/workflows/builder.yml"]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare static site
+        run: |
+          mkdir -p builder_out
+          cp builder/index.html builder/app.js builder/datetime-metadata.js builder/styles.css builder/navbar.css builder/CNAME builder_out/
+          cp -R builder/assets builder/schemas builder_out/
+          touch builder_out/.nojekyll
+      - uses: actions/upload-artifact@v4
+        with:
+          name: builder-preview
+          path: builder_out/
+      - name: Publish existing builder URL
+        if: vars.FRAMEWORK_LIVE == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ secrets.FRAMEWORK_DEPLOY_TOKEN }}
+          external_repository: GlobalLightCommons/glc-metadata-builder
+          publish_branch: gh-pages
+          publish_dir: builder_out

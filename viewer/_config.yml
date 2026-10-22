@@ -7,7 +7,7 @@ baseurl: ""
 
 # SOCIAL PROFILES
 social:
-  github: globallightcommons/glc-dp-viewer
+  github: GlobalLightCommons/glc-framework
 
 
 # Theme
@@ -17,7 +17,7 @@ github_edit: false
 logo: assets/GLC_Logo.png
 
 # Build settings
-repository: globallightcommons/glc-dp-viewer # Required so Jekyll on GitHub Actions can access repo metadata
+repository: GlobalLightCommons/glc-framework # Required so Jekyll on GitHub Actions can access repo metadata
 markdown: kramdown
 plugins:
   - jekyll-feed

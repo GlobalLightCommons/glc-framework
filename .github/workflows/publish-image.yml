@@ -45,12 +45,15 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+      - name: Set lowercase image owner
+        run: echo "IMAGE_OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
+
       - name: Build and push (multi-arch)
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: validator
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/glc-validator:${{ steps.ver.outputs.version }}
-            ghcr.io/${{ github.repository_owner }}/glc-validator:latest
+            ghcr.io/${{ env.IMAGE_OWNER }}/glc-validator:${{ steps.ver.outputs.version }}
+            ghcr.io/${{ env.IMAGE_OWNER }}/glc-validator:latest

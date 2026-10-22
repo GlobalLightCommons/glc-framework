@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import yaml
 
 from validation_artifacts import (
+    archived_result,
     find_validation_artifact,
     get_commit_sha,
     repo_name_from_slug,
@@ -78,6 +79,9 @@ def trust_logic_changed():
     except subprocess.CalledProcessError:
         return False
     trust_paths = {
+        ".github/workflows/validate.yml",
+        "registry/scripts/validation_artifacts.py",
+        "registry/scripts/fetch_registry.py",
         "scripts/validation_artifacts.py",
         "scripts/fetch_registry.py",
     }
@@ -129,7 +133,10 @@ def is_http_url(s: str) -> bool:
 
 def main(cfg_path: str):
     cfg = load_cfg(cfg_path)
-    base_cfg = load_base_cfg(cfg_path)
+    # git show needs the path from the monorepo root, even when CI runs in registry/.
+    repo_root = Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
+    git_cfg_path = str(Path(cfg_path).resolve().relative_to(repo_root))
+    base_cfg = load_base_cfg(git_cfg_path)
     current_schema_version = cfg.get("current_schema_version")
     datasets = cfg.get("datasets") or []
     if not isinstance(datasets, list) or len(datasets) == 0:
@@ -218,7 +225,9 @@ def main(cfg_path: str):
                 expected_sha,
                 artifact_info,
                 work_dir / repo.replace("/", "__") / expected_sha,
-            )
+            ) if artifact_info else archived_result(repo, expected_sha)
+            if result is None:
+                raise RuntimeError("No live or archived validation report found")
             status = result["validation"].get("status")
             if status != "pass":
                 raise RuntimeError(f"current validation status is {status!r}, expected 'pass'")

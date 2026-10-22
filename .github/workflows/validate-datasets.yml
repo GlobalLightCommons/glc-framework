@@ -1,0 +1,31 @@
+name: Verify registry changes
+on:
+  pull_request:
+    paths: ["registry/datasets.yml", "registry/scripts/**", ".github/workflows/validate.yml", ".github/workflows/validate-datasets.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+  attestations: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          ref: validation-archive
+          path: .validation-archive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r registry/requirements.txt
+      - name: Verify new targets and changes to trust policy
+        working-directory: registry
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_ARCHIVE_DIR: ${{ github.workspace }}/.validation-archive/evidence
+          VALIDATION_ARCHIVE_READ_ONLY: "true"
+        run: python scripts/validate_datasets_pr.py datasets.yml

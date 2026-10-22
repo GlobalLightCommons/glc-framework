@@ -1,0 +1,3 @@
+/registry/datasets.yml @salmathalji
+/registry/scripts/validation_artifacts.py @salmathalji
+/.github/workflows/validate.yml @salmathalji

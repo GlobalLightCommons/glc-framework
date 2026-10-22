@@ -1,0 +1,21 @@
+GLC monorepo local verification — 22 October 2026
+
+PASS: validator unittest suite — 108 tests (Python 3.13 with pinned dependencies)
+PASS: registry unittest suite — 14 tests, including six archive tests
+PASS: builder datetime suite and schema/UI consistency suite (Node runtime)
+PASS: all eight active 3.0.2 builder schemas match canonical validator schemas
+PASS: all root GitHub Actions workflows parsed and actionlint passed
+PASS: Jekyll production build with UTF-8 locale
+PASS: generated documentation home, registry, tools, and validation-guide pages
+PASS: git diff --check
+PASS: source imports preserve original commit ancestry
+
+Not yet exercised: GitHub-hosted CI, actual signed-report archival, new monorepo
+signer pilot, Docker image build/publish, and production deployment cutover.
+The local Docker daemon was not running. Archive tests use attestation test doubles;
+real signatures remain delegated to gh attestation verify with the existing policy
+constraints and explicit bundle paths. Fresh validations are required because the
+nine existing validation-report artifacts have already expired.
+
+No original repository, dataset caller, public domain, or live workflow was changed.
+Production publication requires FRAMEWORK_LIVE=true and coordinated Pages settings.

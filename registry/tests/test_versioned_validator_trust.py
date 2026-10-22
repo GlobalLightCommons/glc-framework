@@ -29,7 +29,7 @@ class VersionedValidatorTrustTests(unittest.TestCase):
 
         self.assertEqual(
             [policy["id"] for policy in policies_for_report(report)],
-            ["current_glc"],
+            ["framework_transition", "current_glc"],
         )
 
     def test_legacy_image_selects_legacy_glee_policy(self):

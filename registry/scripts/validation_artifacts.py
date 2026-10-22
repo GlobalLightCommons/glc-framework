@@ -1,4 +1,6 @@
 import json
+import hashlib
+import tempfile
 import os
 import shutil
 import subprocess
@@ -12,6 +14,18 @@ import requests
 
 UA = {"User-Agent": "glc-registry-bot"}
 TRUSTED_VALIDATOR_POLICIES = (
+    {
+        "id": "framework_glc",
+        "signer_workflow": "GlobalLightCommons/glc-framework/.github/workflows/validate.yml",
+        "signer_digest": None,
+        "image_prefix": "ghcr.io/globallightcommons/glc-validator@sha256:",
+    },
+    {
+        "id": "framework_transition",
+        "signer_workflow": "GlobalLightCommons/glc-framework/.github/workflows/validate.yml",
+        "signer_digest": None,
+        "image_prefix": "ghcr.io/tscnlab/glc-validator@sha256:",
+    },
     {
         "id": "current_glc",
         "signer_workflow": os.getenv(
@@ -142,7 +156,7 @@ def policies_for_report(report):
     ]
 
 
-def verify_attestation(path, repo, expected_sha, policy):
+def verify_attestation(path, repo, expected_sha, policy, bundle_path=None):
     if shutil.which("gh") is None:
         raise RuntimeError("GitHub CLI 'gh' is required to verify artifact attestations")
 
@@ -161,6 +175,8 @@ def verify_attestation(path, repo, expected_sha, policy):
         "--format",
         "json",
     ]
+    if bundle_path is not None:
+        cmd.extend(["--bundle", str(bundle_path)])
     if policy.get("signer_digest"):
         cmd.extend(["--signer-digest", policy["signer_digest"]])
     result = subprocess.run(cmd, text=True, capture_output=True)
@@ -198,7 +214,8 @@ def verify_validation_artifact(repo, expected_sha, artifact_info, work_dir):
 
     run = artifact_info["run"]
     artifact = artifact_info["artifact"]
-    extract_dir = download_validation_artifact(repo, artifact, work_dir)
+    archived = artifact_info.get("_archive_dir")
+    extract_dir = Path(archived) if archived else download_validation_artifact(repo, artifact, work_dir)
 
     validation_path = find_report_file(extract_dir, "validation.json")
     manifest_path = find_report_file(extract_dir, "validated-files-manifest.json")
@@ -225,10 +242,12 @@ def verify_validation_artifact(repo, expected_sha, artifact_info, work_dir):
     for candidate in matching_policies:
         try:
             validation_attestation = verify_attestation(
-                validation_path, repo, expected_sha, candidate
+                validation_path, repo, expected_sha, candidate,
+                extract_dir / "validation.bundle.jsonl" if archived else None,
             )
             manifest_attestation = verify_attestation(
-                manifest_path, repo, expected_sha, candidate
+                manifest_path, repo, expected_sha, candidate,
+                extract_dir / "manifest.bundle.jsonl" if archived else None,
             )
             policy = candidate
             break
@@ -250,7 +269,7 @@ def verify_validation_artifact(repo, expected_sha, artifact_info, work_dir):
     if content_errors:
         raise RuntimeError("; ".join(content_errors))
 
-    return {
+    result = {
         "run_id": run.get("id"),
         "run_url": run.get("html_url"),
         "run_conclusion": run.get("conclusion"),
@@ -261,13 +280,111 @@ def verify_validation_artifact(repo, expected_sha, artifact_info, work_dir):
         "trust_policy": policy["id"],
         "validation_attestation": validation_attestation,
         "manifest_attestation": manifest_attestation,
+        "verification_source": "archive" if archived else "github_artifact",
     }
+    if not archived and os.getenv("VALIDATION_ARCHIVE_DIR") and os.getenv("VALIDATION_ARCHIVE_READ_ONLY") != "true":
+        archive_verified_result(repo, expected_sha, artifact_info, validation_path, manifest_path, policy)
+    return result
+
+
+def archive_root():
+    value = os.getenv("VALIDATION_ARCHIVE_DIR")
+    return Path(value) if value else None
+
+
+def archive_commit_dir(repo, sha):
+    # Archive locations come from repository metadata, never from report contents.
+    parts = repo.split("/")
+    if (len(parts) != 2 or any(not part or part in {".", ".."} or "\\" in part for part in parts)
+            or len(sha) != 40 or any(c not in "0123456789abcdefABCDEF" for c in sha)):
+        raise RuntimeError("Invalid archive repository or commit identity")
+    root = archive_root()
+    return root / parts[0] / parts[1] / sha if root else None
+
+
+def download_attestation_bundle(path, repo, destination):
+    with tempfile.TemporaryDirectory() as temporary:
+        result = subprocess.run(
+            ["gh", "attestation", "download", str(Path(path).resolve()), "--repo", repo],
+            cwd=temporary, text=True, capture_output=True,
+        )
+        bundles = list(Path(temporary).glob("*.jsonl"))
+        if result.returncode != 0 or len(bundles) != 1:
+            raise RuntimeError(result.stderr.strip() or "Could not export attestation bundle")
+        shutil.copyfile(bundles[0], destination)
+
+
+def archive_verified_result(repo, sha, artifact_info, validation_path, manifest_path, policy):
+    parent = archive_commit_dir(repo, sha)
+    if parent is None:
+        return
+    # Preserve separate validation runs of the same commit without overwriting evidence.
+    digest = hashlib.sha256(Path(validation_path).read_bytes() + Path(manifest_path).read_bytes()).hexdigest()
+    destination = parent / digest
+    if destination.exists():
+        # An existing archive is reverified by readers; never silently replace its bytes.
+        source = load_json(destination / "source.json")
+        verify_validation_artifact(repo, sha, dict(source, _archive_dir=str(destination)), destination)
+        return
+    parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=".pending-", dir=parent) as temporary:
+        stage = Path(temporary)
+        shutil.copyfile(validation_path, stage / "validation.json")
+        shutil.copyfile(manifest_path, stage / "validated-files-manifest.json")
+        for original, bundle_name in ((validation_path, "validation.bundle.jsonl"), (manifest_path, "manifest.bundle.jsonl")):
+            bundle = stage / bundle_name
+            download_attestation_bundle(original, repo, bundle)
+            # Verify the exported evidence itself before committing it to the archive.
+            verify_attestation(original, repo, sha, policy, bundle)
+        (stage / "source.json").write_text(json.dumps(artifact_info, indent=2) + "\n", encoding="utf-8")
+        shutil.copytree(stage, destination)
+
+
+def archived_result(repo, sha, require_pass=False):
+    parent = archive_commit_dir(repo, sha)
+    if parent is None or not parent.exists():
+        return None
+    candidates = []
+    errors = []
+    for directory in parent.iterdir():
+        if not directory.is_dir() or directory.name.startswith("."):
+            continue
+        try:
+            source = load_json(directory / "source.json")
+            result = verify_validation_artifact(repo, sha, dict(source, _archive_dir=str(directory)), directory)
+            if not require_pass or result["validation"].get("status") == "pass":
+                candidates.append(result)
+        except Exception as exc:
+            errors.append(str(exc))
+    if candidates:
+        return max(candidates, key=lambda r: r["validation"].get("timestamp_utc") or "")
+    if errors:
+        raise RuntimeError("Archived validation evidence could not be verified: " + "; ".join(errors))
+    return None
+
+
+def archived_latest_pass(repo):
+    root = archive_root()
+    if root is None:
+        return None
+    repository_dir = root.joinpath(*repo.split("/"))
+    if not repository_dir.exists():
+        return None
+    candidates = []
+    for commit_dir in repository_dir.iterdir():
+        if not commit_dir.is_dir():
+            continue
+        result = archived_result(repo, commit_dir.name, require_pass=True)
+        if result:
+            candidates.append(result)
+    return max(candidates, key=lambda r: r["validation"].get("timestamp_utc") or "") if candidates else None
 
 
 def find_latest_verified_pass(repo, current_sha, current_result, work_root, max_runs=25):
     if current_result and current_result["validation"].get("status") == "pass":
         return current_result
 
+    saved_pass = archived_latest_pass(repo)
     url = f"https://api.github.com/repos/{repo}/actions/runs?status=completed&per_page={max_runs}"
     runs = sorted(
         github_get_json(url).get("workflow_runs", []),
@@ -291,8 +408,8 @@ def find_latest_verified_pass(repo, current_sha, current_result, work_root, max_
                     Path(work_root) / "latest_pass_candidates" / repo.replace("/", "__") / sha,
                 )
                 if result["validation"].get("status") == "pass":
-                    return result
+                    return max([r for r in (result, saved_pass) if r], key=lambda r: r["validation"].get("timestamp_utc") or "")
             except Exception:
                 continue
             time.sleep(0.2)
-    return None
+    return saved_pass

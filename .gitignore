@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+_site/
+.bundle/
+vendor/
+registry_out/
+_registry_pr_validation/
+_validation_artifacts/
+.validation-archive/
