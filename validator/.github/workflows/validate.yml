@@ -1,0 +1,93 @@
+name: Reusable GLC validation
+
+on:
+  workflow_call:
+    inputs:
+      datapackage:
+        description: Path to datapackage.json in the dataset repository.
+        required: false
+        type: string
+        default: datapackage.json
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+  attestations: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    env:
+      VALIDATOR_IMAGE_TAG: ghcr.io/tscnlab/glc-validator@sha256:d66c9d705e2a59967c5699af55d872b2012d18fb3c9dc611a9837d1c05af6160
+
+    steps:
+      - name: Checkout dataset repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull validator image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull "$VALIDATOR_IMAGE_TAG"
+          digest_ref="$(docker image inspect "$VALIDATOR_IMAGE_TAG" --format='{{index .RepoDigests 0}}')"
+          echo "VALIDATOR_IMAGE=$digest_ref" >> "$GITHUB_ENV"
+          echo "Validator image: $digest_ref"
+
+      - name: Run validator container
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p validation_out
+          set +e
+
+          docker run --rm \
+            -e GITHUB_REPOSITORY="${{ github.repository }}" \
+            -e GITHUB_SHA="${{ github.sha }}" \
+            -e VALIDATOR_IMAGE="$VALIDATOR_IMAGE" \
+            -e VALIDATION_JSON="/data/validation_out/validation.json" \
+            -e VALIDATION_MANIFEST="/data/validation_out/validated-files-manifest.json" \
+            -v "${{ github.workspace }}:/data" \
+            -w /data \
+            "$VALIDATOR_IMAGE" \
+            "${{ inputs.datapackage }}" \
+            | tee validation_out/validation.log
+
+          exit_code=${PIPESTATUS[0]}
+          echo "$exit_code" > validation_out/exit_code.txt
+          exit 0
+
+      - name: Upload validation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-report
+          path: validation_out/
+          retention-days: 30
+
+      - name: Attest validation outputs
+        if: always() && hashFiles('validation_out/*.json') != ''
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: validation_out/*.json
+
+      - name: Fail workflow if validation failed
+        if: always()
+        shell: bash
+        run: |
+          exit_code=$(cat validation_out/exit_code.txt)
+          if [ "$exit_code" -ne 0 ]; then
+            echo "Validation failed (exit_code=$exit_code)"
+            exit 1
+          fi
