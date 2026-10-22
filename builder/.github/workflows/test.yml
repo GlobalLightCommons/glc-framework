@@ -1,0 +1,55 @@
+name: Test GLC metadata builder
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check app.js
+          node --check datetime-metadata.js
+          node --check tests/datetime-metadata.test.js
+          node --check tests/schema-ui-consistency.test.js
+
+      - name: Run JavaScript tests
+        run: |
+          node tests/datetime-metadata.test.js
+          node tests/schema-ui-consistency.test.js
+
+      - name: Validate schema bundles and profile naming
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          for version_dir in (Path("schemas/2.0.0"), Path("schemas/3.0.0")):
+              for path in version_dir.glob("*.json"):
+                  with path.open(encoding="utf-8") as handle:
+                      json.load(handle)
+
+          assert Path("schemas/2.0.0/gleam-dp-profile.json").is_file()
+          assert Path("schemas/3.0.0/glc-dp-profile.json").is_file()
+          assert not Path("schemas/3.0.0/gleam-dp-profile.json").exists()
+
+          with Path("schemas/3.0.0/glc-dp-profile.json").open(encoding="utf-8") as handle:
+              profile = json.load(handle)
+          assert profile["name"] == "glc-dp-profile"
+          assert profile["title"] == "GLC Data Package Profile"
+          assert profile["$id"].endswith("/schemas/3.0.0/glc-dp-profile.json")
+          PY

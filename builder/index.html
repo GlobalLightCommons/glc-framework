@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GLC Metadata Builder</title>
+    <link rel="stylesheet" href="styles.css?v=20260903-shared-navigation" />
+    <link rel="stylesheet" href="navbar.css?v=20260904-ecosystem-navigation" />
+    <link rel="stylesheet" href="https://docs.globallightcommons.org/assets/theme/css/fontawesome-all.min.css" />
+  </head>
+  <body>
+    <nav class="glc-navbar" aria-label="Global Light Commons">
+      <div class="glc-navbar-inner">
+        <a href="https://globallightcommons.org/" class="glc-brand">
+          <img src="assets/GLC_Logo.png" alt="Global Light Commons" />
+        </a>
+
+        <div class="glc-nav-area">
+          <div class="glc-nav-links">
+            <a href="https://globallightcommons.org/about/">About</a>
+            <a href="https://globallightcommons.org/research/">Research</a>
+            <a href="https://globallightcommons.org/team/">Team</a>
+            <a href="https://globallightcommons.org/advisory-board/">Advisory Board</a>
+            <a href="https://globallightcommons.org/news/">News</a>
+            <a href="https://globallightcommons.org/resources/">Resources</a>
+            <a href="https://globallightcommons.org/acknowledgements/">Acknowledgements</a>
+            <a href="https://globallightcommons.org/contact/">Contact</a>
+          </div>
+
+          <div class="glc-ecosystem-nav">
+            <span class="glc-ecosystem-label">Ecosystem</span>
+            <div class="glc-ecosystem-links">
+              <a class="glc-ecosystem-link" href="https://docs.globallightcommons.org/">Overview</a>
+
+              <div class="glc-ecosystem-dropdown">
+                <div class="glc-ecosystem-parent">
+                  <a class="glc-ecosystem-link glc-ecosystem-parent-link" href="https://docs.globallightcommons.org/profile/">Standard</a>
+                  <button class="glc-ecosystem-trigger" type="button" aria-label="Open Standard menu" aria-haspopup="true" aria-expanded="false">
+                    <svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4"></path></svg>
+                  </button>
+                </div>
+                <div class="glc-ecosystem-menu">
+                  <a href="https://docs.globallightcommons.org/profile/">Package profile</a>
+                  <a href="https://docs.globallightcommons.org/schemas/">Resource schemas</a>
+                  <a href="https://docs.globallightcommons.org/example-package/">Example package</a>
+                </div>
+              </div>
+
+              <a class="glc-ecosystem-link" href="https://docs.globallightcommons.org/registry/">Registry</a>
+
+              <div class="glc-ecosystem-dropdown">
+                <div class="glc-ecosystem-parent">
+                  <a class="glc-ecosystem-link glc-ecosystem-parent-link active" href="https://docs.globallightcommons.org/tools/">Tools</a>
+                  <button class="glc-ecosystem-trigger" type="button" aria-label="Open Tools menu" aria-haspopup="true" aria-expanded="false">
+                    <svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4"></path></svg>
+                  </button>
+                </div>
+                <div class="glc-ecosystem-menu glc-tools-menu">
+                  <a href="https://docs.globallightcommons.org/tools/">Tools overview</a>
+                  <a href="./" aria-current="page">Metadata builder</a>
+                  <a href="https://docs.globallightcommons.org/validate/">Validate a dataset</a>
+                  <a href="https://tscnlab.github.io/glc-dp-r/">GLC-dp</a>
+                  <a href="https://tscnlab.github.io/LightLogR/">LightLogR</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="app-shell">
+      <section class="builder-heading">
+        <div>
+          <p class="eyebrow">Prepare a GLC data package</p>
+          <h1>Metadata Builder <span class="title-beta-badge">Beta</span></h1>
+        </div>
+        <div class="builder-heading-actions">
+          <button type="button" id="download-builder-project-header" class="secondary-button small-button" hidden>
+            Save builder draft (.json)
+          </button>
+          <button type="button" id="start-over-header" class="start-over-button small-button" hidden>
+            Start over
+          </button>
+          <a
+            id="active-schema-pill"
+            class="schema-pill schema-pill-current"
+            href="https://github.com/tscnlab/glc-metadata-validator/blob/main/schemas/3.0.2/glc-dp-profile.json"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Schema 3.0.2
+          </a>
+        </div>
+      </section>
+      <section class="workspace">
+        <aside class="progress-panel" aria-label="Builder steps">
+          <ol>
+            <li class="active" data-step-link="start">Start</li>
+            <li data-step-link="project">Project setup</li>
+            <li data-step-link="study">
+              Study
+              <ul class="progress-subnav">
+                <li><button type="button" data-subsection-step="study" data-subsection-target="study-details">Study details</button></li>
+                <li><button type="button" data-subsection-step="study" data-subsection-target="study-contributors">Contributors</button></li>
+              </ul>
+            </li>
+            <li data-step-link="participants">
+              Participants
+              <ul class="progress-subnav">
+                <li><button type="button" data-subsection-step="participants" data-subsection-target="participant-roster">Participant roster</button></li>
+                <li><button type="button" data-subsection-step="participants" data-subsection-target="participant-characteristics">Characteristics</button></li>
+              </ul>
+            </li>
+            <li data-step-link="devices">
+              Devices
+              <ul class="progress-subnav">
+                <li><button type="button" data-subsection-step="devices" data-subsection-target="device-inventory">Device inventory</button></li>
+                <li><button type="button" data-subsection-step="devices" data-subsection-target="device-datasheets">Datasheets</button></li>
+              </ul>
+            </li>
+            <li data-step-link="templates" hidden>Dataset templates</li>
+            <li data-step-link="datasets">Datasets</li>
+            <li data-step-link="export">Export package</li>
+          </ol>
+        </aside>
+
+        <section class="builder-panel">
+          <form id="metadata-form">
+            <section class="form-section builder-step active" data-step="start">
+              <div class="start-guide">
+                <section class="guide-hero" aria-labelledby="guide-title">
+                  <p class="welcome-eyebrow">Getting started with GLC metadata</p>
+                  <h2 id="guide-title">Make light-exposure and optical-radiation datasets easier to understand, validate, and reuse.</h2>
+                  <p>
+                    The Global Light Commons (GLC) standard provides a shared structure for describing studies,
+                    participants, devices, datasheets, and measurement files for light-exposure and optical-radiation research. This builder guides you through creating
+                    a complete metadata package that can accompany your dataset.
+                  </p>
+                  <p class="privacy-note">
+                    Note: Files you select while building the metadata package stay on your computer. They are processed locally in your browser and are not uploaded, transmitted, or stored by this site.
+                    Draft metadata are autosaved only in this browser on this device; selected measurement-file contents are not stored.
+                  </p>
+                  <div class="actions start-actions">
+                    <button type="button" data-next-step="project">Get started</button>
+                  </div>
+                </section>
+
+                <section class="guide-section" aria-labelledby="why-glc">
+                  <div class="guide-section-heading">
+                    <div>
+                      <h3 id="why-glc">Why researchers use GLC</h3>
+                      <p>GLC metadata makes wearable light-exposure and optical-radiation datasets easier to review, combine, and reuse.</p>
+                    </div>
+                  </div>
+                  <div class="guide-grid">
+                    <div>
+                      <strong>Easier collaboration</strong>
+                      <span>Study, participant, device, and dataset information can be found in predictable places.</span>
+                    </div>
+                    <div>
+                      <strong>Validation-ready</strong>
+                      <span>Links between files can be checked automatically to catch common mistakes.</span>
+                    </div>
+                    <div>
+                      <strong>Reusable data</strong>
+                      <span>Future users can understand what was measured, with which device, and under what conditions.</span>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="guide-section" aria-labelledby="package-structure">
+                  <div class="guide-section-heading">
+                    <div>
+                      <h3 id="package-structure">What you’ll create</h3>
+                      <p>A GLC package links the key parts of a wearable light-exposure or optical-radiation dataset.</p>
+                    </div>
+                  </div>
+                  <div class="glc-flow" aria-label="GLC package relationship">
+                    <span>Study</span>
+                    <span>Participants</span>
+                    <span>Devices &amp; Datasheets</span>
+                    <span>Dataset Files</span>
+                  </div>
+                  <p class="guide-note">The resulting metadata package can be validated and shared alongside your data.</p>
+                </section>
+
+                <section class="guide-section guide-resources" aria-labelledby="next-steps">
+                  <div class="guide-section-heading">
+                    <div>
+                      <h3 id="next-steps">How the builder works</h3>
+                      <p>Work through the pages in order, import existing metadata when available, then export a package for validation.</p>
+                    </div>
+                  </div>
+                  <ol class="builder-flow-list">
+                    <li>Describe your study</li>
+                    <li>Add participants</li>
+                    <li>Document devices and datasheets</li>
+                    <li>Register dataset files</li>
+                    <li>Export a package</li>
+                  </ol>
+                  <p class="guide-note">Expected time: 5–30 minutes.</p>
+                </section>
+
+                <section class="guide-section package-details">
+                  <div class="guide-section-heading">
+                    <div>
+                      <h3>Generated files and package structure</h3>
+                    </div>
+                  </div>
+                  <p>
+                    The builder generates the package descriptor, resource
+                    metadata, versioned schemas, and a short README. Add the
+                    referenced data files at the paths declared in
+                    <code>data/datasets.json</code> before validation.
+                  </p>
+                  <pre class="folder-tree" aria-label="Example GLC package structure">glc-metadata-package/
+├── datapackage.json
+├── README.txt
+├── schemas/
+│   └── 3.0.2/
+│       ├── glc-dp-profile.json
+│       └── … resource schemas
+└── data/
+    ├── study.json
+    ├── participants.csv
+    ├── participant_characteristics.csv  (when provided)
+    ├── devices.json
+    ├── device_datasheet.json
+    ├── datasets.json
+    └── datasets/
+        └── your-measurement-files.csv    (add after export)</pre>
+                  <div class="metadata-file-list">
+                    <div><code>study.json</code><span>What was the study, who contributed, and which dataset records belong to it?</span></div>
+                    <div><code>participants.csv</code><span>Who or what was measured?</span></div>
+                    <div><code>participant_characteristics.csv</code><span>Which optional participant-level characteristics help interpret the measurements?</span></div>
+                    <div><code>devices.json</code><span>Which devices were used and which datasheets describe them?</span></div>
+                    <div><code>device_datasheet.json</code><span>What sensor, calibration, channel, or spectral details are needed to interpret the device output?</span></div>
+                    <div><code>datasets.json</code><span>Where are the measurement files, what columns do they contain, and how do they link to study, participant, and device IDs?</span></div>
+                  </div>
+                </section>
+
+                <section class="guide-section resource-callout" aria-label="Project resources">
+                  <div class="guide-section-heading">
+                    <div>
+                      <h3>Useful resources</h3>
+                    </div>
+                  </div>
+                  <div class="resource-links">
+                    <a href="https://visualdiet.org" target="_blank" rel="noopener noreferrer">
+                      Learn more about the Global Light Commons initiative
+                    </a>
+                    <a href="https://docs.globallightcommons.org/" target="_blank" rel="noopener noreferrer">
+                      View human-readable details of the GLC datapackage structure
+                    </a>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <section class="form-section builder-step" data-step="project">
+              <div class="section-heading">
+                <span>1</span>
+                <div>
+                  <h2>Project setup</h2>
+                  <p>Choose the release version and package-level settings.</p>
+                </div>
+              </div>
+              <div id="local-draft-status" class="local-draft-status" hidden>
+                <span id="local-draft-status-message">Your browser-saved draft was restored.</span>
+              </div>
+              <div class="subsection-heading new-package-heading">
+                <h3>Start a new package</h3>
+                <p>Choose a schema version and enter the new package’s name and title.</p>
+              </div>
+              <div class="grid">
+                <label>
+                  Schema version <span class="required">*</span>
+                  <select id="schema-version" name="schema-version" required>
+                    <option value="3.0.2" selected>3.0.2</option>
+                  </select>
+                </label>
+                <label>
+                  Package name
+                  <input id="package-name" type="text" placeholder="Example: melidos-example-package" />
+                </label>
+                <label class="wide">
+                  Package title
+                  <input id="package-title" type="text" placeholder="Example: MeLiDos example GLC package" />
+                </label>
+              </div>
+              <div class="subsection-heading existing-work-heading">
+                <h3>Continue existing work</h3>
+                <p>Choose the option that matches what you previously saved.</p>
+              </div>
+              <div class="existing-work-options">
+                <section class="existing-work-option">
+                  <h4>Open an existing GLC package</h4>
+                  <p>Select a package folder containing separate GLC metadata files.</p>
+                  <div class="file-drop compact-upload package-folder-upload">
+                    <input id="package-folder-import" type="file" webkitdirectory directory multiple />
+                    <p id="package-folder-import-file" class="import-file-label" hidden></p>
+                    <p id="package-folder-import-summary">
+                      Looks for <code>datapackage.json</code> and the metadata resources at the folder root or inside <code>data/</code>.
+                    </p>
+                    <button type="button" class="small-button primary-import-button" id="import-package-folder-button">Open selected package folder</button>
+                    <button type="button" class="secondary-button small-button" id="remove-package-folder-import" hidden>Remove imported package</button>
+                  </div>
+                </section>
+                <section class="existing-work-option">
+                  <h4>Resume a builder draft</h4>
+                  <p>Select the single <code>glc-builder-project.json</code> file previously saved by this builder.</p>
+                  <label class="project-backup-import">
+                    Saved builder draft (.json)
+                  <input id="builder-project-import" type="file" accept=".json,application/json" />
+                  </label>
+                  <p id="builder-project-import-status" class="field-help"></p>
+                </section>
+              </div>
+              <div class="actions inline-actions">
+                <button type="button" data-next-step="study">Next: Study</button>
+              </div>
+            </section>
+
+            <section class="form-section builder-step" data-step="study">
+              <div class="section-heading">
+                <span>2</span>
+                <div>
+                  <h2>Study</h2>
+                  <p>Core fields from <code>study.schema.json</code>. Dataset IDs will be filled from the dataset step.</p>
+                </div>
+              </div>
+              <div class="file-drop compact-upload">
+                <input id="study-import" type="file" accept=".json,application/json" />
+                <p id="study-import-file" class="import-file-label" hidden></p>
+                <p id="study-import-summary">Optional: import an existing <code>study.json</code> to pre-fill this page.</p>
+                <button type="button" class="small-button primary-import-button" id="import-study-button">Import selected study file</button>
+              </div>
+              <div class="grid" id="study-details">
+                <label title="Unique identifier for study. Type: string.">
+                  Study internal ID <span class="required">*</span>
+                  <input id="study-internal-id" type="text" placeholder="Example: STUDY001" />
+                </label>
+                <label title="Study-level metadata. Type: string.">
+                  Study title <span class="required">*</span>
+                  <input id="study-title" type="text" placeholder="Example: Light exposure in daily life" />
+                </label>
+                <label title="Optional DOI, URL, or concise status note for study or analysis preregistration. Clearly distinguish analysis preregistration from preregistration of the study or data collection. Omit when unavailable. Type: string.">
+                  Pre-registration
+                  <input id="study-preregistration" type="text" placeholder="Example: DOI, URL, or concise preregistration status" />
+                </label>
+                <label title="Optional registry and ID of clinical trial registration. Omit when unavailable. Type: string.">
+                  Registration
+                  <input id="study-registration" type="text" placeholder="Example: ClinicalTrials.gov NCT..." />
+                </label>
+                <label title="Optional name of ethics committee and approval number. Omit when unavailable. Type: string.">
+                  Ethics
+                  <input id="study-ethics" type="text" placeholder="Example: Committee and approval number" />
+                </label>
+                <label title="Optional type of study. Omit when unavailable. Type: string.">
+                  Study type
+                  <input id="study-type" type="text" placeholder="Example: observational field study" />
+                </label>
+                <label class="wide" title="Short narrative description of the study. Type: string.">
+                  Short description <span class="required">*</span>
+                  <textarea id="study-short-description" rows="2" placeholder="Brief narrative description of the study"></textarea>
+                </label>
+                <label title="Short description of the study sample. Type: string.">
+                  Study sample <span class="required">*</span>
+                  <input id="study-sample" type="text" placeholder="Example: Healthy adults aged 18-65" />
+                </label>
+                <label title="Description of the study setting. Type: string.">
+                  Study setting <span class="required">*</span>
+                  <input id="study-setting" type="text" placeholder="Example: Field study" />
+                </label>
+                <label title="Geographical location and context. Type: string.">
+                  Geographical location <span class="required">*</span>
+                  <input id="study-geographical-location" type="text" placeholder="Example: Berlin, Germany" />
+                </label>
+                <label class="wide" title="Optional short description of the study intervention, if any. Omit when unavailable or not applicable. Type: string.">
+                  Intervention
+                  <textarea id="study-intervention" rows="2" placeholder="Example: Light therapy protocol, or leave blank if not applicable"></textarea>
+                </label>
+                <label title="Optional funding sources supporting the project. Omit when unavailable. Type: array of strings.">
+                  Funding sources
+                  <input id="study-funding-sources" type="text" placeholder="Comma-separated, e.g. Grant ABC123, Foundation XYZ" />
+                </label>
+                <label title="Optional key words describing the project. Omit when unavailable. Type: array of strings.">
+                  Keywords
+                  <input id="study-keywords" type="text" placeholder="Comma-separated, e.g. light, sleep, wearable" />
+                </label>
+                <label class="wide" title="All dataset IDs for this study are generated from the Datasets page. Type: array of strings.">
+                  All study datasets <span class="required">*</span> <span class="generated-badge">generated from Datasets page</span>
+                  <input id="study-datasets-preview" type="text" readonly placeholder="Dataset IDs will appear here after you add dataset records" />
+                </label>
+              </div>
+
+              <div class="subsection-heading">
+                <h3>Study groups</h3>
+                <p>Optional repeatable groups from <code>study_groups</code>. Select the dataset records that belong to each group.</p>
+              </div>
+              <div class="table-builder">
+                <div id="study-groups-list"></div>
+                <button type="button" class="secondary-button" id="add-study-group">Add study group</button>
+              </div>
+
+              <div class="subsection-heading" id="study-contributors">
+                <h3>Study contributors</h3>
+                <p>Optional embedded contributors from <code>contributor.schema.json</code>. Add rows manually, or import a CSV/TSV/JSON file to fill the table.</p>
+              </div>
+              <div class="file-drop compact-upload">
+                <input id="contributors-import" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json" />
+                <p id="contributors-import-file" class="import-file-label" hidden></p>
+                <p id="contributors-import-summary">
+                  Import replaces the contributor rows below. For CSV/TSV, use these column names:
+                  <code>contributor_full_name</code>,
+                  <code>contributor_roles</code>,
+                  <code>contributor_email</code>,
+                  <code>contributor_orcid</code>,
+                  <code>contributor_institution_name</code>,
+                  <code>contributor_institution_city</code>,
+                  <code>contributor_institution_country</code>.
+                  Roles can be separated with semicolons. JSON can be either <code>contributors.json</code> or <code>study.json</code> with <code>study_contributors</code>.
+                </p>
+                <button type="button" class="small-button primary-import-button" id="import-contributors-button">Import selected contributor file</button>
+                <button type="button" class="secondary-button small-button" id="clear-contributors-import">Remove imported contributor file</button>
+              </div>
+              <div class="table-builder contributor-builder">
+                <div id="contributors-list"></div>
+                <div class="row-actions">
+                  <button type="button" class="secondary-button" id="add-contributor">Add contributor</button>
+                  <button type="button" class="secondary-button danger-button" id="clear-all-contributors">Clear all contributor rows</button>
+                </div>
+              </div>
+
+              <div id="study-validation-panel" class="section-validation-panel" aria-live="polite"></div>
+              <div class="metadata-actions bottom-schema-actions">
+                <span>Download metadata:</span>
+                <button type="button" id="download-study-metadata">Download study.json</button>
+              </div>
+              <div class="schema-actions bottom-schema-actions">
+                <span>Reference schemas:</span>
+                <button type="button" class="secondary-button small-button" id="download-study-schema">Study schema</button>
+                <button type="button" class="secondary-button small-button" id="download-contributor-schema">Contributor schema</button>
+              </div>
+              <div class="actions inline-actions">
+                <button type="button" class="secondary-button" data-prev-step="project">Back</button>
+                <button type="button" class="secondary-button danger-button" id="clear-study-page">Clear Study page</button>
+                <button type="button" data-next-step="participants">Next: Participants</button>
+              </div>
+            </section>
+
+            <section class="form-section builder-step" data-step="participants">
+              <div class="section-heading">
+                <span>3</span>
+                <div>
+                  <h2>Participants</h2>
+                  <p>Add participant rows for <code>participants.csv</code> and optional characteristics.</p>
+                </div>
+              </div>
+              <div class="subsection-heading prominent-subsection" id="participant-roster">
+                <h3>Participant roster</h3>
+                <p>Required rows for <code>participants.csv</code>.</p>
+              </div>
+              <div class="file-drop compact-upload">
+                <input id="participants-import" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json" />
+                <p id="participants-import-file" class="import-file-label" hidden></p>
+                <p id="participants-import-summary">
+                  Optional: import <code>participants.csv</code> or <code>participants.json</code>. Expected fields:
+                  <code>participant_internal_id</code>,
+                  <code>participant_age</code>,
+                  <code>participant_sex</code>,
+                  <code>participant_gender</code>.
+                </p>
+                <button type="button" class="small-button primary-import-button" id="import-participants-button">Import selected participants file</button>
+                <button type="button" class="secondary-button small-button" id="remove-participants-import">Remove imported participants file</button>
+              </div>
+              <div class="table-builder">
+                <div id="participants-list"></div>
+                <div class="row-actions">
+                  <button type="button" class="secondary-button" id="add-participant">Add participant</button>
+                  <button type="button" class="secondary-button danger-button" id="clear-all-participants">Clear all participant rows</button>
+                </div>
+              </div>
+
+              <div class="subsection-heading prominent-subsection" id="participant-characteristics">
+                <h3>Participant characteristics</h3>
+                <p>Optional long-format rows for <code>participant_characteristics.csv</code>.</p>
+              </div>
+              <div class="file-drop compact-upload">
+                <input id="characteristics-import" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json" />
+                <p id="characteristics-import-file" class="import-file-label" hidden></p>
+                <p id="characteristics-import-summary">
+                  Optional: import <code>participant_characteristics.csv</code> or JSON. Expected fields:
+                  <code>participant_internal_id</code>,
+                  <code>participant_characteristic_name</code>,
+                  <code>participant_characteristic_value</code>,
+                  <code>participant_characteristic_unit</code>,
+                  <code>participant_characteristic_description</code>.
+                </p>
+                <button type="button" class="small-button primary-import-button" id="import-characteristics-button">Import selected characteristics file</button>
+                <button type="button" class="secondary-button small-button" id="remove-characteristics-import">Remove imported characteristics file</button>
+              </div>
+              <div class="table-builder">
+                <div id="characteristics-list"></div>
+                <div class="row-actions">
+                  <button type="button" class="secondary-button" id="add-characteristic">Add characteristic</button>
+                  <button type="button" class="secondary-button danger-button" id="clear-all-characteristics">Clear all characteristic rows</button>
+                </div>
+              </div>
+              <div id="participants-validation-panel" class="section-validation-panel" aria-live="polite"></div>
+              <div class="metadata-actions bottom-schema-actions">
+                <span>Download metadata:</span>
+                <button type="button" id="download-participants-metadata">Download participants.csv</button>
+                <button type="button" id="download-characteristics-metadata">Download participant_characteristics.csv</button>
+              </div>
+              <div class="schema-actions bottom-schema-actions">
+                <span>Reference schemas:</span>
+                <button type="button" class="secondary-button small-button" id="download-participants-schema">Participants schema</button>
+                <button type="button" class="secondary-button small-button" id="download-characteristics-schema">Characteristics schema</button>
+              </div>
+              <div class="actions inline-actions">
+                <button type="button" class="secondary-button" data-prev-step="study">Back</button>
+                <button type="button" class="secondary-button danger-button" id="clear-participants-page">Clear Participants page</button>
+                <button type="button" data-next-step="devices">Next: Devices</button>
+              </div>
+            </section>
+
+            <section class="form-section builder-step" data-step="devices">
+              <div class="section-heading">
+                <span>4</span>
+                <div>
+                  <h2>Devices</h2>
+                  <p>Add device records and the datasheets they reference.</p>
+                </div>
+              </div>
+              <div class="subsection-heading prominent-subsection" id="device-inventory">
+                <h3>Device inventory</h3>
+                <p>Required records for <code>devices.json</code>.</p>
+              </div>
+              <div class="file-drop compact-upload">
+                <input id="devices-import" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json" />
+                <p id="devices-import-file" class="import-file-label" hidden></p>
+                <p id="devices-import-summary">
+                  Optional: import <code>devices.json</code> or a CSV/TSV device table. Expected fields:
+                  <code>device_internal_id</code>,
+                  <code>device_manufacturer</code>,
+                  <code>device_model</code>,
+                  <code>device_serial_number</code>,
+                  <code>device_calibration_date</code>,
+                  <code>device_firmware_version</code>,
+                  <code>device_datasheet_id</code>,
+                  <code>device_sensors</code>.
+                  Sensor entries can use <code>sensor type | sensor datasheet id</code>, separated by semicolons.
+                </p>
+                <button type="button" class="small-button primary-import-button" id="import-devices-button">Import selected devices file</button>
+                <button type="button" class="secondary-button small-button" id="remove-devices-import">Remove imported devices file</button>
+              </div>
+              <div class="validation-summary">
+                Datasheet IDs are pending cross-references: if the matching datasheet has not been added yet, leave the field blank or keep the imported ID and complete the datasheet section below.
+              </div>
+              <div id="devices-list" class="card-list"></div>
+              <div class="row-actions">
+                <button type="button" class="secondary-button" id="add-device">Add device</button>
+                <button type="button" class="secondary-button danger-button" id="clear-all-devices">Clear all device rows</button>
+              </div>
+
+              <div class="subsection-heading prominent-subsection" id="device-datasheets">
+                <h3>Device datasheets</h3>
+                <p>Add device or sensor datasheet records referenced by devices.</p>
+              </div>
+              <div class="file-drop compact-upload">
+                <input id="datasheets-import" type="file" accept=".csv,.tsv,.json,text/csv,text/tab-separated-values,application/json" multiple />
+                <p id="datasheets-import-file" class="import-file-label" hidden></p>
+                <p id="datasheets-import-summary">
+                  Optional: import <code>device_datasheet.json</code>, <code>sensor_datasheet.json</code>, or a CSV/TSV datasheet table.
+                  Expected fields include <code>datasheet_id</code>, <code>datasheet_manufacturer</code>, <code>datasheet_type</code>,
+                  <code>datasheet_model</code>, <code>datasheet_calibration_interval</code>, spectral sensitivity, calibration fields, and channels.
+                </p>
+                <button type="button" class="small-button primary-import-button" id="import-datasheets-button">Import selected datasheet file(s)</button>
+                <button type="button" class="secondary-button small-button" id="remove-datasheets-import">Remove imported datasheet files</button>
+              </div>
+              <div id="datasheets-list" class="card-list"></div>
+              <div class="row-actions">
+                <button type="button" class="secondary-button" id="add-datasheet">Add datasheet</button>
+                <button type="button" class="secondary-button danger-button" id="clear-all-datasheets">Clear all datasheet rows</button>
+              </div>
+              <div id="devices-validation-panel" class="section-validation-panel" aria-live="polite"></div>
+              <div class="metadata-actions bottom-schema-actions">
+                <span>Download metadata:</span>
+                <button type="button" id="download-devices-metadata">Download devices.json</button>
+                <button type="button" id="download-datasheets-metadata">Download device_datasheet.json</button>
+              </div>
+              <div class="schema-actions bottom-schema-actions">
+                <span>Reference schemas:</span>
+                <button type="button" class="secondary-button small-button" id="download-device-schema">Device schema</button>
+                <button type="button" class="secondary-button small-button" id="download-datasheet-schema">Device datasheet schema</button>
+              </div>
+              <div class="actions inline-actions">
+                <button type="button" class="secondary-button" data-prev-step="participants">Back</button>
+                <button type="button" class="secondary-button danger-button" id="clear-devices-page">Clear device inventory</button>
+                <button type="button" class="secondary-button danger-button" id="clear-datasheets-page">Clear datasheets section</button>
+                <button type="button" data-next-step="datasets">Next: Datasets</button>
+              </div>
+            </section>
+
+            <section class="form-section builder-step" data-step="templates" hidden>
+              <div class="section-heading">
+                <span>5</span>
+                <div>
+                  <h2>Dataset templates</h2>
+                  <p>Define reusable dataset and file-group structure, or skip this step and create datasets manually.</p>
+                </div>
+              </div>
+              <div class="template-editor-toolbar">
+                <label>
+                  Start with
+                  <select id="template-editor-select">
+                    <option value="">Create a new template</option>
+                  </select>
+                </label>
+              </div>
+              <p id="template-editor-status" class="field-help"><strong>Creating a new template.</strong> Configure it below and save it at the end of this page, or select a saved template to edit.</p>
+              <div id="template-editor-host"></div>
+              <div class="actions inline-actions">
+                <button type="button" class="secondary-button" data-prev-step="devices">Back</button>
+                <button type="button" data-next-step="datasets">Skip templates / Next: Datasets</button>
+              </div>
+            </section>
+
+            <section class="form-section builder-step" data-step="datasets">
+              <div class="section-heading">
+                <span>6</span>
+                <div>
+                  <h2 title="A dataset record is one participant-level measurement dataset, with primary and supporting file groups collected in the same context.">
+                    Dataset record <span class="help-marker" title="Create a new dataset record when the participant, main device, body/device location, or primary modality changes. Add file groups when files belong to the same participant measurement context.">?</span>
+                  </h2>
+                  <p>One dataset record represents one participant dataset. Cross-reference fields use earlier pages.</p>
+                </div>
+              </div>
+              <div class="concept-card">
+                <h3>Dataset or file group?</h3>
+                <p>
+                  Use a <strong>new dataset record</strong> for a different participant or measurement context.
+                  Use a <strong>file group</strong> for each set of same-structure files, including files from different devices, locations, sampling intervals, or collection instructions within that context.
+                </p>
+                <p class="field-help">
+                  Example: wrist light data, chest light data, and a corresponding wear log can be bundled in one dataset as separate file groups when they belong to the same recording period.
+                </p>
+              </div>
+              <div class="file-drop compact-upload">
+                <input id="dataset-import" type="file" accept=".json,application/json" />
+                <p id="dataset-import-file" class="import-file-label" hidden></p>
+                <p id="dataset-import-summary">
+                  Optional: import an existing <code>datasets.json</code>. Multiple dataset records are imported as separate participant-level records.
+                </p>
+                <button type="button" class="small-button primary-import-button" id="import-dataset-button">Import selected dataset file</button>
+                <button type="button" class="secondary-button small-button" id="remove-dataset-import">Remove imported dataset file</button>
+              </div>
+
+              <div class="subsection-heading">
+                <h3 title="Each dataset record represents one participant or non-participant collection context.">
+                  Dataset records <span class="help-marker" title="A study can have many dataset records. Participant records may combine related file groups from one recording context; purely environmental records may explicitly declare that no participant is associated.">?</span>
+                </h3>
+                <p>Each record should describe one participant or one non-participant collection context.</p>
+              </div>
+              <div class="file-group-toolbar">
+                <div id="dataset-records-list" class="file-groups-list"></div>
+                <button type="button" class="secondary-button" id="add-dataset-record">Add dataset record</button>
+              </div>
+
+              <section id="dataset-template-tools" class="template-tools" hidden>
+                <div class="subsection-heading">
+                  <h3>Create datasets from a template <span class="help-marker" title="Select a saved template and one or more participants. The builder creates a linked dataset record for each selected participant. You can also leave all participants unchecked to create one unassigned dataset.">?</span></h3>
+                  <p>Select a saved template and the participants for whom dataset records should be created.</p>
+                </div>
+                <div class="grid">
+                  <label>
+                    Saved template
+                    <select id="dataset-template-select">
+                      <option value="">Select template</option>
+                    </select>
+                  </label>
+                  <fieldset class="template-participant-picker">
+                    <legend>Participants for new datasets</legend>
+                    <div id="dataset-template-participants" class="template-participant-options"></div>
+                    <span class="field-help">Check any combination of participants. Leave all unchecked to create one unassigned linked dataset.</span>
+                  </fieldset>
+                </div>
+                <div class="inline-actions template-actions">
+                  <button type="button" class="secondary-button" id="create-linked-dataset">Create dataset records from template</button>
+                </div>
+                <p id="dataset-template-status" class="field-help">No templates created yet.</p>
+              </section>
+
+              <div id="dataset-editor-home">
+              <div id="dataset-editor-workspace">
+              <div class="grid">
+                <label id="dataset-id-field">
+                  Dataset ID <span class="required">*</span>
+                  <input id="dataset-id" name="dataset-id" type="text" placeholder="Example: DS001" required />
+                </label>
+                <label id="dataset-study-id-field">
+                  Study ID <span class="required">*</span>
+                  <select id="study-id" name="study-id" required></select>
+                </label>
+                <label id="participant-associated-field" hidden>
+                  Participant associated <span class="required">*</span>
+                  <span class="help-marker" title="Select Yes when the dataset describes one participant, including questionnaire-only datasets. Select No only when the dataset contains no participant-associated data, such as purely environmental monitoring.">?</span>
+                  <select id="participant-associated" required>
+                    <option value="true" selected>Yes</option>
+                    <option value="false">No</option>
+                  </select>
+                </label>
+                <label id="dataset-participant-id-field">
+                  Participant ID <span id="participant-id-required" class="required">*</span>
+                  <select id="participant-id" name="participant-id" required></select>
+                </label>
+                <label>
+                  Dataset timezone <span class="required">*</span>
+                  <input id="dataset-timezone" name="dataset-timezone" type="text" list="timezone-options" placeholder="Example: Europe/Berlin" required />
+                </label>
+                <label>
+                  Dataset location: latitude <span class="required">*</span>
+                  <input id="latitude" name="latitude" type="number" step="any" placeholder="Example: 48.5216" required />
+                </label>
+                <label>
+                  Dataset location: longitude <span class="required">*</span>
+                  <input id="longitude" name="longitude" type="number" step="any" placeholder="Example: 9.0576" required />
+                </label>
+              </div>
+
+              <div class="section-heading compact-heading">
+                <span>5a</span>
+                <div>
+                  <h2 title="A file group is one or more same-structure files within the active dataset record.">
+                    Dataset file assistant <span class="help-marker" title="Use file groups for same-context files with the same structure. In schema 3.0.2, identify whether each group has a primary or supporting role.">?</span>
+                  </h2>
+                  <p>Each file group describes one set of same-structure files for this participant.</p>
+                </div>
+              </div>
+
+              <div class="file-group-toolbar">
+                <div id="file-groups-list" class="file-groups-list"></div>
+                <button type="button" class="secondary-button" id="add-file-group">Add file group</button>
+              </div>
+
+              <div class="file-drop">
+                <input id="file-input" type="file" accept=".csv,.txt,.tsv" multiple />
+                <p id="file-summary">No file selected yet.</p>
+                <div id="file-warning" class="file-warning" hidden></div>
+              </div>
+
+              <div class="grid">
+                <fieldset id="file-modality-field" class="wide modality-options" hidden>
+                  <legend>
+                    File modalities <span class="required">*</span>
+                    <span class="help-marker" title="Multiple sensor modalities may share a same-structure file group. A questionnaire, diary, or wear log must use its own file group and cannot be combined with sensor modalities. Add those related groups under the same dataset record.">?</span>
+                  </legend>
+                  <label><input type="checkbox" name="file-modality" value="light" /> Light</label>
+                  <label><input type="checkbox" name="file-modality" value="accelerometry" /> Accelerometry</label>
+                  <label><input type="checkbox" name="file-modality" value="temperature" /> Temperature</label>
+                  <label><input type="checkbox" name="file-modality" value="humidity" /> Humidity</label>
+                  <label><input type="checkbox" name="file-modality" value="air_pollution" /> Air pollution</label>
+                  <label><input type="checkbox" name="file-modality" value="questionnaire" /> Questionnaire</label>
+                  <label><input type="checkbox" name="file-modality" value="diary" /> Diary</label>
+                  <label><input type="checkbox" name="file-modality" value="wear_log" /> Wear log</label>
+                  <label><input type="checkbox" name="file-modality" value="other" /> Other</label>
+                </fieldset>
+                <p id="file-modality-warning" class="file-warning wide" hidden></p>
+                <label id="file-modality-other-field" hidden>
+                  Other modality <span class="required">*</span>
+                  <input id="file-modality-other" type="text" placeholder="Example: electrodermal activity" />
+                </label>
+                <label id="file-modality-other-type-field" hidden>
+                  Other modality type <span class="required">*</span>
+                  <select id="file-modality-other-type">
+                    <option value="" selected>Select modality type</option>
+                    <option value="sensor">Sensor</option>
+                    <option value="non_device">Non-device</option>
+                  </select>
+                </label>
+                <fieldset id="file-instrument-field" class="wide nested-editor" hidden>
+                  <legend>Instrument and collection method</legend>
+                  <div class="grid">
+                    <label>
+                      Instrument type <span class="required">*</span>
+                      <select id="file-instrument-type" disabled>
+                        <option value="">Selected from modality</option>
+                        <option value="questionnaire">Questionnaire</option>
+                        <option value="diary">Diary</option>
+                        <option value="wear_log">Wear log</option>
+                      </select>
+                    </label>
+                    <label>
+                      Instrument name <span class="required">*</span>
+                      <input id="file-instrument-name" type="text" placeholder="Example: MCTQ" />
+                    </label>
+                    <label>
+                      Collection method <span class="required">*</span>
+                      <select id="file-collection-method">
+                        <option value="">Select collection method</option>
+                        <option value="paper">Paper</option>
+                        <option value="software">Software</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </label>
+                    <label id="file-software-name-field" hidden>
+                      Software name <span class="required">*</span>
+                      <input id="file-software-name" type="text" placeholder="Example: REDCap" />
+                    </label>
+                    <label id="file-collection-method-other-field" hidden>
+                      Other collection method <span class="required">*</span>
+                      <input id="file-collection-method-other" type="text" placeholder="Describe the collection method" />
+                    </label>
+                    <label>
+                      Recorded by <span class="required">*</span>
+                      <span class="help-marker" title="Identifies who entered or completed the record. Select participant when the participant completed it themselves, study staff when a researcher, clinician, interviewer, or another study team member entered it, and other for any other person or process.">?</span>
+                      <select id="file-recorded-by">
+                        <option value="">Select who recorded it</option>
+                        <option value="participant">Participant</option>
+                        <option value="study_staff">Study staff</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </label>
+                    <label id="file-recorded-by-other-field" hidden>
+                      Other recorder <span class="required">*</span>
+                      <input id="file-recorded-by-other" type="text" placeholder="Describe who recorded it" />
+                    </label>
+                  </div>
+                </fieldset>
+                <label class="wide">
+                  File-group description
+                  <span class="help-marker" title="Describe what the file group contains or represents when that information is not clear from its modality and other structured metadata. This may include its conceptual scope, how it differs from related file groups, or why an otherwise expected association is intentionally absent. Do not use this field for collection instructions, preprocessing steps, variable definitions, or repetition of structured metadata. Leave it empty when no additional explanation is needed.">?</span>
+                  <textarea id="file-description" name="file-description" rows="3" placeholder="Example: Participant-reported wear events concerning all study-worn devices collectively."></textarea>
+                </label>
+                <label id="file-device-id-field">
+                  Device ID <span id="file-device-id-required" class="required">*</span>
+                  <span class="help-marker" title="Required for sensor files. For questionnaires, diaries, and wear logs, link a device only when the complete file group unambiguously concerns one device. Leave it empty when the group concerns multiple devices collectively or device attribution is unknown.">?</span>
+                  <select id="device-id" name="device-id" required></select>
+                </label>
+                <label id="file-device-location-field">
+                  Device location <span id="file-device-location-required" class="required">*</span>
+                  <input id="device-location" name="device-location" type="text" placeholder="Example: non-dominant wrist" required />
+                </label>
+                <label id="file-device-location-type-field">
+                  Device location type <span id="file-device-location-type-required" class="required">*</span>
+                  <span class="help-marker" title="Body worn: attached to or worn by the participant, such as on the wrist or chest. Near participant: intentionally positioned near the participant but not worn, such as on a bedside table or beside a workstation. Environmental: measures the wider environment without being positioned relative to a participant, such as on a building rooftop or at an outdoor monitoring station.">?</span>
+                  <select id="device-location-type" name="device-location-type" required>
+                    <option value="" selected>Select location type</option>
+                    <option value="body_worn">Body worn</option>
+                    <option value="participant_proximal">Near participant</option>
+                    <option value="environmental">Environmental</option>
+                  </select>
+                </label>
+                <label>
+                  Temporal resolution type <span class="required">*</span>
+                  <select id="temporal-resolution-type" name="temporal-resolution-type" required>
+                    <option value="fixed_interval" selected>Fixed interval</option>
+                    <option value="event_based">Event based</option>
+                  </select>
+                </label>
+                <label>
+                  Temporal resolution value <span id="temporal-resolution-value-required" class="required">*</span>
+                  <input id="sampling-interval" name="temporal-resolution-value" type="number" min="0" step="any" placeholder="Example: 60" required />
+                </label>
+                <label>
+                  Temporal resolution unit <span id="temporal-resolution-unit-required" class="required">*</span>
+                  <input id="temporal-resolution-unit" name="temporal-resolution-unit" type="text" placeholder="Example: second" required />
+                </label>
+                <label class="wide">
+                  File-group instructions <span class="required">*</span>
+                  <textarea id="instructions" name="instructions" rows="3" placeholder="Example: Wear device during waking hours and log non-wear periods."></textarea>
+                </label>
+                <label>
+                  File format <span class="required">*</span>
+                  <input id="file-format" type="text" placeholder="Example: csv" />
+                </label>
+                <label>
+                  Encoding <span class="required">*</span>
+                  <input id="encoding" type="text" placeholder="Example: UTF-8" />
+                </label>
+                <label>
+                  Header row
+                  <input id="header-row" type="number" min="1" step="1" placeholder="Example: 1" />
+                </label>
+                <label>
+                  File timezone <span class="required">*</span>
+                  <input id="file-timezone" type="text" list="timezone-options" placeholder="Example: Europe/Berlin" />
+                </label>
+                <label id="legacy-auxiliary-field">
+                  Auxiliary file <span class="required">*</span>
+                  <select id="auxiliary">
+                    <option value="" selected>Select file role</option>
+                    <option value="false">No, primary dataset file</option>
+                    <option value="true">Yes, auxiliary file</option>
+                  </select>
+                </label>
+                <label id="file-role-field" hidden>
+                  File role <span class="required">*</span>
+                  <select id="file-role">
+                    <option value="" selected>Select file role</option>
+                    <option value="primary">Primary</option>
+                    <option value="supporting">Supporting</option>
+                  </select>
+                </label>
+                <label id="data-state-field" hidden>
+                  Data state <span class="required">*</span>
+                  <select id="data-state">
+                    <option value="" selected>Select data state</option>
+                    <option value="raw">Raw</option>
+                    <option value="processed">Processed</option>
+                  </select>
+                </label>
+                <label id="legacy-preprocessing-status-field">
+                  Preprocessing applied <span class="required">*</span>
+                  <select id="preprocessing-bol" required>
+                    <option value="" selected>Select preprocessing status</option>
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </select>
+                </label>
+                <label class="wide" id="preprocessing-description-field">
+                  Preprocessing description
+                  <textarea id="preprocessing-desc" rows="2" placeholder="Required if preprocessing was applied"></textarea>
+                </label>
+              </div>
+
+              <div class="file-group-terms">
+                <div>
+                  <h3>Variable terms for this file group</h3>
+                  <p>These terms populate the semantic-term dropdowns for variables in the active file group. <code>other</code> is always included.</p>
+                </div>
+                <div class="term-row term-header" aria-hidden="true">
+                  <span>Term token</span>
+                  <span>Human-readable label</span>
+                  <span>Action</span>
+                </div>
+                <div id="terms-list" class="terms-list"></div>
+                <button type="button" class="secondary-button" id="add-term">Add term</button>
+              </div>
+
+              <div class="datetime-card">
+                <div>
+                  <h3>Datetime for this file group</h3>
+                  <p>Use column metadata when the file contains date/time columns. If it does not, declare the collection date/time instead.</p>
+                </div>
+                <div class="grid">
+                  <label>
+                    Datetime source <span class="required">*</span>
+                    <select id="datetime-source">
+                      <option value="column" selected>Stored in file column(s)</option>
+                      <option value="collection">No datetime column; declare collection date/time</option>
+                    </select>
+                    <span class="field-help">Choose whether this file group has date/time columns or only a known collection date/time.</span>
+                  </label>
+                  <label>
+                    Collection date/time value
+                    <input id="collection-datetime" type="text" placeholder="Example: 2025-06-01" />
+                    <span class="field-help">Use this only when the file has no date/time column. Prefer YYYY-MM-DD or YYYY-MM-DD HH:mm:ss.</span>
+                  </label>
+                  <label>
+                    Date or datetime column
+                    <select id="datetime-date"></select>
+                    <span class="field-help">Column containing a full datetime, or the date column if date and time are separate.</span>
+                  </label>
+                  <label>
+                    Date/datetime format <span class="required">*</span>
+                    <input id="datetime-dateformat" type="text" placeholder="Example: YYYY-MM-DD HH:mm:ss" required />
+                    <span class="field-help">Format of the selected date or datetime value. Prefer YYYY-MM-DD or YYYY-MM-DD HH:mm:ss.</span>
+                  </label>
+                  <label>
+                    Separate time column
+                    <select id="datetime-time"></select>
+                    <span class="field-help">Only choose a column here if date and time are stored in two separate columns.</span>
+                  </label>
+                  <label>
+                    Time format
+                    <input id="datetime-timeformat" type="text" placeholder="Example: HH:mm:ss" />
+                    <span class="field-help">Use this to describe the separate time column format, for example HH:mm:ss.</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="section-heading compact-heading">
+                <span>5b</span>
+                <div>
+                  <h2>Detected variables</h2>
+                  <p>Edit labels, units, calibration notes, semantic terms, and tick primary variables.</p>
+                </div>
+              </div>
+
+              <div id="validation-summary" class="validation-summary">Select a file to detect columns.</div>
+              <div id="variables-table" class="variables-table" aria-live="polite"></div>
+
+              <section id="dataset-template-save-tools" class="template-tools" hidden>
+                <div class="subsection-heading">
+                  <h3>Save this dataset structure as a template</h3>
+                  <p>Finish configuring this dataset and its file groups first. Saving captures the reusable structure, not the dataset ID, participant ID, file names, or fixed collection datetime values.</p>
+                </div>
+                <div class="grid">
+                  <label>
+                    New template name
+                    <input id="dataset-template-name" type="text" placeholder="Example: Wearable recording" />
+                  </label>
+                </div>
+                <div class="inline-actions template-actions">
+                  <button type="button" id="save-dataset-template">Save as new template</button>
+                  <button type="button" class="secondary-button" id="update-dataset-template">Update selected template</button>
+                  <button type="button" class="secondary-button" id="detach-dataset-template">Detach current dataset from template</button>
+                </div>
+                <p id="dataset-template-save-status" class="field-help">Configure at least one file group before saving a template.</p>
+                <div class="grid" id="restore-template-group-tools" hidden>
+                  <label>
+                    File group excluded from this dataset
+                    <select id="excluded-template-group-select"></select>
+                  </label>
+                  <div class="field-action">
+                    <button type="button" class="secondary-button" id="restore-template-group">Restore excluded file group</button>
+                  </div>
+                </div>
+              </section>
+              </div>
+              </div>
+
+              <div id="datasets-validation-panel" class="section-validation-panel" aria-live="polite"></div>
+              <div class="metadata-actions bottom-schema-actions">
+                <span>Download metadata:</span>
+                <button type="button" id="download-datasets-metadata">Download datasets.json</button>
+              </div>
+              <div class="schema-actions bottom-schema-actions">
+                <span>Reference schemas:</span>
+                <button type="button" class="secondary-button small-button" id="download-dataset-schema">Dataset schema</button>
+              </div>
+              <div class="actions inline-actions">
+                <button type="button" class="secondary-button" data-prev-step="devices">Back</button>
+                <button type="button" class="secondary-button danger-button" id="clear-dataset-page">Clear Dataset page</button>
+                <button type="button" data-next-step="export">Next: Export</button>
+              </div>
+            </section>
+
+            <section class="form-section builder-step" data-step="export">
+              <div class="section-heading">
+                <span>7</span>
+                <div>
+                  <h2>Export package</h2>
+                  <p>Download individual metadata files or a metadata package zip.</p>
+                </div>
+              </div>
+              <div id="package-summary" class="validation-summary"></div>
+              <div id="export-validation-panel" class="export-validation-panel"></div>
+              <p class="field-help">
+                The zip includes generated metadata files and schemas. It does not include the original data files referenced by <code>datasets.json</code>.
+              </p>
+              <p class="field-help">
+                Missing-value convention: optional properties with no value are omitted from exported JSON rather than written as <code>null</code>, an empty string, or an empty array.
+              </p>
+              <p class="field-help">
+                The editable project backup preserves form entries, detected headers, and selected file names, but browsers do not allow it to retain access to the original measurement files.
+              </p>
+              <div class="export-grid">
+                <button type="button" id="download-package-zip" class="zip-download">Download metadata package .zip</button>
+                <button type="button" id="download-builder-project">Save builder draft (.json)</button>
+                <button type="button" id="download-datapackage">Download datapackage.json</button>
+                <button type="button" id="download-study">Download study.json</button>
+                <button type="button" id="download-participants">Download participants.csv</button>
+                <button type="button" id="download-characteristics">Download participant_characteristics.csv</button>
+                <button type="button" id="download-devices">Download devices.json</button>
+                <button type="button" id="download-datasheets">Download device_datasheet.json</button>
+                <button type="button" id="download-json">Download datasets.json</button>
+              </div>
+              <div class="actions inline-actions">
+                <button type="button" class="secondary-button" data-prev-step="datasets">Back</button>
+              </div>
+            </section>
+          </form>
+        </section>
+
+        <aside class="preview-panel">
+          <div class="preview-heading">
+            <h2 id="preview-title">Package preview</h2>
+            <p>Updates as you move through the builder.</p>
+          </div>
+          <pre id="json-preview">{}</pre>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="glc-footer">
+      <div class="glc-footer-inner">
+        <div class="glc-footer-top">
+          <div class="glc-footer-brand">
+            <img src="assets/glc-footer-logo.png" alt="Global Light Commons" class="glc-footer-logo" />
+            <p>
+              Global Light Commons Research Initiative at the Technical University
+              of Munich, studying how light affects health and well-being across
+              cultures and environments.
+            </p>
+            <div class="glc-footer-social">
+              <a href="https://www.linkedin.com/in/spitschan/" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+              <a href="https://github.com/GlobalLightCommons" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+              <a href="https://www.youtube.com/channel/UCTrGLi-baRDhagV8ckBFgPQ" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+              <a href="mailto:manuel.spitschan@tum.de" aria-label="Email"><i class="fa-regular fa-envelope"></i></a>
+            </div>
+          </div>
+
+          <div class="glc-footer-links">
+            <h3>Quick Links</h3>
+            <a href="https://globallightcommons.org/about/">About Us</a>
+            <a href="https://globallightcommons.org/research/">Research</a>
+            <a href="https://docs.globallightcommons.org/registry/">GLC dataset registry</a>
+            <a href="./">Metadata builder</a>
+            <a href="https://tscnlab.github.io/LightLogR/">LightLogR</a>
+            <a href="https://globallightcommons.org/news/">News &amp; Events</a>
+          </div>
+        </div>
+
+        <div class="glc-footer-affiliation">
+          <img src="assets/tscn-unit-logo.png" alt="Translational Sensory &amp; Circadian Neuroscience Unit" class="glc-tscn-logo" />
+          <p>GLC is a research initiative by the Translational Sensory &amp; Circadian Neuroscience Unit at Technical University of Munich.</p>
+        </div>
+
+        <div class="glc-footer-bottom">
+          <span>© 2026 GLC Research Initiative. All rights reserved.</span>
+          <div class="glc-footer-legal">
+            <a href="https://www.hs.mh.tum.de/en/mgt/datenschutz/" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+            <a href="https://www.hs.mh.tum.de/en/mgt/impressum/" target="_blank" rel="noopener noreferrer">Terms of Use</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <datalist id="timezone-options"></datalist>
+    <script src="datetime-metadata.js"></script>
+    <script src="app.js?v=20260726-sensor-datasheet-options"></script>
+  </body>
+</html>
