@@ -18,7 +18,8 @@ env:
   LC_ALL: en_US.UTF-8
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # commonmarker 0.23.x does not compile with the Ubuntu 26.04 toolchain.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
