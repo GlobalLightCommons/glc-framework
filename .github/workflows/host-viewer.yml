@@ -33,6 +33,9 @@ jobs:
           working-directory: viewer
       - uses: actions/configure-pages@v5
         id: pages
+      - name: Check Sass map key compatibility
+        working-directory: viewer
+        run: bundle exec ruby tests/sass_number_equality.rb
       - name: Build documentation and viewer
         working-directory: viewer
         env:

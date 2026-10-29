@@ -24,6 +24,7 @@ plugins:
   - jekyll-sitemap
 
 exclude:
+   - tests/
    - .sass-cache/
    - .jekyll-cache/
    - gemfiles/
