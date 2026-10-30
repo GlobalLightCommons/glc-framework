@@ -89,9 +89,6 @@ def trust_logic_changed():
 
 
 def dataset_entries_requiring_verification(current_datasets, base_cfg, force_all=False):
-    if force_all:
-        return [(ds, "registry trust logic changed") for ds in current_datasets]
-
     if base_cfg is None:
         print("No PR base dataset file found; checking all dataset entries.")
         return [(ds, "base unavailable") for ds in current_datasets]
@@ -113,7 +110,18 @@ def dataset_entries_requiring_verification(current_datasets, base_cfg, force_all
             requiring_verification.append((ds, "new dataset entry"))
         elif target_fields(base_ds) != target_fields(ds):
             requiring_verification.append((ds, "validation target changed"))
+        elif force_all:
+            requiring_verification.append((ds, "registry trust logic changed"))
     return requiring_verification
+
+
+def check_validation_status(status, reason):
+    # Rechecking trust must not confuse an authentic failure with missing or
+    # untrusted evidence. New entries and changed targets still require a pass.
+    if reason == "registry trust logic changed" and status in ("pass", "fail"):
+        return
+    if status != "pass":
+        raise RuntimeError(f"current validation status is {status!r}, expected 'pass'")
 
 
 def is_repo_slug(value: str) -> bool:
@@ -206,7 +214,7 @@ def main(cfg_path: str):
             f"{dataset_label(ds)} ({reason})"
             for ds, reason in datasets_to_verify
         )
-        print(f"Trusted validation will check new or target-changed dataset entries only: {changed_ids}")
+        print(f"Trusted validation will check these dataset entries: {changed_ids}")
     else:
         print("No dataset entries were added or had validation targets changed; skipping trusted artifact checks.")
 
@@ -229,15 +237,14 @@ def main(cfg_path: str):
             if result is None:
                 raise RuntimeError("No live or archived validation report found")
             status = result["validation"].get("status")
-            if status != "pass":
-                raise RuntimeError(f"current validation status is {status!r}, expected 'pass'")
+            check_validation_status(status, reason)
         except Exception as e:
             verification_errors.append(f"{ds_id}: trusted validation check failed: {e}")
 
     if verification_errors:
         die("Trusted validation checks failed:\n" + "\n".join(f" - {e}" for e in verification_errors))
 
-    print("\nOK: datasets.yml entries have trusted passing validation artifacts.")
+    print("\nOK: selected datasets have trusted reports; new entries and changed targets have passing validation.")
 
 
 if __name__ == "__main__":
