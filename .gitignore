@@ -13,3 +13,6 @@ _validation_artifacts/
 .framework-source/
 .framework-registry/
 framework_out/
+tutorials/*.html
+tutorials/*_files/
+tutorials/.quarto/

@@ -1,0 +1,6 @@
+source,output,transformation,reason
+messy-light.csv,P01_light.csv,Trim numeric whitespace and replace numeric decimal commas with decimal points,Consistent numeric representation
+messy-light.csv,P01_light.csv,Map NA to an empty illuminance cell,Preserve the documented missing measurement
+messy-light.csv,P01_light.csv,Remove one identical repeated 08:01 row,Confirmed export duplication in field notes
+messy-light.csv,P01_light.csv,Combine Date and Clock as YYYY-MM-DD HH:mm:ss,Unambiguous local timestamp without timezone conversion
+messy-light.csv,P01_light.csv,Retain P01 and D01 association in inventory and metadata,One participant and one physical device in this file
