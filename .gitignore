@@ -10,3 +10,6 @@ registry_out/
 _registry_pr_validation/
 _validation_artifacts/
 .validation-archive/
+.framework-source/
+.framework-registry/
+framework_out/

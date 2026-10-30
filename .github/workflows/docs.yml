@@ -30,7 +30,7 @@ jobs:
           working-directory: viewer
       - name: Check Sass map key compatibility
         run: bundle exec ruby tests/sass_number_equality.rb
-      - run: bundle exec jekyll build --baseurl ""
+      - run: bundle exec ruby -r ./_plugins/sass_number_equality -S jekyll build --baseurl ""
         env:
           JEKYLL_ENV: production
       - uses: actions/upload-pages-artifact@v3

@@ -942,7 +942,7 @@ function syncActiveSchemaPill(schemaVersion = fields.schemaVersion.value || "3.0
     ? "glc-dp-profile.json"
     : "gleam-dp-profile.json";
   pill.textContent = `Schema ${schemaVersion}`;
-  pill.href = `https://github.com/tscnlab/glc-metadata-validator/blob/main/schemas/${schemaVersion}/${profileFilename}`;
+  pill.href = `https://github.com/GlobalLightCommons/glc-framework/blob/main/validator/schemas/${schemaVersion}/${profileFilename}`;
   pill.setAttribute("aria-label", `View GLC schema ${schemaVersion}`);
   pill.classList.toggle("schema-pill-current", isCurrentSchema);
   pill.classList.toggle("schema-pill-legacy", !isCurrentSchema);
