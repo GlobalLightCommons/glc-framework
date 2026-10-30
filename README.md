@@ -40,7 +40,7 @@ Build the viewer and documentation:
 ```sh
 cd viewer
 bundle install
-bundle exec jekyll serve --baseurl ""
+bundle exec ruby -r ./_plugins/sass_number_equality -S jekyll serve --baseurl ""
 ```
 
 From the monorepo root, build the validator container with:
@@ -66,6 +66,10 @@ The registry exports and verifies both bundles before archiving. When an Actions
 Run **Initialize validation archive branch** once, then **Update registry and preserve evidence** to populate it. `VALIDATION_ARCHIVE_DIR` selects the archive directory locally. Deleted Actions artifacts cannot be recovered from signatures alone; the initial nine dataset validations must be rerun to seed the archive.
 
 ## Deployment
+
+The combined framework site is built and published directly from this repository by `.github/workflows/framework-pages.yml`. It provides `/docs/`, `/viewer/`, `/builder/`, and `/registry/` under one Pages site, separate from the main initiative website. The intended custom domain is `framework.globallightcommons.org`; until that domain is connected, GitHub Pages uses `https://globallightcommons.github.io/glc-framework/`. The build reads the configured Pages address and supports both layouts. See [framework hosting](docs/framework-hosting.md) for setup, verification, and rollback.
+
+### Legacy sites during transition
 
 The monorepo owns the application source, CI, archive collection, and reusable hosting workflows. The existing repositories keep their domains and serve as hosting entry points, while retaining their original source trees and histories for rollback.
 

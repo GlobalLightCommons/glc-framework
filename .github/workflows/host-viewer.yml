@@ -40,7 +40,7 @@ jobs:
         working-directory: viewer
         env:
           JEKYLL_ENV: production
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        run: bundle exec ruby -r ./_plugins/sass_number_equality -S jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: viewer/_site
