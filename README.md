@@ -1,90 +1,30 @@
 # Global Light Commons framework
 
-The GLC metadata builder, validator, data-package viewer and documentation, and dataset registry in one repository. Dataset repositories and the main `globallightcommons.org` website remain separate.
+Tools for creating, validating, exploring, and discovering standardized light-exposure data packages. This repository brings together the GLC metadata builder, validator, dataset viewer, documentation, and registry.
 
-| Directory | Purpose |
+**[Open the framework website](https://globallightcommons.github.io/glc-framework/)**
+
+| Use | Link |
 | --- | --- |
-| `builder/` | Static metadata builder, published at `builder.globallightcommons.org` |
-| `validator/` | Canonical versioned schemas, Python validator, and container |
-| `viewer/` | Data-package viewer and documentation at `docs.globallightcommons.org` |
-| `registry/` | Dataset list, signed-evidence verification, and registry generator |
-| `.github/workflows/` | Shared CI, trusted dataset validation, and deployment workflows |
-| `scripts/` | Cross-component consistency checks |
+| Learn the standard and package structure | [Documentation](https://globallightcommons.github.io/glc-framework/docs/) |
+| Create metadata for your data | [Metadata builder](https://globallightcommons.github.io/glc-framework/builder/) |
+| Explore a populated example package | [Dataset viewer](https://globallightcommons.github.io/glc-framework/viewer/) |
+| Find datasets and their validation results | [Dataset registry](https://globallightcommons.github.io/glc-framework/registry/) |
+| Validate your own package | [Validation guide](https://globallightcommons.github.io/glc-framework/docs/validate/) |
 
-Original Git histories are preserved through merge commits. No original repository is deleted, archived, or rewritten by this migration. See [the migration record](docs/monorepo-migration.md) for provenance, deployment setup, and rollback.
+The website is published directly from this repository. The planned address is `framework.globallightcommons.org`; the links above use the working GitHub Pages address until DNS is connected.
 
-## Development
+## What's in this repository
 
-Run commands from the component that owns the code:
+- [`builder/`](builder/) — browser-based metadata entry and package export.
+- [`validator/`](validator/) — versioned schemas, Python validator, Docker image, and reusable dataset-validation workflow.
+- [`viewer/`](viewer/) — documentation and interactive example viewer.
+- [`registry/`](registry/) — dataset catalogue and verification of signed validation reports.
 
-```sh
-cd builder
-node tests/datetime-metadata.test.js
-node tests/schema-ui-consistency.test.js
-```
+Signed reports and their supporting evidence are preserved on the [`validation-archive` branch](https://github.com/GlobalLightCommons/glc-framework/tree/validation-archive), so registry verification can continue after GitHub Actions artifacts expire.
 
-```sh
-cd validator
-python -m pip install -r requirements.txt
-python -m unittest discover -s tests -v
-```
+The [main GLC website](https://globallightcommons.org/) and individual dataset repositories are maintained separately. Original component histories and attribution are preserved; each component retains its own license.
 
-```sh
-cd registry
-python -m pip install -r requirements.txt
-python -m unittest discover -s tests -v
-```
+## For maintainers
 
-Build the viewer and documentation:
-
-```sh
-cd viewer
-bundle install
-bundle exec ruby -r ./_plugins/sass_number_equality -S jekyll serve --baseurl ""
-```
-
-From the monorepo root, build the validator container with:
-
-```sh
-docker build -t glc-validator validator
-```
-
-The published schema files retain their existing identities and historical contents. `validator/schemas/` is canonical. `python scripts/check_schema_copies.py` checks that the active builder bundle matches it. Historical builder bundles remain unchanged during migration.
-
-## Dataset validation
-
-The trusted reusable workflow remains at `.github/workflows/validate.yml` because GitHub requires reusable workflows at the repository root. It checks out the **calling dataset repository**, not this monorepo, and uses the public `ghcr.io/globallightcommons/glc-validator` image pinned by digest. Validator version 0.5.2 and the existing schema versions are unchanged.
-
-All nine registered dataset callers now use the pinned monorepo release; see the [migration record](docs/dataset-validation-migration.md). Original tagged validator workflows remain available for external callers. The template in `validator/templates/github-actions/` targets `GlobalLightCommons/glc-framework` at `framework-v0.1.0`. Pin callers to that release's reviewed commit SHA for production use. The `Verify released validator image` workflow pulls the pinned image without credentials and tests both AMD64 and ARM64, including validation of a schema 3.0.2 fixture. The IZTECH pilot and the remaining eight dataset migrations have verified signing, registry recognition, and archived evidence end to end.
-
-## Durable validation evidence
-
-The `validation-archive` branch of this same repository stores reports, validated-file manifests, and attestation bundles under `evidence/<owner>/<dataset>/<commit>/<content-digest>/`. Each validation is appended; revalidating a commit does not replace its earlier evidence.
-
-The registry exports and verifies both bundles before archiving. When an Actions artifact expires, the registry retrieves its archive and rechecks the signature, trusted workflow, source commit, repository, and report contents. An archive entry is never trusted simply because it is in Git.
-
-Run **Initialize validation archive branch** once, then **Update registry and preserve evidence** to populate it. `VALIDATION_ARCHIVE_DIR` selects the archive directory locally. Deleted Actions artifacts cannot be recovered from signatures alone; the initial nine dataset validations must be rerun to seed the archive.
-
-## Deployment
-
-The combined framework site is built and published directly from this repository by `.github/workflows/framework-pages.yml`. It provides `/docs/`, `/viewer/`, `/builder/`, and `/registry/` under one Pages site, separate from the main initiative website. The intended custom domain is `framework.globallightcommons.org`; until that domain is connected, GitHub Pages uses `https://globallightcommons.github.io/glc-framework/`. The build reads the configured Pages address and supports both layouts. See [framework hosting](docs/framework-hosting.md) for setup, verification, and rollback.
-
-### Legacy sites during transition
-
-The monorepo owns the application source, CI, archive collection, and reusable hosting workflows. The existing repositories keep their domains and serve as hosting entry points, while retaining their original source trees and histories for rollback.
-
-| Hosting repository | Monorepo workflow | Existing domain |
-| --- | --- | --- |
-| `glc-registry` | `.github/workflows/host-registry.yml` | `registry.globallightcommons.org` |
-| `glc-dp-viewer` | `.github/workflows/host-viewer.yml` | `docs.globallightcommons.org` |
-| `glc-metadata-builder` | `.github/workflows/host-builder.yml` | `builder.globallightcommons.org` |
-
-The small caller workflows in `templates/github-actions/` belong in those existing hosting repositories. They call this repository's reusable workflows on `main`, so source and deployment logic remain centralized. Each caller grants its own GitHub token the permissions needed to publish its own site. No shared deployment credential or domain transfer is required.
-
-Cutover PRs build previews on pull requests; production publication is disabled for PR events and for refs other than the hosting repository's `main`. After review and merge, the hosting callers publish on a 15-minute schedule and on manual dispatch. The builder additionally needs its Pages source switched from `main:/` to `gh-pages:/` after its first generated branch is ready. Registry and documentation retain their existing Pages settings.
-
-`FRAMEWORK_ARCHIVE_ENABLED=true` enables scheduled evidence collection in the monorepo independently of hosting cutover. This is already enabled; all nine current reports and their 18 attestation bundles have been archived and verified.
-
-See [the migration record](docs/monorepo-migration.md) for the review order and rollback steps. Original dataset callers remain valid against their existing tagged validator workflows.
-
-Each component retains its existing license and attribution files; the migration does not introduce a new blanket license.
+[Development](docs/development.md) · [Website deployment and DNS handoff](docs/framework-hosting.md) · [Repository migration](docs/monorepo-migration.md) · [Dataset workflow migration](docs/dataset-validation-migration.md)
