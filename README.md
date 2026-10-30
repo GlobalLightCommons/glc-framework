@@ -55,7 +55,7 @@ The published schema files retain their existing identities and historical conte
 
 The trusted reusable workflow remains at `.github/workflows/validate.yml` because GitHub requires reusable workflows at the repository root. It checks out the **calling dataset repository**, not this monorepo, and uses the public `ghcr.io/globallightcommons/glc-validator` image pinned by digest. Validator version 0.5.2 and the existing schema versions are unchanged.
 
-Existing dataset callers keep working against the original validator repository until individually migrated. The template in `validator/templates/github-actions/` targets `GlobalLightCommons/glc-framework` at `framework-v0.1.0`. Pin callers to that release's reviewed commit SHA for production use. The `Verify released validator image` workflow pulls the pinned image without credentials and tests both AMD64 and ARM64, including validation of a schema 3.0.2 fixture. A real dataset signer/archive pilot is a separate rollout step.
+All nine registered dataset callers now use the pinned monorepo release; see the [migration record](docs/dataset-validation-migration.md). Original tagged validator workflows remain available for external callers. The template in `validator/templates/github-actions/` targets `GlobalLightCommons/glc-framework` at `framework-v0.1.0`. Pin callers to that release's reviewed commit SHA for production use. The `Verify released validator image` workflow pulls the pinned image without credentials and tests both AMD64 and ARM64, including validation of a schema 3.0.2 fixture. The IZTECH pilot and the remaining eight dataset migrations have verified signing, registry recognition, and archived evidence end to end.
 
 ## Durable validation evidence
 
