@@ -96,11 +96,10 @@ to learn how the files fit together and download the complete example.
 {% include example_viewer.html %}
 """)
     nav = staging / "_includes/navbar.html"
-    text = nav.read_text().replace('href="https://globallightcommons.org/"', 'href="{{ \'/\' | relative_url }}"', 1)
-    text = text.replace("            Overview\n          </a>", """            Framework
-          </a>
-          <a class="glc-ecosystem-link" href="{{ '/docs/' | relative_url }}">Documentation</a>
-          <a class="glc-ecosystem-link" href="{{ '/viewer/' | relative_url }}">Viewer</a>""", 1)
+    # Preserve the established ecosystem labels, order, menus, and logo target.
+    # The existing Overview page now lives at /docs/ in the combined site.
+    text = nav.read_text().replace('href="{{ \'/\' | relative_url }}"',
+                                   'href="{{ \'/docs/\' | relative_url }}"', 1)
     nav.write_text(text)
 
 
