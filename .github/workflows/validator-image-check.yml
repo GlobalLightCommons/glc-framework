@@ -1,0 +1,64 @@
+name: Verify released validator image
+on:
+  pull_request:
+    paths: [".github/workflows/validate.yml", ".github/workflows/validator-image-check.yml", "validator/**"]
+  push:
+    branches: [main]
+    paths: [".github/workflows/validate.yml", ".github/workflows/validator-image-check.yml", "validator/**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        architecture: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - name: Read the reusable workflow's pinned image
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          workflow = Path('.github/workflows/validate.yml').read_text()
+          image = re.search(r'^      VALIDATOR_IMAGE_TAG: (ghcr\.io/globallightcommons/glc-validator@sha256:[0-9a-f]{64})$', workflow, re.M)
+          if not image:
+              raise SystemExit('Expected a digest-pinned GlobalLightCommons image')
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write(f'IMAGE_REF={image.group(1)}\n')
+          PY
+      - name: Pull publicly without registry credentials
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/anonymous-docker"
+          DOCKER_CONFIG="$RUNNER_TEMP/anonymous-docker" docker pull --platform "linux/$ARCHITECTURE" "$IMAGE_REF"
+      - name: Test the published validator
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+        run: |
+          docker run --rm --platform "linux/$ARCHITECTURE" \
+            -v "$PWD/validator/tests:/repo/tests:ro" -w /repo \
+            --entrypoint python "$IMAGE_REF" -m unittest discover -s tests -v
+      - name: Validate a schema 3.0.2 package with the container entrypoint
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/validator-output"
+          docker run --rm --platform "linux/$ARCHITECTURE" \
+            -v "$PWD/validator/tests/fixtures/schema-3.0.2/pass:/data:ro" \
+            -v "$RUNNER_TEMP/validator-output:/out" -w /data \
+            -e VALIDATION_JSON=/out/validation.json \
+            -e VALIDATION_MANIFEST=/out/validated-files-manifest.json \
+            -e VALIDATOR_IMAGE="$IMAGE_REF" \
+            "$IMAGE_REF" datapackage.json
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads((Path(os.environ['RUNNER_TEMP']) / 'validator-output/validation.json').read_text())
+          assert report['status'] == 'pass', report
+          assert report['validator_version'] == Path('validator/VERSION').read_text().strip(), report
+          assert report['validator_image'] == os.environ['IMAGE_REF'], report
+          PY

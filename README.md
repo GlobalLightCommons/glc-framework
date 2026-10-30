@@ -53,9 +53,9 @@ The published schema files retain their existing identities and historical conte
 
 ## Dataset validation
 
-The trusted reusable workflow remains at `.github/workflows/validate.yml` because GitHub requires reusable workflows at the repository root. It still checks out the **calling dataset repository**, not this monorepo, and uses the existing digest-pinned validator image during transition.
+The trusted reusable workflow remains at `.github/workflows/validate.yml` because GitHub requires reusable workflows at the repository root. It checks out the **calling dataset repository**, not this monorepo, and uses the public `ghcr.io/globallightcommons/glc-validator` image pinned by digest. Validator version 0.5.2 and the existing schema versions are unchanged.
 
-Existing dataset callers keep working against the original validator repository. The updated template in `validator/templates/github-actions/` targets `GlobalLightCommons/glc-framework` and requires the reviewed `framework-v0.1.0` tag to be published before callers switch. Pin callers to a reviewed commit SHA for production use.
+Existing dataset callers keep working against the original validator repository until individually migrated. The template in `validator/templates/github-actions/` targets `GlobalLightCommons/glc-framework` at `framework-v0.1.0`. Pin callers to that release's reviewed commit SHA for production use. The `Verify released validator image` workflow pulls the pinned image without credentials and tests both AMD64 and ARM64, including validation of a schema 3.0.2 fixture. A real dataset signer/archive pilot is a separate rollout step.
 
 ## Durable validation evidence
 
