@@ -4,6 +4,8 @@
 
 The draft assumes basic folder and spreadsheet/text-file handling and access to study records. It teaches GitHub and GLC concepts without requiring Git, JSON editing, a terminal, R, Python, or Docker. Cleanup instructions are tool-neutral; the choice of application-specific examples is open for review.
 
+Intended learning objectives frame the tutorial and connect each skill to an observable checkpoint. GitHub basics are introduced in context, with official external tutorials for the first repository, connecting a local working folder, and cloning an existing repository. Computing fundamentals and detailed application installation are outside scope.
+
 Render for review with an installed Quarto CLI (RStudio also bundles one):
 
 ```sh

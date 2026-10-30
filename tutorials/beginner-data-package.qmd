@@ -31,8 +31,13 @@ We assume that you:
 - have permission to prepare the data for the intended sharing arrangement.
 
 We **do not assume** that you know GitHub, Git, JSON, GLC terminology, Docker,
-Python, R, or a command-line interface. These are not interchangeable prerequisites:
-this route uses the GitHub website and the browser-based Metadata Builder.
+Python, R, or a command-line interface. We introduce the GitHub concepts needed
+for this workflow and link to external setup tutorials. The GLC instructions
+use the GitHub website and the browser-based Metadata Builder.
+
+Basic computer use is outside this tutorial's scope: it does not teach how to
+operate a computer, manage folders, install applications, or use a spreadsheet
+from scratch. If those tasks are unfamiliar, get help with them before starting.
 
 We do not assume that a folder full of files is already ready to share. You may
 need help from a study colleague to resolve unidentified participants, uncertain
@@ -61,6 +66,25 @@ the same whether you apply them with a spreadsheet or a script.
 
 The cleanup exercise is deliberately small. It is not itself a complete GLC
 package and does not supply the device and study metadata for your research.
+
+## Intended learning objectives
+
+By the end, you should be able to demonstrate the following:
+
+| Objective | How you check that you have achieved it |
+| --- | --- |
+| Distinguish a data package, metadata resource, dataset record, and measurement file | Identify each in the populated example and explain their links. |
+| Inspect source files and make justified cleanup decisions | Produce an inventory, a cleaning log, and an output whose changes you can account for. |
+| Describe the study, participants, devices, and variables using the builder | Export metadata with consistent IDs, units, timestamps, and file references. |
+| Assemble a complete GLC package | Locate every declared file at its exact path relative to `datapackage.json`. |
+| Distinguish local edits, commits, and changes published to GitHub | Identify the repository and commit on GitHub that contain the package you intend to validate. |
+| Run validation and use its results | Find the report, correct an error, rerun, and explain any remaining warnings. |
+| Request a registry listing through review | Prepare an entry and explain why a passing validation and an opened pull request do not themselves publish a listing. |
+
+For the cleanup exercise, use the supplied expected file to check your work.
+For GitHub setup skills, use the external tutorials below before applying them
+to the GLC package. For a real registry request, check the outcome after
+maintainer review; do not submit fictional practice data.
 
 ## Understand the destination
 
@@ -385,6 +409,41 @@ A **repository** is the online project holding your files. A **commit** is a
 recorded version of those files. A **branch** is a line of work; this guide uses
 `main`. A **workflow** is an instruction file that tells GitHub to run a task.
 
+### GitHub preparation and external tutorials
+
+If these concepts are new, work through GitHub's
+[Hello World tutorial](https://docs.github.com/en/get-started/using-github/hello-world)
+first. It introduces repositories, branches, commits, and pull requests using
+a small practice project. Return here when you can find your repository and
+identify a recorded change.
+
+“Linking a computer directory to GitHub” means establishing a local Git
+repository and its connection to an online repository. A folder of files, a ZIP
+download, and a cloned repository are different things. Saving a file locally
+does not automatically publish the change to GitHub.
+
+Use the external guide that matches your situation:
+
+| Situation | External guide | Check before returning |
+| --- | --- | --- |
+| You need a new project folder connected to GitHub | [Create and publish your first repository with GitHub Desktop](https://docs.github.com/en/desktop/overview/creating-your-first-repository-using-github-desktop) | You know which local folder belongs to the repository and can see a committed change on GitHub after publishing or pushing it. |
+| Your team already has the repository on GitHub | [Clone it to your computer with GitHub Desktop](https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-a-repository-from-github-to-github-desktop) | You can open the local working folder and identify its matching online repository. Downloading a ZIP does not establish this connection. |
+
+For an ordinary folder of prepared package files, a straightforward beginner
+route is to create or clone the intended repository using those guides, then
+copy the **contents** of the package into that working folder. Keep
+`datapackage.json` at its root and review the proposed changes before committing
+and publishing them. If a folder is already managed with Git, ask your team's
+maintainer how to use its existing connection rather than creating a second
+repository or replacing its history.
+
+The remaining GLC steps use the browser upload route for a small package;
+the connected-folder route is an alternative for ongoing work. Choose one
+working copy and keep track of which changes have reached GitHub. Detailed
+installation and Git setup belong to the linked guides.
+
+### Upload the complete package
+
 For the practice route, use only material approved for public sharing. Create
 an account at [GitHub](https://github.com/) if needed and complete its own setup.
 For a real study, use the repository and access arrangement agreed by your team.
@@ -540,5 +599,5 @@ evidence. It is separate from hosting or backing up your measurement data.
 3. Should an instructor provide an entirely fictional, complete study/device
    scenario for the packaging exercise, in addition to this cleanup exercise
    and the existing populated package example?
-4. Which representative novice users should pilot the instructions, including
-   the GitHub upload and pull-request steps, before public release?
+4. Do the learning objectives and checkpoints give readers enough evidence that
+   they are ready for each next step, especially publishing changes to GitHub?
