@@ -255,9 +255,10 @@ If you can edit the registry repository:
 5. Choose **Create a new branch for this commit and start a pull request**.
 6. Open the pull request against the registry's `main` branch.
 
-If GitHub does not allow you to edit the file, fork `globallightcommons/glc-registry`,
-edit `datasets.yml` in your fork, and open a pull request from that fork to
-`globallightcommons/glc-registry:main`.
+If GitHub does not allow you to edit the file, fork
+[`GlobalLightCommons/glc-framework`](https://github.com/GlobalLightCommons/glc-framework),
+edit `registry/datasets.yml` in your fork, and open a pull request from that
+fork to `GlobalLightCommons/glc-framework:main`.
 
 ### What happens after submission
 

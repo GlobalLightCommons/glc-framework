@@ -74,6 +74,8 @@ permalink: /
 description: Tools and documentation for Global Light Commons data packages
 ---
 <p class="tools-intro">Create, explore, and discover standardized light-exposure data packages.</p>
+<p>New to GLC? <a href="{{ '/docs/' | relative_url }}">Start with the overview</a> for a guide to the standard, metadata creation, validation, and sharing.</p>
+<p><a class="glc-action-link" href="{{ '/docs/validate/' | relative_url }}">Validate your data package</a></p>
 <div class="tools-grid">
   <article class="tool-card"><h2>Documentation</h2><p>Understand the GLC standard, resource schemas, and validation workflow.</p><a class="tool-card-link" href="{{ '/docs/' | relative_url }}">Read the documentation →</a></article>
   <article class="tool-card"><h2>Dataset viewer</h2><p>Explore a populated example package and its linked metadata and measurements.</p><a class="tool-card-link" href="{{ '/viewer/' | relative_url }}">Explore the example →</a></article>

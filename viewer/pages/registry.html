@@ -14,6 +14,20 @@ permalink: /registry/
   schema versions.
 </p>
 
+<details>
+  <summary>New here? How to read the validation results</summary>
+  <ul>
+    <li><strong>Pass:</strong> the verified report records a passing validation for the displayed commit and schema version. Warnings may still need review.</li>
+    <li><strong>Fail:</strong> the verified report records validation errors that need correction.</li>
+    <li><strong>Unverified:</strong> the registry could not verify the required validation evidence. This is not a finding that the measurements or package failed validation.</li>
+    <li><strong>Unknown:</strong> no result is available for that row; for example, a latest passing report may not exist.</li>
+    <li><strong>Repository unavailable:</strong> the registry could not access the repository.</li>
+  </ul>
+  <p><strong>Current</strong> refers to the configured branch's current commit. <strong>Latest pass</strong> refers to the available verified passing snapshot and can be older. Compare the commit links before using a result.</p>
+  <p>The schema version identifies the rules used for that validation. A result applies to the displayed commit and version, not to later changes, newer schema versions, or an independent assessment of scientific quality.</p>
+</details>
+<p>Want to list your own package? <a href="{{ '/validate/' | relative_url }}#registry-request">Validate it and request a registry listing</a>. A passing run does not add it automatically.</p>
+
 <p class="small">
   Registry data:
   <a href="https://registry.globallightcommons.org/registry.json"><code>registry.json</code></a>

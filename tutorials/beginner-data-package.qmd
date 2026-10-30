@@ -1,0 +1,544 @@
+---
+title: "From messy files to a GLC data package"
+subtitle: "Beginner tutorial — draft for audience and teaching review"
+format:
+  html:
+    toc: true
+    number-sections: true
+    embed-resources: true
+execute:
+  enabled: false
+---
+
+This tutorial takes you from inspecting measurement files to describing them,
+assembling a GLC 3.0.2 data package, checking it, and requesting a registry listing.
+You do not need to write code. You will learn the GitHub steps used to run validation.
+
+**Draft status:** the audience assumptions and teaching approach below need
+review before this becomes part of the public documentation. The small practice
+files are fictional. Do not request a real registry listing for the exercise.
+
+## Who is this for?
+
+### Proposed starting assumptions
+
+We assume that you:
+
+- understand the study that produced your files, or can ask someone who does;
+- can create folders, copy files, and open a spreadsheet or text file;
+- have access to study notes, participant codes, device documentation, and the
+  information needed to explain what each measurement means;
+- have permission to prepare the data for the intended sharing arrangement.
+
+We **do not assume** that you know GitHub, Git, JSON, GLC terminology, Docker,
+Python, R, or a command-line interface. These are not interchangeable prerequisites:
+this route uses the GitHub website and the browser-based Metadata Builder.
+
+We do not assume that a folder full of files is already ready to share. You may
+need help from a study colleague to resolve unidentified participants, uncertain
+units, clock problems, or missing device documentation. The builder cannot recover
+those facts from numbers alone.
+
+### What you will need by the relevant step
+
+| Stage | What you need | What you finish with |
+| --- | --- | --- |
+| Inspect and clean | A working copy of the files; a spreadsheet, text editor, or your usual data tool | Documented, consistently formatted measurement files |
+| Describe | Study records and device documentation; a modern browser | Exported GLC metadata and schemas |
+| Validate | A GitHub account and permission to write to the package repository | A validation report for an exact version of the package |
+| Request listing | A current passing run and permission to share the repository | A pull request for maintainer review |
+
+Quarto is an authoring tool for this tutorial. **Readers do not need Quarto** to
+follow it. This draft uses tool-neutral cleanup instructions: the decisions are
+the same whether you apply them with a spreadsheet or a script.
+
+### Choose a route
+
+- **Learning:** use the fictional cleanup files below, then inspect the existing
+  populated GLC example to learn packaging. These are two separate exercises.
+- **Preparing your study:** apply the same checks to copies of your own files,
+  and enter your actual study information in the builder.
+
+The cleanup exercise is deliberately small. It is not itself a complete GLC
+package and does not supply the device and study metadata for your research.
+
+## Understand the destination
+
+A **measurement file** contains observations. **Metadata** explain what was
+measured, by whom or what, when, and how. A **data package** brings the files and
+metadata together with a descriptor named `datapackage.json`.
+
+That descriptor is an index: it tells the validator where the metadata resources
+are. A **resource** is a table or JSON file containing one kind of metadata.
+JSON is a text format for structured information; the builder writes it for you.
+
+| Part | Question it answers |
+| --- | --- |
+| Study | What was done, who contributed, and what groups were studied? |
+| Participants | Which coded participants belong to which groups? |
+| Devices | Which physical devices collected the measurements? |
+| Device datasheets | What are the model's measurement channels and technical characteristics? |
+| Dataset records | Which files belong to a participant or non-participant-associated recording, and what do their columns mean? |
+| Optional participant characteristics | Which additional participant-level characteristics are supplied? |
+
+In ordinary conversation, “dataset” might mean your whole study. In GLC, one
+**dataset record** links a study to files for one participant, or to measurements
+without a participant association, such as environmental monitoring. One package
+can contain many records. A participant's light measurements and questionnaires
+can belong to one record, with separate file groups for their different structures.
+
+Start by opening the
+[populated example](https://globallightcommons.github.io/glc-framework/docs/example-package/).
+Download its ZIP, unzip it, and locate `datapackage.json` and the `data/` folder.
+Do not overwrite the example or treat its study information as your own.
+
+**Checkpoint:** you can explain the difference between the complete package,
+one dataset record, one measurement file, and the metadata describing it.
+
+## Preserve the originals and make an inventory
+
+Create a working folder outside the folder holding your originals:
+
+```text
+preparation/
+├── originals/             untouched copies of the source exports
+├── working/               files you are inspecting or cleaning
+├── notes/                 inventory, decisions, and cleaning log
+└── package/               only the files intended for the final package
+```
+
+Keep a separate backup of the originals. The folder names above organize your
+work; GLC does not require them. Do not upload the whole `preparation/` folder
+as your package.
+
+Create an inventory with one row per source file. Record:
+
+| Column | Example |
+| --- | --- |
+| Source filename | `P01 export.csv` |
+| What it contains | Wrist light readings |
+| Participant code | `P01` |
+| Physical device code | `D01` |
+| Time basis | Local wall-clock time, Europe/Berlin |
+| Measurement units | Photopic illuminance, lux |
+| Known issue | Decimal commas; export contains a duplicate row |
+| Planned output | `data/datasets/P01_light.csv` |
+
+Determine these facts from records and documentation. An unfamiliar column
+called `Light` is not enough to establish a calibrated quantity or its unit.
+Mark unresolved questions in your notes and resolve them before describing the
+file as if the answers were known.
+
+Check sharing readiness before using real files in the public GitHub route:
+remove direct identifiers from the sharing copy and keep any re-identification
+key outside the package. Review dates, free text, location, and device serial
+numbers as well as obvious name columns. Use your institution's process to decide
+what may be shared. This tutorial's public workflow is not a solution for
+restricted participant data.
+
+**Checkpoint:** every file has an identified purpose, participant association,
+device association where relevant, time basis, and known issues.
+
+## Practice: clean one small export
+
+Use [messy-light.csv](practice/messy-light.csv). Its companion
+[field notes](practice/field-notes.txt) establish the meaning of the columns.
+Read those notes before changing any values.
+
+The source export is:
+
+```csv
+Participant,Date,Clock,Light [lux],Device
+P01,15/01/2025,08:00:00,"12,5",D01
+P01,15/01/2025,08:01:00," 20,0 ",D01
+P01,15/01/2025,08:01:00," 20,0 ",D01
+P01,15/01/2025,08:02:00,NA,D01
+P01,15/01/2025,08:03:00,"8,0",D01
+```
+
+The notes say these are fictional photopic illuminance measurements in lux,
+recorded at one-minute intervals in Europe/Berlin. `NA` means missing, not zero.
+The identical repeated 08:01 row is a confirmed export duplication.
+
+### Inspect before transforming
+
+Open a copy using your tool's CSV import controls. Choose a comma delimiter and
+keep participant codes, dates, and clocks as text while inspecting them. Review
+the import preview: a quoted decimal comma must stay inside one cell.
+
+Do not double-click an unfamiliar CSV and assume the application's automatic
+conversions preserved everything. Watch for dates being swapped, leading zeroes
+being removed from IDs, or values being displayed as scientific notation.
+
+### Make explicit cleanup decisions
+
+1. **Use one header row.** Rename the measurement column to `illuminance_lx`.
+   This is a tutorial naming choice, not a GLC requirement. Original names can
+   be retained if their meaning is documented and metadata match exactly.
+2. **Normalize numbers.** Trim spaces and convert decimal commas to decimal
+   points in the numeric field only: `" 20,0 "` becomes `20.0`. Do not replace
+   every comma in a CSV: some commas separate columns.
+3. **Represent missing values.** Convert `NA` to an empty measurement cell
+   for this exercise. Do not fill it with `0`, interpolate it, or delete the
+   observation just to obtain a clean-looking file.
+4. **Remove the confirmed export duplicate.** Keep one copy of the identical
+   08:01 row and record the decision. Repeated timestamps alone do not prove
+   that rows are duplicates in real data.
+5. **Make the timestamp unambiguous.** Combine date and clock into
+   `2025-01-15 08:00:00`, using the documented day/month order. Keep local time
+   and describe its timezone as `Europe/Berlin`. Formatting a timestamp is
+   different from converting its timezone.
+6. **Keep the participant and device mapping.** This output contains only P01
+   and D01. Record that association in the inventory and later in GLC metadata.
+   A file mixing participants must first be split or otherwise reorganized to
+   match the participant association of the dataset records.
+7. **Export a separate UTF-8 CSV.** Save to `working/P01_light.csv`. Export the
+   actual values, then inspect the resulting text file, rather than relying
+   on how cells look in the spreadsheet.
+
+For a real recording, check daylight-saving transitions, clock corrections,
+missing intervals, and device changes. Local timestamps repeated at a clock
+change cannot be resolved by sorting or guessing. Recover the time basis from
+source records and document any transformation.
+
+### Compare your output
+
+Expected output:
+
+```csv
+timestamp,illuminance_lx
+2025-01-15 08:00:00,12.5
+2025-01-15 08:01:00,20.0
+2025-01-15 08:02:00,
+2025-01-15 08:03:00,8.0
+```
+
+Compare with [the expected CSV](practice/P01_light.csv). There are four
+observations, one missing illuminance value, and no confirmed export duplicate.
+The surviving non-missing measurements have not changed numerically.
+
+Use [the cleaning log](practice/cleaning-log.csv) as a model for recording the
+source, output, transformation, and reason. Use
+[the data dictionary](practice/data-dictionary.csv) to record each column's
+meaning, type, unit, and missing-value convention.
+
+**Checkpoint:** reopening the exported file preserves its header, four rows,
+timestamps, values, and empty cell. You can account for the one removed row.
+
+## Apply the checks to your own files
+
+Work one file type at a time. Do not combine unlike files just to reduce the
+file count. Check:
+
+- **IDs:** spelling and case are consistent across files and metadata;
+- **rows:** each row has the expected number of columns; stray export headings
+  or footer notes are handled explicitly;
+- **variables:** every column has a meaning, appropriate type, and unit where
+  needed; categorical values have documented levels;
+- **time:** timestamp source, format, timezone, and sampling arrangement are
+  understood; actual gaps remain visible;
+- **device changes:** a replacement physical device has its own ID and the
+  affected files have the right link;
+- **transformations:** scaling, calibration, exclusions, and missing-value
+  handling are documented and scientifically justified;
+- **paths:** filenames are stable and can be reproduced exactly, including case.
+
+Cleaning does not necessarily mean resampling, averaging, removing outliers,
+or converting every source file into a new form. Those are study-specific
+analytical decisions. A formatting change and an analytical transformation
+should be distinguishable in your log.
+
+If many files need the same transformation, have a colleague help create a
+repeatable script rather than manually editing hundreds of files. Retain the
+script and its version with your preparation records.
+
+**Checkpoint:** the files are understandable and internally consistent, and
+unresolved scientific questions are recorded rather than hidden.
+
+## Create the metadata with the builder
+
+Open the [Metadata Builder](https://globallightcommons.github.io/glc-framework/builder/).
+The steps below describe its existing sequence. Required fields are marked
+with an asterisk; use the field help and actual study documentation to complete
+them. The short tables below explain key links, not every required field.
+
+### Project setup
+
+Select **Get started**, choose schema **3.0.2**, and provide a package name
+and title. Use a descriptive package name, such as `your-study-light-package`.
+Save a builder draft as you work. Browser autosave is local to that browser and
+device; it is not a substitute for an exported draft or a backup.
+
+### Study and contributors
+
+Describe the purpose, sample, study design, groups, and contributors using your
+actual records. “Study sample” describes the overall sample; group descriptions
+explain the individual groups. Neither is a structured summary-statistics table.
+
+Choose a stable Study ID. Do not change IDs casually after linking records.
+The builder fills study-to-dataset references from the dataset records you add.
+
+### Participants
+
+Add coded participant IDs and group membership. Use the exact same codes as in
+your inventory. Supply optional participant characteristics only when you intend
+to include them and can describe them accurately.
+
+A participant ID is a code within this package, not a row number automatically
+assigned by a spreadsheet.
+
+### Devices and datasheets
+
+Distinguish the **physical device** from its **model-level datasheet**. Two
+physical devices of the same model can refer to one datasheet. Record a device
+replacement as separate physical devices, not as a silent change to one record.
+
+Use documented measurement channels, units, model information, and calibration
+information. Do not copy technical specifications from an example merely to
+satisfy a required field. Ask the device or study expert if information is missing.
+
+### Dataset records and file groups
+
+For a participant's recording, add a dataset record, select the Study ID,
+set **Participant associated** to **Yes**, and select the participant.
+Use **No** only for measurements without participant-associated data, such as
+purely environmental monitoring.
+
+A **file group** describes files with shared structure and acquisition metadata.
+Add different structures as separate groups. Questionnaires, diaries, and wear
+logs use their own groups rather than being combined with sensor modalities.
+
+For a cleaned file like the exercise, the important settings would be:
+
+| Builder item | Exercise meaning |
+| --- | --- |
+| Dataset ID | A stable record ID, for example `DS_P01` |
+| Participant | `P01` |
+| Dataset and file timezone | `Europe/Berlin` |
+| Modality | Light |
+| Device | The physical device linked to this file, `D01` in the exercise |
+| Temporal resolution | Fixed interval, value `60`, unit `second` |
+| Format / encoding / header row | `csv` / `UTF-8` / `1` |
+| File role | Primary, if this is the principal measurement file |
+| Data state / preprocessing | Processed; describe the cleanup actually applied |
+| Timestamp source | Column `timestamp`, using `YYYY-MM-DD HH:mm:ss` |
+| Measurement variable | Exact column name `illuminance_lx`, numeric, unit `lx`, photopic illuminance |
+
+Also complete collection instructions, device placement, dataset location, and
+other required fields from the study records. These facts are not supplied by the
+cleanup CSV. The exercise does not constitute a filled-out real-study package.
+
+When selecting a file, inspect the detected headers and variable descriptions.
+Check every column, not just the main light variable. Keep the exact filenames
+and paths shown for the group; record where you must copy the files after export.
+
+**Checkpoint:** the study, participants, devices, and dataset records link to
+one another without spelling mismatches, and every measurement column is described.
+
+## Export and assemble the complete package
+
+Export the metadata package and unzip it into `package/`. The builder exports
+descriptions and schemas. It does not retain the measurement-file contents you
+selected in the browser, so you must add those files to the exported package.
+
+A builder-exported package typically looks like:
+
+```text
+package/
+├── datapackage.json
+├── README.txt
+├── schemas/
+│   └── 3.0.2/
+└── data/
+    ├── study.json
+    ├── participants.csv
+    ├── devices.json
+    ├── device_datasheet.json
+    ├── datasets.json
+    └── datasets/
+        └── P01_light.csv
+```
+
+Optional resources may add files. The populated example uses some different
+filenames: **the paths declared in your descriptor and dataset metadata are the
+authority**, not the exact tree printed in this tutorial.
+
+Copy each measurement file into the declared location. A path such as
+`data/datasets/P01_light.csv` starts at the package root, the folder containing
+`datapackage.json`. It is not an absolute path on your own computer. Compare the
+paths with `data/datasets.json`, including capitalization and extensions.
+
+Keep preparation originals, participant re-identification keys, unrelated exports,
+and private notes outside the package intended for public sharing.
+
+Write a README describing the study, package contents, column conventions,
+preprocessing, known gaps, intended reuse, and applicable sharing/license
+information. Metadata plus a useful README help readers; passing validation
+alone will not explain every scientific decision.
+
+**Checkpoint:** opening the package root shows `datapackage.json` immediately,
+and every referenced metadata and measurement file exists at the declared path.
+
+## Put the package on GitHub
+
+A **repository** is the online project holding your files. A **commit** is a
+recorded version of those files. A **branch** is a line of work; this guide uses
+`main`. A **workflow** is an instruction file that tells GitHub to run a task.
+
+For the practice route, use only material approved for public sharing. Create
+an account at [GitHub](https://github.com/) if needed and complete its own setup.
+For a real study, use the repository and access arrangement agreed by your team.
+
+1. Create a repository or open the study repository you are allowed to edit.
+2. Use **Add file → Upload files** to upload the **contents** of `package/`,
+   including its subfolders. Do not upload the ZIP as the package.
+3. Enter a short description of the change and select **Commit changes**.
+4. Check the repository's default branch is `main`, which the supplied template
+   uses for automatic validation.
+5. Open `datapackage.json` in the repository and confirm it is at the root.
+   If you have to open an extra `package/` folder first, the upload is nested
+   one level too deeply for the supplied workflow.
+
+The browser upload route suits small packages. Large files or many files may
+require a different supported GitHub upload arrangement. Ask your maintainer
+before splitting, deleting, or truncating scientific data to fit an upload limit.
+Do not assume a pointer file or an external link will be fetched as measurement
+content by the validator.
+
+**Checkpoint:** the online file tree matches the complete local package, and
+`datapackage.json` is at the repository root.
+
+## Add and run validation
+
+The [validation guide](https://globallightcommons.github.io/glc-framework/docs/validate/)
+is the maintained reference for the workflow and report files.
+
+1. Open the [workflow template](https://github.com/GlobalLightCommons/glc-framework/blob/main/validator/templates/github-actions/validate-glc-dataset.yml).
+2. In your package repository, choose **Add file → Create new file**.
+3. Name it `.github/workflows/validate-glc-dataset.yml`.
+4. Copy the complete template into the file and commit it. Keep the permissions
+   and reusable-workflow reference intact.
+5. Open **Actions → Validate GLC Dataset** and select the run for your commit.
+   To start a run manually, use **Run workflow** and select the intended branch.
+6. Wait for it to finish. Open the run summary and download the
+   **validation-report** artifact, then unzip it.
+
+If Actions is unavailable or the organization blocks a required action, ask the
+repository maintainer to inspect its policy. A permissions error is not an error
+in your light measurements. If there is no validation artifact, inspect the failed
+job's logs rather than assuming a report exists.
+
+You do not need to install Python or Docker for this GitHub route.
+
+## Read the report, correct errors, and repeat
+
+Start with `validation.log`. Use `validation.json` for the structured result.
+`validated-files-manifest.json` identifies the checked file contents; it is not
+the primary explanation of errors.
+
+| Symptom | What to check first |
+| --- | --- |
+| Referenced file missing | Declared path, capitalization, upload, and nested package folders |
+| Required field missing | The named field in the named metadata resource; do not invent a value |
+| Unknown participant or device reference | IDs and links across resources |
+| Header or column mismatch | The actual CSV header and exact variable names in metadata |
+| Numeric/type error | Decimal convention, stray text, and the chosen variable type |
+| Timestamp error | Date order, timestamp source/format, timezone, and exported values |
+| Missing unit | The documented measurement quantity and schema-supported unit |
+| Workflow fails before validation | Actions/job logs, permissions, or service failure |
+
+An **error** prevents a pass. A **warning** allows a pass but still deserves
+review. A real missing measurement may produce a warning; changing it to zero
+just to silence a warning would misrepresent the data.
+
+Correct the source of the problem. If metadata are wrong, edit them in your
+saved builder project and re-export carefully. If measurements are wrong, repeat
+the documented cleanup from the originals rather than making an unexplained edit.
+Keep the final metadata and files together.
+
+Commit the corrected package and inspect the new validation run. A passing report
+for yesterday's commit does not validate today's changed files. A passing result
+checks supported structural and consistency rules; it does not establish that
+calibration, scientific interpretation, privacy review, or the research itself
+are correct.
+
+**Checkpoint:** the current `main` commit has a passing trusted validation, and
+you have reviewed its warnings and retained your preparation records.
+
+## Request a registry listing
+
+Validation and registry admission are separate steps. A successful run does not
+automatically add your repository to the registry. A maintainer reviews each request.
+
+Only request a listing for a genuine package intended for the registry. Do not
+submit this fictional practice exercise.
+
+1. Check your dataset repository's current `main` commit has a passing run.
+2. Open [registry/datasets.yml](https://github.com/GlobalLightCommons/glc-framework/blob/main/registry/datasets.yml).
+3. Add an entry below the existing `datasets:` list, keeping the indentation:
+
+```yaml
+  - id: your-study-dataset
+    repo: your-github-owner/your-package-repository
+    branch: main
+```
+
+4. Replace both placeholders with the actual unique entry ID and repository.
+   Leave existing entries in place. Do not type in a pass status or validation date.
+5. Propose the change on a **new branch**, then open a **pull request** against
+   `GlobalLightCommons/glc-framework:main`. A pull request asks maintainers to
+   review a proposed change; it does not publish it immediately.
+6. If you cannot edit directly, **fork** `GlobalLightCommons/glc-framework`
+   (create your own GitHub copy), edit `registry/datasets.yml` in that fork,
+   and open the pull request back to the original repository's `main` branch.
+7. Include a link to the dataset repository and current passing workflow run,
+   the schema version, a brief description, and notes on any warnings.
+8. Read the automated checks and maintainer comments. Resolve requested changes.
+   Keep validation current if you change the dataset while the request is reviewed.
+
+After a maintainer merges the registry change and publication finishes, open
+[the registry](https://globallightcommons.github.io/glc-framework/registry/)
+and inspect your entry's commit, schema version, and status.
+
+**Current** refers to the configured branch's current commit. **Latest pass**
+may refer to an older passing snapshot. **Unverified** means the required evidence
+could not be verified; it does not itself mean the package failed validation.
+Ask maintainers to investigate an unexpected verification state rather than
+manually changing the displayed status.
+
+**Checkpoint:** the entry is visible after review and deployment, and its result
+corresponds to the intended commit and schema version.
+
+## Maintain the package after listing
+
+When you change files or metadata, commit them and review the new validation.
+Preserve the originals and transformation record, and explain important changes
+to users in your README. Review schema-version upgrades deliberately rather than
+assuming that an earlier pass demonstrates conformance to a newer schema.
+
+The registry's durable evidence archive preserves signed reports and supporting
+evidence. It is separate from hosting or backing up your measurement data.
+
+## Final review checklist
+
+- Original files and a separate backup are preserved.
+- Every cleanup decision is recorded and can be explained.
+- Participant, study, and device IDs match across resources.
+- Column names, units, time basis, gaps, and transformations are documented.
+- All declared files are present at the exact relative paths.
+- The shared copy has been reviewed for its intended access arrangement.
+- The package README explains how to interpret and reuse it.
+- The current commit has a passing validation and reviewed warnings.
+- A registry request has been reviewed and merged before claiming a listing.
+
+## Questions to settle before publishing this tutorial
+
+1. Do the proposed starting assumptions match the intended users, particularly
+   basic file handling and study/device knowledge?
+2. Should one specific spreadsheet application be illustrated, or should the
+   main route remain tool-neutral with optional R/Python examples?
+3. Should an instructor provide an entirely fictional, complete study/device
+   scenario for the packaging exercise, in addition to this cleanup exercise
+   and the existing populated package example?
+4. Which representative novice users should pilot the instructions, including
+   the GitHub upload and pull-request steps, before public release?
