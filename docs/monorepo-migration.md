@@ -1,5 +1,7 @@
 # Monorepo migration record
 
+Current status (2026-10-30): all three sites publish monorepo source through their existing hosting repositories, and all nine registered dataset validation workflows now use the pinned monorepo release. See the [dataset migration record](dataset-validation-migration.md). The staged rollout below records the original plan; old hosting endpoints still need a separate migration.
+
 Prepared on 22 October 2026 for `GlobalLightCommons/glc-framework`.
 
 ## Scope and original sources
