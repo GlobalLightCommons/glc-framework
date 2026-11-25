@@ -29,12 +29,13 @@ docker build -t glc-validator validator
 
 Pull requests run **Test proposed validator image** on AMD64 and ARM64. It
 builds the proposed code into a temporary local image without publishing,
-runs the image's bundled tests, and checks the normal entrypoint with complete
+runs the matching branch's tests, and checks the normal entrypoint with complete
 3.0.2 and 3.1.0 packages and a metadata-only 3.1.0 package.
 
 **Verify released validator image** is separate. It checks the reusable
-workflow's exact published digest with the tests and fixtures bundled in that
-release, rather than injecting a newer branch's tests. It runs when the pin or
+workflow's exact published digest with a stable 3.0.2 example package and checks
+the version embedded in the image, without injecting a newer branch's unit tests.
+It runs when the pin or
 release-check workflow changes and can be dispatched with a candidate release
 digest and expected version before updating the workflow pin.
 

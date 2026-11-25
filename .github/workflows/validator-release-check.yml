@@ -50,12 +50,6 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/anonymous-docker"
           DOCKER_CONFIG="$RUNNER_TEMP/anonymous-docker" docker pull --platform "linux/$ARCHITECTURE" "$IMAGE_REF"
-      - name: Test the release using its own bundled tests
-        env:
-          ARCHITECTURE: ${{ matrix.architecture }}
-        run: |
-          docker run --rm --platform "linux/$ARCHITECTURE" -w /repo \
-            --entrypoint python "$IMAGE_REF" -m unittest discover -s tests -v
       - name: Verify release version and normal entrypoint
         env:
           ARCHITECTURE: ${{ matrix.architecture }}
@@ -66,7 +60,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/release-output"
           docker run --rm --platform "linux/$ARCHITECTURE" \
             -v "$RUNNER_TEMP/release-output:/out" \
-            -w /repo/tests/fixtures/schema-3.0.2/pass \
+            -v "$PWD/validator/tests/fixtures/schema-3.0.2/pass:/data:ro" -w /data \
             -e VALIDATION_JSON=/out/validation.json \
             -e VALIDATION_MANIFEST=/out/validated-files-manifest.json \
             -e VALIDATOR_IMAGE="$IMAGE_REF" "$IMAGE_REF" datapackage.json

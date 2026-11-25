@@ -31,7 +31,8 @@ jobs:
           ARCHITECTURE: ${{ matrix.architecture }}
         run: |
           docker run --rm --platform "linux/$ARCHITECTURE" \
-            -w /repo --entrypoint python glc-validator:proposed \
+            -v "$PWD/validator/tests:/repo/tests:ro" -w /repo \
+            --entrypoint python glc-validator:proposed \
             -m unittest discover -s tests -v
       - name: Validate complete 3.0.2 and 3.1.0 packages with the container entrypoint
         env:
@@ -42,7 +43,7 @@ jobs:
             mkdir -p "$RUNNER_TEMP/validator-output/$schema"
             docker run --rm --platform "linux/$ARCHITECTURE" \
               -v "$RUNNER_TEMP/validator-output/$schema:/out" \
-              -w "/repo/tests/fixtures/schema-$schema/pass" \
+              -v "$PWD/validator/tests/fixtures/schema-$schema/pass:/data:ro" -w /data \
               -e VALIDATION_JSON=/out/validation.json \
               -e VALIDATION_MANIFEST=/out/validated-files-manifest.json \
               -e VALIDATOR_IMAGE=glc-validator:proposed \
