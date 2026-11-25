@@ -54,8 +54,7 @@ levels or a metadata-only flag to their metadata. An orange **Metadata only**
 registry badge means recording contents were not assessed, not that the
 metadata failed validation.
 
-These submission rules apply to schema 3.1.0 with validator 0.6.0; the production
-workflow must use that validator before metadata-only submissions can be accepted.
+These submission rules apply to schema 3.1.0 with validator 0.6.0 or later.
 
 </details>
 

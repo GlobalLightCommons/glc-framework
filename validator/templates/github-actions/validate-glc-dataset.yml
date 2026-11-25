@@ -14,6 +14,6 @@ permissions:
 
 jobs:
   validate:
-    uses: GlobalLightCommons/glc-framework/.github/workflows/validate.yml@framework-v0.1.0
+    uses: GlobalLightCommons/glc-framework/.github/workflows/validate.yml@validator-v0.6.0
     with:
       datapackage: datapackage.json

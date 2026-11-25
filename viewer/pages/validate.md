@@ -108,9 +108,8 @@ If some records supply recordings and others do not, all metadata are still
 checked and every recording actually listed must be supplied. Recording results
 cover listed files only, not the entire study's collected data.
 
-**Rollout:** this requires schema 3.1.0 and validator 0.6.0 in the trusted
-workflow. Until the new image is published and pinned, production validation
-continues to use the previous rules.
+These rules require schema 3.1.0 and validator 0.6.0 or later. The workflow
+template below selects the validator 0.6.0 workflow release.
 
 Folders below `data/datasets/` may use descriptive names such as `light/`,
 `questionnaires/` or `longitudinal-reports/`. These are organizational
@@ -213,9 +212,10 @@ summary statistics, confirm preprocessing or calibration, verify usable
 recording duration or contiguity, or compare declared sampling intervals with
 observed timestamp spacing. Timestamp checks test declared formats, not spacing.
 
-These changes require the new validator image to be published and the reusable
-workflow's pinned digest to be updated. Until then, the deployed workflow uses
-the existing validator; source/schema changes alone do not deploy this behaviour.
+The workflow template selects validator 0.6.0 using a versioned workflow release
+and an immutable container digest. Existing repositories pinned to older workflow
+releases must update their workflow reference to use the new validator. Updating
+the validator does not change a package's declared schema version.
 
 The downloadable **validation-report** artifact is the main place to inspect
 the results:
@@ -358,10 +358,6 @@ For a metadata-only request, use the [metadata-only pull-request template](https
 selecting the branch or fork containing your dataset-list change. If a request
 is already open, copy the [template contents](https://github.com/GlobalLightCommons/glc-framework/blob/main/.github/PULL_REQUEST_TEMPLATE/metadata-only-inclusion.md)
 into its description. You can also copy the template below. No separate form is required.
-
-**Local preview:** the template has been created with this update, but the GitHub
-links become available only after it is merged into the repository's default
-branch. The copy below can be reviewed now.
 
 <details markdown="1">
 <summary>Metadata-only justification template — copy into the PR description</summary>
