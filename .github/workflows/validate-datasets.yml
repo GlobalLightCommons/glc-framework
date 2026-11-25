@@ -1,14 +1,18 @@
 name: Verify registry changes
 on:
   pull_request:
-    paths: ["registry/datasets.yml", "registry/scripts/**", ".github/workflows/validate.yml", ".github/workflows/validate-datasets.yml"]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
 permissions:
   contents: read
   actions: read
   attestations: read
+concurrency:
+  group: registry-inclusion-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   verify:
+    name: Registry inclusion checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

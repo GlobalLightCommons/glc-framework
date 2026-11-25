@@ -10,7 +10,7 @@ This repository contains the GLC metadata validator for GLC Frictionless data pa
 - `Dockerfile`: a containerized runtime for running validation consistently in local development and CI.
 - `requirements.txt`: pinned Python dependencies used by the validator.
 - `VERSION`: the validator release version.
-- `schemas/1.0.0/`, `schemas/2.0.0/`, `schemas/3.0.0/`, `schemas/3.0.1/`, and `schemas/3.0.2/`: supported GLC schema bundles, including the Frictionless data package profile and JSON/Table Schema files for core resources.
+- `schemas/1.0.0/`, `schemas/2.0.0/`, `schemas/3.0.0/`, `schemas/3.0.1/`, `schemas/3.0.2/`, and `schemas/3.1.0/`: supported GLC schema bundles, including the Frictionless data package profile and JSON/Table Schema files for core resources.
 - `docs/schema-3.0.1-development.md`: the corrective-release checklist for coordinating schema, validator, builder, viewer, and dataset changes.
 - `.github/workflows/validate.yml`: a reusable trusted validation workflow that runs the validator container, uploads reports, and attests the validation outputs.
 - `templates/github-actions/validate-glc-dataset.yml`: a ready-to-copy caller workflow for dataset repositories.
@@ -125,7 +125,7 @@ docker run --rm \
 
 ## Expected package shape
 
-The metadata repository should include a `datapackage.json` with a supported `schema_version`, currently `1.0.0`, `2.0.0`, `3.0.0`, `3.0.1`, or `3.0.2`. New packages should use `3.0.2`; earlier versions remain supported for reproducibility of packages validated against published releases. The package must declare the required core resources using the canonical resource names:
+The metadata repository should include a `datapackage.json` with a supported `schema_version`, currently `1.0.0`, `2.0.0`, `3.0.0`, `3.0.1`, `3.0.2`, or `3.1.0`. New packages should use `3.1.0`; earlier versions remain supported for reproducibility of packages validated against published releases. The package must declare the required core resources using the canonical resource names:
 
 - `study`
 - `participants`
@@ -138,6 +138,42 @@ The optional canonical resource is:
 - `participant_characteristics`
 
 Additional resources may be included. If an additional tabular resource declares a Table Schema, or an additional JSON resource declares a local `jsonSchema`, the validator will validate it. Remote schemas are not supported by the validator container.
+For 3.1.0, an explicitly declared additional tabular or JSON entity resource
+must supply its applicable schema; omission is a metadata error. Unlisted
+repository files are not package resources and are not scanned for validation.
+
+## Binary validation scope (3.1.0; validator 0.6.0)
+
+Omit `dataset_file` from **all** dataset records for metadata-only validation.
+An empty `dataset_file: []` has the same meaning. A non-empty list must contain
+complete file groups and requires `dataset_variable_terms`.
+Every declared recording must be present. Dataset records without recording
+lists can coexist with records listing files; data checks cover listed files
+only, not the entire study's collected data. Missing files are errors even when all declared
+recordings are absent. Metadata errors prevent recording checks; mere presence
+does not establish readability or validity. Older schemas retain their
+published required fields.
+
+Generated `validation.json` includes `validation_scope` and `coverage`, including
+metadata/data outcomes, declared/present file counts and individual recording
+outcomes. `validation.html` renders these alongside errors, warnings and file
+fingerprints. The scope is derived, never written back into package metadata.
+Warnings are grouped by type with instance counts; empty-value notices remain
+included in both report and registry totals. An instance is one emitted warning
+message, not one missing cell or one affected participant.
+The file manifest hashes available declared package files regardless of check
+outcome; a hash is evidence of bytes, not successful content validation.
+Unrelated repository files are outside recording-validation scope.
+
+The scope label `metadata_and_data` describes the intended submission scope;
+only `coverage.recordings: pass` establishes successful recording checks.
+`not_determined` means invalid metadata prevented determining scope.
+Declared sampling intervals, usable duration and summary statistics are not
+recalculated or compared with recording contents.
+
+The deployed reusable workflow remains pinned to the existing image until
+0.6.0 is published and its digest is reviewed and updated. Build the local
+container to exercise these changes before publication.
 
 ## Configuration
 

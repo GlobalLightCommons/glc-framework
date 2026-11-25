@@ -59,6 +59,9 @@ class ValidationArchiveTests(unittest.TestCase):
         dataset = json.loads((output / "registry.json").read_text())["datasets"][0]
         self.assertTrue(dataset["attestation_verified"])
         self.assertEqual(dataset["current_status"], "pass")
+        self.assertEqual(dataset["current"]["schema_version"], "3.0.2")
+        self.assertEqual(dataset["current"]["schema_lifecycle"], "legacy")
+        self.assertTrue(dataset["current"]["upgrade_recommended"])
         self.assertEqual(dataset["current"]["verification_source"], "archive")
         self.assertEqual(dataset["fetch_errors"], [])
 

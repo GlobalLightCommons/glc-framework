@@ -24,9 +24,9 @@ Resource | Purpose
 `device_datasheets` | Model-level channels, calibration, and measurement characteristics.
 `participant_characteristics` | Optional participant-level characteristics and derived phenotypes.
 
-## GLC 3.0.2
+## GLC 3.1.0
 
-This site documents GLC schema version **3.0.2**. The schema bundle is sourced
+This site documents GLC schema version **3.1.0**. The schema bundle is sourced
 from the canonical
 [GLC metadata validator](https://github.com/GlobalLightCommons/glc-framework/tree/main/validator),
 which also performs cross-resource, file-header, type, timestamp, and
@@ -58,4 +58,4 @@ For the underlying metadata recommendations:
 
 The original Frictionless documentation implementation was informed by
 [Camtrap DP](https://camtrap-dp.tdwg.org); no Camtrap schema or example content
-is used by GLC 3.0.2.
+is used by GLC 3.1.0.

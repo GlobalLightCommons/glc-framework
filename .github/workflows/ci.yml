@@ -21,7 +21,13 @@ jobs:
           node --check datetime-metadata.js
           node tests/datetime-metadata.test.js
           node tests/schema-ui-consistency.test.js
+          node tests/summary-statistics.test.js
+          node tests/dataset-recording.test.js
+          node tests/metadata-only.test.js
+          node tests/schema-links.test.js
       - run: python3 ../scripts/check_schema_copies.py
+      - run: node tests/registry-coverage.test.js
+        working-directory: viewer
   python:
     runs-on: ubuntu-latest
     strategy:

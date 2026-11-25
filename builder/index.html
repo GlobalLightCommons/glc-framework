@@ -85,11 +85,11 @@
           <a
             id="active-schema-pill"
             class="schema-pill schema-pill-current"
-            href="https://github.com/GlobalLightCommons/glc-framework/blob/main/validator/schemas/3.0.2/glc-dp-profile.json"
+            href="https://github.com/GlobalLightCommons/glc-framework/blob/main/validator/schemas/3.1.0/glc-dp-profile.json"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Schema 3.0.2
+            Schema 3.1.0
           </a>
         </div>
       </section>
@@ -218,7 +218,7 @@
 ├── datapackage.json
 ├── README.txt
 ├── schemas/
-│   └── 3.0.2/
+│   └── 3.1.0/
 │       ├── glc-dp-profile.json
 │       └── … resource schemas
 └── data/
@@ -277,7 +277,7 @@
                 <label>
                   Schema version <span class="required">*</span>
                   <select id="schema-version" name="schema-version" required>
-                    <option value="3.0.2" selected>3.0.2</option>
+                    <option value="3.1.0" selected>3.1.0</option>
                   </select>
                 </label>
                 <label>
@@ -402,6 +402,15 @@
               <div class="table-builder">
                 <div id="study-groups-list"></div>
                 <button type="button" class="secondary-button" id="add-study-group">Add study group</button>
+              </div>
+
+              <div class="subsection-heading">
+                <h3>Summary statistics</h3>
+                <p>Optional aggregate values for the whole study or a named study group. Enter one statistic per row; describe weighting and valid-data rules in the aggregation method.</p>
+              </div>
+              <div class="table-builder">
+                <div id="summary-statistics-list"></div>
+                <button type="button" class="secondary-button" id="add-summary-statistic">Add summary statistic</button>
               </div>
 
               <div class="subsection-heading" id="study-contributors">
@@ -720,6 +729,16 @@
                   Dataset timezone <span class="required">*</span>
                   <input id="dataset-timezone" name="dataset-timezone" type="text" list="timezone-options" placeholder="Example: Europe/Berlin" required />
                 </label>
+                <label>Recording duration (optional)
+                  <input id="recording-duration" type="number" min="0" step="any" placeholder="Example: 4" />
+                </label>
+                <label>Recording duration unit
+                  <select id="recording-duration-unit"><option value="">Not specified</option><option value="second">Second</option><option value="minute">Minute</option><option value="hour">Hour</option><option value="day">Day</option><option value="week">Week</option></select>
+                </label>
+                <label>Recording contiguity
+                  <select id="recording-contiguity"><option value="">Not specified</option><option value="contiguous">Contiguous</option><option value="noncontiguous">Noncontiguous</option></select>
+                </label>
+                <p class="hint">Supply duration, unit, and contiguity together or omit all three. Count cumulative usable data, excluding gaps and invalid recordings. Two usable two-week seasonal sessions equal 4 weeks, noncontiguous. Ordinary missing samples within a session do not break contiguity. Explain session timing in the file group description, or the study short description when shared across the study.</p>
                 <label>
                   Dataset location: latitude <span class="required">*</span>
                   <input id="latitude" name="latitude" type="number" step="any" placeholder="Example: 48.5216" required />
@@ -730,11 +749,15 @@
                 </label>
               </div>
 
+              <p class="hint"><strong>GLC prioritises openly shared recordings.</strong> Metadata-only packages are accepted where ethical, consent-related or legal constraints prevent public sharing. They support study discovery but do not provide openly reusable recordings. The registry labels them <strong>Metadata only</strong>; only metadata are validated, and registry inclusion requires maintainer review.</p>
+              <label><input id="include-recordings" type="checkbox" checked /> Include recording files for this dataset</label>
+              <p class="hint">Turn this off if you are supplying only metadata for this dataset. When on, the exported metadata list the files below; add every listed file to the package at its specified path. The downloaded zip contains metadata, not the original recordings. Turning this off keeps your file-group edits in the draft but leaves them out of exported metadata.</p>
+              <div id="recording-fields">
               <div class="section-heading compact-heading">
                 <span>5a</span>
                 <div>
                   <h2 title="A file group is one or more same-structure files within the active dataset record.">
-                    Dataset file assistant <span class="help-marker" title="Use file groups for same-context files with the same structure. In schema 3.0.2, identify whether each group has a primary or supporting role.">?</span>
+                    Dataset file assistant <span class="help-marker" title="Use file groups for same-context files with the same structure. In schema 3.1.0, identify whether each group has a primary or supporting role.">?</span>
                   </h2>
                   <p>Each file group describes one set of same-structure files for this participant.</p>
                 </div>
@@ -993,6 +1016,7 @@
               <div id="validation-summary" class="validation-summary">Select a file to detect columns.</div>
               <div id="variables-table" class="variables-table" aria-live="polite"></div>
 
+              </div>
               <section id="dataset-template-save-tools" class="template-tools" hidden>
                 <div class="subsection-heading">
                   <h3>Save this dataset structure as a template</h3>

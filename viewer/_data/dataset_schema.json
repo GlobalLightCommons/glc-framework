@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/tscnlab/glc-metadata-validator/main/schemas/3.0.2/dataset.schema.json",
-  "version": "3.0.2",
+  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.1.0/dataset.schema.json",
+  "version": "3.1.0",
   "title": "Dataset Schema",
   "type": "object",
   "additionalProperties": false,
@@ -10,7 +10,7 @@
       "type": "string",
       "description": "Version of the metadata schema used by this dataset",
       "examples": [
-        "3.0.2"
+        "3.1.0"
       ]
     },
     "dataset_internal_id": {
@@ -121,8 +121,7 @@
     },
     "dataset_file": {
       "type": "array",
-      "description": "Dataset descriptors",
-      "minItems": 1,
+      "description": "Recording files grouped by shared structure. Omit dataset_file or use an empty array when no recordings are supplied for this dataset record. Every named recording must be included in the package; missing files are errors. Non-empty file groups must contain all required file metadata. Recording checks cover listed files only, not all data collected in the study.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -342,7 +341,7 @@
           "dataset_file_temporal_resolution": {
             "type": "object",
             "additionalProperties": false,
-            "description": "Temporal resolution of records in this file group",
+            "description": "Temporal resolution of records in this file group. The declared interval is not compared with observed timestamp spacing.",
             "properties": {
               "resolution_type": {
                 "type": "string",
@@ -421,7 +420,7 @@
           "dataset_file_description": {
             "type": "string",
             "minLength": 1,
-            "description": "Concise human-readable description of the file group’s contents, scope, and intended interpretation. Use when important information is not represented by the structured file-group metadata.",
+            "description": "Concise human-readable description of the file group’s contents, scope, and intended interpretation. Use when important information is not represented by the structured file-group metadata. Explain recording session timing here, or in study_short_description when applicable across the study.",
             "examples": [
               "Thirty-second light and activity measurements."
             ]
@@ -817,12 +816,12 @@
                   "properties": {
                     "variable_term": {
                       "type": "string",
-                        "description": "Controlled semantic term for this variable",
-                        "x-glc-validation": [
-                          "The value must be declared in dataset_variable_terms or use the reserved fallback term other."
-                        ],
-                        "examples": [
-                          "illuminance"
+                      "description": "Controlled semantic term for this variable",
+                      "x-glc-validation": [
+                        "The value must be declared in dataset_variable_terms or use the reserved fallback term other."
+                      ],
+                      "examples": [
+                        "illuminance"
                       ]
                     },
                     "variable_name": {
@@ -1383,9 +1382,51 @@
           }
         ]
       ]
+    },
+    "dataset_recording_duration": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Cumulative usable recording duration, excluding gaps and invalid recordings. Two usable two-week seasonal sessions equal 4 weeks, noncontiguous. Supply duration, unit, and contiguity together or omit all three.",
+      "examples": [
+        4
+      ]
+    },
+    "dataset_recording_duration_unit": {
+      "type": "string",
+      "enum": [
+        "second",
+        "minute",
+        "hour",
+        "day",
+        "week"
+      ],
+      "description": "Unit of cumulative usable recording duration.",
+      "examples": [
+        "week"
+      ]
+    },
+    "dataset_recording_contiguity": {
+      "type": "string",
+      "enum": [
+        "contiguous",
+        "noncontiguous"
+      ],
+      "description": "Whether recording sessions form one contiguous session or separate noncontiguous sessions. Ordinary missing samples within a session do not break contiguity. Explain session timing in dataset_file_description, or study_short_description when applicable across the study.",
+      "examples": [
+        "noncontiguous"
+      ]
     }
   },
   "allOf": [
+    {
+      "if": {
+        "required": ["dataset_file"],
+        "properties": {
+          "dataset_file": {"type": "array", "minItems": 1}
+        }
+      },
+      "then": {"required": ["dataset_variable_terms"]}
+    },
     {
       "if": {
         "properties": {
@@ -1474,9 +1515,21 @@
     "dataset_participant_associated",
     "dataset_crossref",
     "dataset_timezone",
-    "dataset_location",
-    "dataset_variable_terms",
-    "dataset_file"
+    "dataset_location"
   ],
-  "$comment": "Missing-value convention: Optional properties with no value must be omitted rather than represented as null, an empty string, or an empty array."
+  "$comment": "Missing-value convention: Optional properties with no value must be omitted rather than represented as null, an empty string, or an empty array. Exception: dataset_file may be an empty array, equivalent to omitting the recording list.",
+  "dependencies": {
+    "dataset_recording_duration": [
+      "dataset_recording_duration_unit",
+      "dataset_recording_contiguity"
+    ],
+    "dataset_recording_duration_unit": [
+      "dataset_recording_duration",
+      "dataset_recording_contiguity"
+    ],
+    "dataset_recording_contiguity": [
+      "dataset_recording_duration",
+      "dataset_recording_duration_unit"
+    ]
+  }
 }
