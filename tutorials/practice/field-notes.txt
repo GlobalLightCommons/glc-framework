@@ -1,0 +1,11 @@
+FICTIONAL TRAINING DATA. These are invented values, not research observations.
+Participant code: P01. Physical device code: D01.
+Quantity: photopic illuminance. Unit: lux (lx).
+Local time: Europe/Berlin. Dates use day/month/year.
+Intended recording interval: 60 seconds. No timezone conversion is needed here.
+NA denotes a missing observation and must not be interpreted as zero.
+The identical repeated 08:01 row is a confirmed export duplication.
+All non-missing values should be retained without rescaling.
+This cleanup example is not a complete GLC package: it deliberately supplies no
+study, contributor, device model, calibration, or geographic metadata. Those facts
+cannot be reconstructed from this CSV. Never invent them for a real study.

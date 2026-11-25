@@ -48,3 +48,13 @@ glc-example-package/
 ```
 
 {% include example_viewer.html %}
+
+## Try the next step
+
+Download and unzip the example to inspect the files on your computer. For your
+own study, use the [Metadata Builder](https://builder.globallightcommons.org/)
+to create descriptions of your actual study, participants, devices, and files.
+Example identifiers and study details must be replaced with your own.
+
+**[Validate your data package]({{ '/validate/' | relative_url }})** explains how
+to check the complete package, read the report, and request registry inclusion.

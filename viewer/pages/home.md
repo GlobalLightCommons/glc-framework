@@ -6,13 +6,45 @@ description: Interoperable metadata and data packages for light-exposure and opt
 
 The **Global Light Commons (GLC)** provides a community-developed data-package
 standard and open tooling for interoperable, FAIR, and reproducible
-light-exposure and optical-measurement research.
+light-exposure and optical-measurement research. It helps you describe your
+measurements consistently, check the resulting package, and make it easier
+for other researchers to understand and reuse.
+
+## Start here
+
+1. **Understand the standard.** Start with the
+   [populated example package]({{ '/example-package/' | relative_url }}) to see
+   how measurement files and their descriptions fit together.
+2. **Create metadata.** Use the
+   [Metadata Builder](https://builder.globallightcommons.org/) to describe
+   your study, participants, devices, and files, then export the package.
+3. **Validate your data package.** Follow the
+   [validation guide]({{ '/validate/' | relative_url }}) to add your measurement
+   files, run the checks, and correct errors.
+4. **Share and discover.** After a passing validation, request a listing in the
+   [dataset registry]({{ '/registry/' | relative_url }}). Listing requires a
+   separate request and maintainer review.
+
+<p><a class="glc-action-link" href="https://builder.globallightcommons.org/">Create metadata</a>
+<a class="glc-action-link" href="{{ '/validate/' | relative_url }}">Validate your data package</a></p>
+
+## What is a data package?
+
+A **data package** contains measurement files plus **metadata**: information
+explaining the study, participants, devices, variables, units, and file paths.
+The builder creates the descriptions; you add the measurement files themselves.
 
 A GLC data package is a
 [Frictionless Data Package](https://specs.frictionlessdata.io/data-package/)
 whose `datapackage.json` descriptor connects study, participant, dataset,
 device, datasheet, and optional participant-characteristic metadata with the
 underlying data files.
+
+In everyday use, “dataset” can mean an entire study's shared data. Within the
+GLC schema, a **dataset record** groups files for one participant, or for
+measurements without a participant association, and links them to a study.
+One data package can contain many such records. A **resource** is one of the
+metadata tables or JSON files declared in the package descriptor.
 
 Resource | Purpose
 --- | ---

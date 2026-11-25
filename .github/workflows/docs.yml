@@ -16,7 +16,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # commonmarker 0.23.x does not compile with the Ubuntu 26.04 toolchain.
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: viewer
@@ -27,7 +28,9 @@ jobs:
           ruby-version: "3.2"
           bundler-cache: true
           working-directory: viewer
-      - run: bundle exec jekyll build --baseurl ""
+      - name: Check Sass map key compatibility
+        run: bundle exec ruby tests/sass_number_equality.rb
+      - run: bundle exec ruby -r ./_plugins/sass_number_equality -S jekyll build --baseurl ""
         env:
           JEKYLL_ENV: production
       - uses: actions/upload-pages-artifact@v3

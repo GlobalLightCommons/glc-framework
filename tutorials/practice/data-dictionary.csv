@@ -1,0 +1,3 @@
+column,meaning,type,unit,missing_value,time_basis
+timestamp,Observation local date and time,string,,Not expected,Europe/Berlin; YYYY-MM-DD HH:mm:ss
+illuminance_lx,Photopic illuminance,numeric,lx,Empty cell,

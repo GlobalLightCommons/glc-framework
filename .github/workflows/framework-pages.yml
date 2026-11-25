@@ -1,0 +1,85 @@
+name: Publish framework site
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "13,28,43,58 * * * *"
+  push:
+    branches: [main]
+    paths: ["viewer/**", "builder/**", "registry/**", "scripts/framework_site.py", "scripts/check_framework_site.py", "tests/test_framework_site.py", ".github/workflows/framework-pages.yml"]
+  pull_request:
+    paths: ["viewer/**", "builder/**", "registry/**", "scripts/framework_site.py", "scripts/check_framework_site.py", "tests/test_framework_site.py", ".github/workflows/framework-pages.yml"]
+permissions:
+  contents: read
+concurrency:
+  group: framework-pages-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  LANG: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: read
+      actions: read
+      attestations: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: validation-archive
+          path: .validation-archive
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r registry/requirements.txt
+      - name: Test site path handling
+        run: python -m unittest discover -s tests -p test_framework_site.py -v
+      - uses: actions/configure-pages@v5
+        id: pages
+      - uses: ruby/setup-ruby@4a9ddd6f338a97768b8006bf671dfbad383215f4
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: viewer
+      - name: Verify current reports and archived evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VALIDATION_ARCHIVE_DIR: ${{ github.workspace }}/.validation-archive/evidence
+          VALIDATION_ARCHIVE_READ_ONLY: "true"
+        run: python registry/scripts/fetch_registry.py registry/datasets.yml .framework-registry
+      - name: Prepare combined documentation and viewer
+        env:
+          FRAMEWORK_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: python scripts/framework_site.py prepare --base-url "$FRAMEWORK_BASE_URL"
+      - name: Build documentation and viewer
+        working-directory: viewer
+        env:
+          JEKYLL_ENV: production
+        run: |
+          bundle exec ruby tests/sass_number_equality.rb
+          bundle exec ruby -r ./_plugins/sass_number_equality -S jekyll build --source "$GITHUB_WORKSPACE/.framework-source" --destination "$GITHUB_WORKSPACE/framework_out"
+      - name: Add builder and registry data, then check internal links
+        env:
+          FRAMEWORK_BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          python scripts/framework_site.py assemble --base-url "$FRAMEWORK_BASE_URL" --registry .framework-registry/registry.json
+          python scripts/check_framework_site.py framework_out --base-url "$FRAMEWORK_BASE_URL"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: framework_out
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment
