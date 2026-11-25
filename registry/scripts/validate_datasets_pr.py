@@ -1,6 +1,8 @@
 import sys
 import os
 import subprocess
+import json
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -139,6 +141,51 @@ def is_http_url(s: str) -> bool:
         return False
 
 
+def pull_request_body():
+    """Read event data as data, never interpolate contributor text into a shell."""
+    event_path = os.getenv("GITHUB_EVENT_PATH")
+    if not event_path:
+        return None
+    event = json.loads(Path(event_path).read_text(encoding="utf-8"))
+    pr = event.get("pull_request")
+    return (pr.get("body") or "") if isinstance(pr, dict) else None
+
+
+def justification_for(body, repo):
+    body = re.sub(r"<!--.*?-->", "", body or "", flags=re.S)
+    section = re.search(
+        r"^## Metadata-only justification\s*\n(.*?)(?=^## |\Z)",
+        body, flags=re.M | re.S | re.I,
+    )
+    if not section:
+        return ""
+    # Repository headings make multi-dataset requests unambiguous.
+    for heading, text in re.findall(
+        r"^###\s+([^\n]+)\n(.*?)(?=^### |\Z)",
+        section.group(1), flags=re.M | re.S,
+    ):
+        if heading.strip().casefold() != repo.casefold():
+            continue
+        text = text.strip()
+        if text.casefold() in {"", "…", "...", "tbd", "todo", "n/a", "none",
+                               "reason:", "reason: …", "reason: ...", "[explain here]"}:
+            return ""
+        return text
+    return ""
+
+
+def inclusion_policy_error(report, body, repo):
+    scope = report.get("validation_scope")
+    if scope not in {"metadata_only", "metadata_and_data"}:
+        return (f"{repo}: validation scope is not recorded. Rerun validation with "
+                "a validator that records metadata-only versus metadata-and-data coverage.")
+    if scope == "metadata_only" and not justification_for(body, repo):
+        return (f"{repo}: This submission is metadata-only. Please explain why recordings "
+                "cannot be shared publicly in the 'Metadata-only justification' section, "
+                f"under a '### {repo}' heading.")
+    return None
+
+
 def main(cfg_path: str):
     cfg = load_cfg(cfg_path)
     # git show needs the path from the monorepo root, even when CI runs in registry/.
@@ -209,6 +256,11 @@ def main(cfg_path: str):
         base_cfg,
         force_all=trust_logic_changed(),
     )
+    body = pull_request_body()
+    # Trust-policy changes may recheck old entries, but do not create new inclusion requests.
+    inclusion_repos = {
+        ds["repo"] for ds, _ in dataset_entries_requiring_verification(datasets, base_cfg)
+    }
     if datasets_to_verify:
         changed_ids = ", ".join(
             f"{dataset_label(ds)} ({reason})"
@@ -238,10 +290,20 @@ def main(cfg_path: str):
                 raise RuntimeError("No live or archived validation report found")
             status = result["validation"].get("status")
             check_validation_status(status, reason)
+            if body is not None and repo in inclusion_repos:
+                policy_error = inclusion_policy_error(result["validation"], body, repo)
+                if policy_error:
+                    raise RuntimeError(policy_error)
         except Exception as e:
             verification_errors.append(f"{ds_id}: trusted validation check failed: {e}")
 
     if verification_errors:
+        summary = os.getenv("GITHUB_STEP_SUMMARY")
+        if summary:
+            with open(summary, "a", encoding="utf-8") as stream:
+                stream.write("## Registry inclusion checks failed\n\n")
+                for error in verification_errors:
+                    stream.write(f"- {error}\n")
         die("Trusted validation checks failed:\n" + "\n".join(f" - {e}" for e in verification_errors))
 
     print("\nOK: selected datasets have trusted reports; new entries and changed targets have passing validation.")

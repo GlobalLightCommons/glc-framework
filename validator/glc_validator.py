@@ -7,6 +7,7 @@ import csv
 import hashlib
 import math
 import re
+import html
 from pathlib import Path
 from referencing import Registry, Resource as RefResource
 from jsonschema.validators import validator_for
@@ -604,6 +605,33 @@ def validate_study_group_datasets_link(study_data, dataset_ids):
                     dataset_assignments[ds_id] = (group_index, group_name)
 
     return errors
+
+def validate_summary_statistics_groups(study_data):
+    """Resolve group-specific aggregate summaries within their own study."""
+    errors = []
+    studies = study_data if isinstance(study_data, list) else [study_data]
+    for study in studies:
+        if not isinstance(study, dict):
+            continue
+        groups = study.get("study_groups", [])
+        names = [group.get("study_group_name") for group in groups if isinstance(group, dict)] if isinstance(groups, list) else []
+        summaries = study.get("summary_statistics", [])
+        if not isinstance(summaries, list):
+            continue
+        for index, summary in enumerate(summaries):
+            if not isinstance(summary, dict) or summary.get("population") != "study_group":
+                continue
+            name = summary.get("study_group_name")
+            if not isinstance(name, str):
+                continue  # The schema reports missing or mistyped names.
+            if names.count(name) != 1:
+                errors.append({
+                    "resource": "study",
+                    "message": f"Summary statistic group '{name}' must identify exactly one study group in this study.",
+                    "path": ["summary_statistics", index, "study_group_name"],
+                })
+    return errors
+
 
 def validate_characteristics_links(characteristics_table, participant_table):
     valid_ids = set(participant_table.cut("participant_internal_id").values("participant_internal_id"))
@@ -1224,6 +1252,13 @@ def add_manifest_entry(entries, seen_paths, base_path, path_str, source, require
     abs_path = path_str if os.path.isabs(path_str) else resolve_local_path(base_path, path_str)
     abs_path = os.path.abspath(abs_path)
 
+    # JSON metadata resources can point to a directory. Match the JSON loader's
+    # non-recursive selection and fingerprint each submitted metadata file.
+    if os.path.isdir(abs_path):
+        for child in sorted(Path(abs_path).glob("*.json")):
+            add_manifest_entry(entries, seen_paths, base_path, str(child), source, required)
+        return
+
     if abs_path in seen_paths:
         return
     seen_paths.add(abs_path)
@@ -1364,6 +1399,166 @@ def value_matches_declared_type(value, variable_type, factor_values=None):
     return False
 
 
+def validate_recording_metadata(dataset_rows):
+    """Checks about recording declarations that do not require recording bytes."""
+    errors = []
+    rows = dataset_rows if isinstance(dataset_rows, list) else [dataset_rows]
+    for ds in rows:
+        if not isinstance(ds, dict):
+            continue
+        dataset_id = ds.get("dataset_internal_id", "<unnamed>")
+        groups = ds.get("dataset_file", [])
+        for group_index, group in enumerate(groups if isinstance(groups, list) else []):
+            if not isinstance(group, dict):
+                continue
+            prefix = ["dataset_file", group_index]
+            variables = group.get("dataset_file_variables", [])
+            for variable_index, variable in enumerate(variables if isinstance(variables, list) else []):
+                if not isinstance(variable, dict) or variable.get("dataset_file_variables_type") != "factor":
+                    continue
+                levels = variable.get("dataset_file_variables_factor_levels", [])
+                if not isinstance(levels, list):
+                    continue  # Schema validation reports the invalid structure.
+                values = [level.get("value") for level in levels if isinstance(level, dict)]
+                if any(not isinstance(value, str) for value in values) or len(set(values)) != len(levels):
+                    errors.append({
+                        "message": f"[dataset {dataset_id}] Duplicate or invalid factor-level values",
+                        "path": prefix + ["dataset_file_variables", variable_index, "dataset_file_variables_factor_levels"],
+                    })
+            datetime_metadata = group.get("dataset_file_datetime", {})
+            if isinstance(datetime_metadata, dict) and datetime_metadata.get("dataset_file_datetime_source") == "collection":
+                _, parse_errors, _, config_errors = parse_collection_timestamp(datetime_metadata)
+                if parse_errors or config_errors:
+                    errors.append({
+                        "message": f"[dataset {dataset_id}] Collection date does not match its declared format or has invalid metadata",
+                        "path": prefix + ["dataset_file_datetime"],
+                    })
+    return errors
+
+
+def recording_submission(dataset_rows, package, base_path, allow_metadata_only=False):
+    """Classify declarations, never infer metadata-only from missing files."""
+    rows = dataset_rows if isinstance(dataset_rows, list) else [dataset_rows]
+    rows = [row for row in rows if isinstance(row, dict)]
+    with_recordings = [bool(row.get("dataset_file")) for row in rows]
+    errors = []
+    scope = "metadata_only" if allow_metadata_only and rows and not any(with_recordings) else "metadata_and_data"
+    files = []
+    candidate_dirs = collect_candidate_data_dirs(package, base_path)
+    for ds in rows:
+        groups = ds.get("dataset_file", [])
+        for group_index, group in enumerate(groups if isinstance(groups, list) else []):
+            if not isinstance(group, dict):
+                continue
+            names = group.get("dataset_file_names", [])
+            for name in names if isinstance(names, list) else []:
+                if not isinstance(name, str):
+                    continue
+                resolved = resolve_dataset_file_path(base_path, name, candidate_dirs)
+                present = bool(resolved and os.path.isfile(resolved))
+                files.append({
+                    "dataset_id": ds.get("dataset_internal_id"),
+                    "file_group": group_index + 1,
+                    "path": name,
+                    "present": present,
+                })
+                if not present:
+                    errors.append({
+                        "message": f"[dataset {ds.get('dataset_internal_id')}] Referenced file does not exist or is not a regular file: '{name}'. Declared recordings are required, including when none are present.",
+                        "path": ["dataset_file", group_index, "dataset_file_names"],
+                    })
+    paths = {item["path"] for item in files}
+    present_paths = {item["path"] for item in files if item["present"]}
+    coverage = {
+        "metadata": "not_assessed", "recordings": "not_assessed",
+        "declared_file_count": len(paths), "present_file_count": len(present_paths),
+        "dataset_count": len(rows), "datasets_with_files": sum(with_recordings),
+        "datasets_without_files": len(rows) - sum(with_recordings),
+        "files": files,
+    }
+    return scope, coverage, errors
+
+
+VALIDATION_LIMITS = (
+    "Validation checks GLC metadata requirements and, where assessed, recording structure "
+    "and declared value formats. It does not independently verify scientific accuracy, "
+    "recalculate summary statistics, confirm preprocessing or calibration, verify usable "
+    "recording duration or contiguity, or compare declared sampling intervals with observed timestamps."
+)
+
+
+WARNING_TYPES = {
+    "empty_values": "Empty values",
+    "row_width": "Rows with extra or missing cells",
+    "extra_columns": "Columns not described in metadata",
+    "unreferenced_participants": "Participants without linked datasets",
+    "unchecked_resource": "Additional resources not assessed",
+    "profile_override": "Declared profile replaced by canonical profile",
+    "legacy_sampling": "Legacy sampling or file-classification notices",
+    "other": "Other warnings",
+}
+
+
+def warning_type(warning):
+    message = warning.get("message", "") if isinstance(warning, dict) else str(warning)
+    for text, category in (
+        ("empty values", "empty_values"),
+        ("cells than the", "row_width"),
+        ("undeclared extra columns", "extra_columns"),
+        ("not referenced by any dataset", "unreferenced_participants"),
+        ("resource not validated", "unchecked_resource"),
+        ("canonical validator profile is enforced", "profile_override"),
+        ("appears irregular", "legacy_sampling"),
+        ("appears highly regular", "legacy_sampling"),
+        ("has very few rows", "legacy_sampling"),
+    ):
+        if text in message:
+            return category
+    return "other"
+
+
+def summarize_warnings(warnings):
+    counts = Counter(warning_type(warning) for warning in warnings)
+    return [{"type": category, "label": WARNING_TYPES[category], "count": count}
+            for category, count in counts.items()]
+
+
+def write_validation_html(report, manifest, output_path):
+    """Standalone, escaped report; fingerprints and validation outcomes stay distinct."""
+    escape = lambda value: html.escape(str(value))
+    coverage = report.get("coverage", {})
+    def messages(items):
+        return "<ul>" + "".join(f"<li>{escape(item.get('message', item))}</li>" for item in items) + "</ul>"
+    grouped_warnings = "".join(
+        f"<details><summary>{escape(group['label'])}: {group['count']} instance(s)</summary>"
+        + messages([warning for warning in report["warnings"] if warning_type(warning) == group["type"]])
+        + "</details>" for group in summarize_warnings(report["warnings"])
+    )
+    recording_rows = "".join(
+        f"<tr><td>{escape(item.get('dataset_id'))}</td><td>{escape(item.get('file_group'))}</td>"
+        f"<td>{escape(item.get('path'))}</td><td>{escape(item.get('outcome', 'not_assessed'))}</td></tr>"
+        for item in coverage.get("files", [])
+    )
+    inventory_rows = "".join(
+        f"<tr><td>{escape(item['path'])}</td><td>{escape(item['exists'])}</td>"
+        f"<td>{escape(item.get('size_bytes'))}</td><td><code>{escape(item.get('sha256') or '—')}</code></td></tr>"
+        for item in manifest.get("files", [])
+    )
+    document = f'''<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>GLC validation report</title>
+<style>body{{font:16px system-ui;max-width:1100px;margin:2rem auto;padding:1rem}}table{{border-collapse:collapse;width:100%}}td,th{{text-align:left;border:1px solid #ccc;padding:.5rem}}code{{overflow-wrap:anywhere}}.notice{{background:#f4f4f4;padding:1rem}}</style>
+<h1>GLC validation: {escape(report['status'])}</h1>
+<p>Scope: {escape(report.get('validation_scope', 'not_determined'))}. Metadata: {escape(coverage.get('metadata'))}. Recordings: {escape(coverage.get('recordings'))}.</p>
+<p>Dataset records listing recordings: {escape(coverage.get('datasets_with_files', 'not assessed'))}. Dataset records without recording lists: {escape(coverage.get('datasets_without_files', 'not assessed'))}. Recording results cover listed files only, not all data collected in the study.</p>
+<p>Repository: {escape(report.get('repo'))} · Commit: {escape(report.get('commit_sha'))} · Validator: {escape(report.get('validator_version'))} · Schema: {escape(report.get('schema_version'))}</p>
+<p class="notice">{escape(VALIDATION_LIMITS)}</p>
+<h2>Recording coverage</h2><table><tr><th>Dataset</th><th>Group</th><th>File</th><th>Outcome</th></tr>{recording_rows}</table>
+<h2>Errors</h2>{messages(report['errors'])}<h2 id="warnings">Warnings ({report['warning_count']})</h2>{grouped_warnings}
+<h2>Submitted-file inventory</h2><p>Hashes identify submitted bytes, not successful validation. Unrelated repository files are outside this inventory and recording-validation scope.</p>
+<table><tr><th>Path</th><th>Present</th><th>Bytes</th><th>SHA-256</th></tr>{inventory_rows}</table></html>'''
+    Path(output_path).write_text(document, encoding="utf-8")
+
+
 def validate_declared_column_values(
     data_rows, declared_variables, available_columns, file_name, label, variable_path, warnings
 ):
@@ -1435,7 +1630,7 @@ def validate_declared_column_values(
     return errors
 
 
-def validate_dataset_file_content(dataset_rows, package: Package, base_path: str, warnings):
+def validate_dataset_file_content(dataset_rows, package: Package, base_path: str, warnings, outcomes=None):
     errors = []
     rows = dataset_rows if isinstance(dataset_rows, list) else [dataset_rows]
     candidate_dirs = collect_candidate_data_dirs(package, base_path)
@@ -1520,6 +1715,12 @@ def validate_dataset_file_content(dataset_rows, package: Package, base_path: str
             header_row_hint = file_obj.get("dataset_file_header_row")
 
             for f_idx, file_name in enumerate(file_names):
+                error_start = len(errors)
+                outcome = next((item for item in (outcomes or []) if
+                    item["dataset_id"] == ds.get("dataset_internal_id")
+                    and item["file_group"] == j + 1 and item["path"] == file_name), None)
+                if outcome is not None:
+                    outcome["outcome"] = "fail"  # A failed read/early exit cannot count as passing.
                 resolved = resolve_dataset_file_path(base_path, file_name, candidate_dirs)
                 label = f"[dataset {dataset_id} file {j+1}]"
 
@@ -1702,6 +1903,9 @@ def validate_dataset_file_content(dataset_rows, package: Package, base_path: str
                             }
                         )
 
+                if outcome is not None:
+                    outcome["outcome"] = "fail" if len(errors) > error_start else "pass"
+
     return errors
 
 # ----------------------------
@@ -1709,7 +1913,7 @@ def validate_dataset_file_content(dataset_rows, package: Package, base_path: str
 # ----------------------------
 VALIDATOR_ROOT = Path(__file__).parent.resolve()
 CANONICAL_SCHEMAS_DIR = VALIDATOR_ROOT / "schemas"
-SCHEMA_3_VERSIONS = {"3.0.0", "3.0.1", "3.0.2"}
+SCHEMA_3_VERSIONS = {"3.0.0", "3.0.1", "3.0.2", "3.1.0"}
 SUPPORTED_SCHEMA_VERSIONS = {"1.0.0", "2.0.0"} | SCHEMA_3_VERSIONS
 
 CORE_JSON_RESOURCES = {"study", "datasets", "devices", "device_datasheets"}
@@ -1761,6 +1965,9 @@ def validate_crossrefs(datapackage_path: str):
 
     errors = []
     warnings = []
+    validation_scope = "not_determined"
+    coverage = {"metadata": "not_assessed", "recordings": "not_assessed", "files": []}
+    datasets_data = None
 
     report = {
         "status": "unknown",
@@ -1997,9 +2204,11 @@ def validate_crossrefs(datapackage_path: str):
                         }
                     )
                 else:
-                    warnings.append(
+                    (errors if schema_version == "3.1.0" else warnings).append(
                         {
-                            "message": f"[{name}] No Table Schema declared; additional tabular resource not validated",
+                            "message": (f"[{name}] Missing required schema for declared additional tabular resource"
+                                        if schema_version == "3.1.0" else
+                                        f"[{name}] No Table Schema declared; additional tabular resource not validated"),
                             "path": ["resources", name],
                         }
                     )
@@ -2069,9 +2278,11 @@ def validate_crossrefs(datapackage_path: str):
                             }
                         )
                     else:
-                        warnings.append(
+                        (errors if schema_version == "3.1.0" else warnings).append(
                             {
-                                "message": f"[{name}] No JSON Schema declared; additional JSON resource not validated",
+                                "message": (f"[{name}] Missing required jsonSchema for declared additional JSON resource"
+                                            if schema_version == "3.1.0" else
+                                            f"[{name}] No JSON Schema declared; additional JSON resource not validated"),
                                 "path": ["resources", name],
                             }
                         )
@@ -2241,6 +2452,9 @@ def validate_crossrefs(datapackage_path: str):
         if datasets_data is not None and study_data is not None:
             errors += validate_dataset_study_ids(datasets_data, study_data)
         
+        if study_data is not None and schema_version == "3.1.0":
+            errors += validate_summary_statistics_groups(study_data)
+
         # Study to datasets cross-reference
         if study_data is not None and datasets_data is not None:
             dataset_ids = {
@@ -2265,17 +2479,32 @@ def validate_crossrefs(datapackage_path: str):
             errors += validate_dataset_timezones(datasets_data, schema_version)
             errors += validate_dataset_variable_terms(datasets_data)
             errors += validate_primary_variables_subset(datasets_data, warnings)
+            errors += validate_recording_metadata(datasets_data)
+
+        coverage["metadata"] = "fail" if errors else "pass"
+        metadata_outcome = coverage["metadata"]
+        if datasets_data is not None and not errors:
+            validation_scope, coverage, presence_errors = recording_submission(
+                datasets_data, package, base_path, allow_metadata_only=schema_version == "3.1.0",
+            )
+            coverage["metadata"] = metadata_outcome
+            errors += presence_errors
 
         # ----------------------------
         # Phase 3: File-content validation (run only after metadata passes)
         # ----------------------------
-        if not errors and datasets_data is not None:
+        if not errors and datasets_data is not None and validation_scope == "metadata_and_data":
             errors += validate_dataset_file_content(
                 dataset_rows=datasets_data,
                 package=package,
                 base_path=base_path,
                 warnings=warnings,
+                outcomes=coverage["files"],
             )
+            coverage["recordings"] = "fail" if errors else "pass"
+        else:
+            for item in coverage["files"]:
+                item["outcome"] = "missing" if not item["present"] else "not_assessed"
 
     if package is None and not errors:
         errors.append({"message": "[datapackage] Package not loaded", "path": ["<root>"]})
@@ -2290,6 +2519,15 @@ def validate_crossrefs(datapackage_path: str):
     # Add counts 
     report["error_count"] = len(errors)
     report["warning_count"] = len(warnings)
+    report["warning_groups"] = summarize_warnings(warnings)
+    for warning in warnings:
+        if isinstance(warning, dict):
+            warning["type"] = warning_type(warning)
+    if coverage["metadata"] == "not_assessed" and errors:
+        coverage["metadata"] = "fail"
+    report["validation_scope"] = validation_scope
+    report["coverage"] = coverage
+    report["validation_limits"] = VALIDATION_LIMITS
 
     # Try to populate commit SHA locally if missing
     if not report["commit_sha"]:
@@ -2339,6 +2577,7 @@ def validate_crossrefs(datapackage_path: str):
     os.makedirs(os.path.dirname(manifest_path), exist_ok=True)
     with open(manifest_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
+    write_validation_html(report, manifest, Path(out_path).with_suffix(".html"))
 
     # Console output
     if warnings:
@@ -2354,7 +2593,7 @@ def validate_crossrefs(datapackage_path: str):
         for e in errors:
             print(f" - {e['message']} (failed at path: {e['path']})")
     else:
-        print("All validations passed (profile + schema + cross-resource).")
+        print(f"Validation passed — {validation_scope}. Recording checks: {coverage['recordings']}.")
 
     return exit_code
 

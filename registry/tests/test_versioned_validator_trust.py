@@ -82,7 +82,8 @@ class VersionedValidatorTrustTests(unittest.TestCase):
         self.assertIn("--deny-self-hosted-runners", command)
 
     def test_schema_lifecycle_distinguishes_current_and_legacy(self):
-        self.assertEqual(schema_lifecycle("3.0.2"), "current")
+        self.assertEqual(schema_lifecycle("3.1.0"), "current")
+        self.assertEqual(schema_lifecycle("3.0.2"), "legacy")
         self.assertEqual(schema_lifecycle("3.0.0"), "legacy")
         self.assertEqual(schema_lifecycle("2.0.0"), "legacy")
         self.assertEqual(schema_lifecycle("4.0.0"), "unrecognized")
@@ -134,6 +135,24 @@ class VersionedValidatorTrustTests(unittest.TestCase):
                 (datasets[1], "registry trust logic changed"),
             ],
         )
+
+    def test_scope_and_warnings_are_taken_from_the_same_verified_report(self):
+        report = {
+            "status": "pass", "schema_version": "3.1.0",
+            "validation_scope": "metadata_only", "warning_count": 1,
+            "warnings": [{"message": "A participant is not referenced"}],
+            "coverage": {"metadata": "pass", "recordings": "not_assessed"},
+        }
+        summary = validation_summary({"validation": report, "manifest": {"files": []}})
+        self.assertEqual(summary["validation_scope"], "metadata_only")
+        self.assertEqual(summary["warnings"], report["warnings"])
+        self.assertEqual(summary["coverage"], report["coverage"])
+        self.assertEqual(summary["warning_count"], 1)
+
+    def test_historical_report_scope_is_not_invented(self):
+        summary = validation_summary({"validation": {"status": "pass"}, "manifest": {"files": []}})
+        self.assertIsNone(summary["validation_scope"])
+        self.assertIsNone(summary["warning_count"])
 
 
 if __name__ == "__main__":

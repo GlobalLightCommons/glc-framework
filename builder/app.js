@@ -30,7 +30,7 @@ function omitEmptyOptionalProperties(value, schema) {
 const omitEmptyOptionalEntities = (rows, schema) => rows.map((row) => omitEmptyOptionalProperties(row, schema));
 const createBuilderId = (prefix) => `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;
 
-// Deferred until the schema 3.0.2 metadata workflow is stable and fully tested.
+// Deferred until the schema 3.1.0 metadata workflow is stable and fully tested.
 const DATASET_TEMPLATES_ENABLED = false;
 
 const createFileGroup = (name = "Primary file group") => ({
@@ -119,6 +119,7 @@ const createDatasheet = () => ({
 });
 
 const createDatasetRecord = () => ({
+  includeRecordings: true,
   datasetId: "",
   studyId: "",
   participantAssociated: true,
@@ -126,6 +127,9 @@ const createDatasetRecord = () => ({
   deviceId: "",
   deviceLocation: "",
   samplingInterval: "",
+  recordingDuration: "",
+  recordingDurationUnit: "",
+  recordingContiguity: "",
   datasetTimezone: "",
   latitude: "",
   longitude: "",
@@ -179,6 +183,7 @@ const state = {
   activeDatasetIndex: 0,
   activeGroupIndex: 0,
   studyGroups: [],
+  summaryStatistics: [],
   contributors: [],
   participants: [createParticipant()],
   characteristics: [],
@@ -273,6 +278,7 @@ const datasheetsImportSummary = document.querySelector("#datasheets-import-summa
 const datasheetsList = document.querySelector("#datasheets-list");
 
 const fields = {
+  includeRecordings: document.querySelector("#include-recordings"),
   schemaVersion: document.querySelector("#schema-version"),
   packageName: document.querySelector("#package-name"),
   packageTitle: document.querySelector("#package-title"),
@@ -311,6 +317,9 @@ const fields = {
   temporalResolutionType: document.querySelector("#temporal-resolution-type"),
   samplingInterval: document.querySelector("#sampling-interval"),
   temporalResolutionUnit: document.querySelector("#temporal-resolution-unit"),
+  recordingDuration: document.querySelector("#recording-duration"),
+  recordingDurationUnit: document.querySelector("#recording-duration-unit"),
+  recordingContiguity: document.querySelector("#recording-contiguity"),
   datasetTimezone: document.querySelector("#dataset-timezone"),
   latitude: document.querySelector("#latitude"),
   longitude: document.querySelector("#longitude"),
@@ -721,7 +730,7 @@ function placeDatasetEditor(step) {
   });
   const participantAssociation = document.querySelector("#participant-associated-field");
   if (participantAssociation && templateMode) {
-    participantAssociation.hidden = !String(fields.schemaVersion.value || "3.0.2").startsWith("3.");
+    participantAssociation.hidden = !String(fields.schemaVersion.value || "3.1.0").startsWith("3.");
   }
 }
 
@@ -768,7 +777,7 @@ function renderTemplateEditorControls() {
 }
 
 function syncParticipantAssociationControls() {
-  const schema3 = String(fields.schemaVersion.value || "3.0.2").startsWith("3.");
+  const schema3 = String(fields.schemaVersion.value || "3.1.0").startsWith("3.");
   const associated = fields.participantAssociated.value !== "false";
   document.querySelector("#participant-associated-field").hidden = !schema3;
   fields.participantId.disabled = schema3 && !associated;
@@ -787,16 +796,21 @@ function syncActiveDatasetFromControls() {
     return;
   }
   syncActiveGroupFromControls();
+  dataset.includeRecordings = fields.includeRecordings.checked;
+  document.querySelector("#recording-fields").hidden = !dataset.includeRecordings;
   dataset.datasetId = fields.datasetId.value.trim();
   dataset.studyId = fields.studyId.value;
   dataset.participantAssociated = fields.participantAssociated.value !== "false";
   dataset.participantId = fields.participantId.value;
-  if (!String(fields.schemaVersion.value || "3.0.2").startsWith("3.")) {
+  if (!String(fields.schemaVersion.value || "3.1.0").startsWith("3.")) {
     dataset.deviceId = fields.deviceId.value;
     dataset.deviceLocation = fields.deviceLocation.value.trim();
     dataset.samplingInterval = fields.samplingInterval.value;
     dataset.instructions = fields.instructions.value.trim();
   }
+  dataset.recordingDuration = fields.recordingDuration.value.trim();
+  dataset.recordingDurationUnit = fields.recordingDurationUnit.value.trim();
+  dataset.recordingContiguity = fields.recordingContiguity.value.trim();
   dataset.datasetTimezone = fields.datasetTimezone.value.trim();
   dataset.latitude = fields.latitude.value.trim();
   dataset.longitude = fields.longitude.value.trim();
@@ -809,11 +823,16 @@ function syncControlsFromActiveDataset() {
     return;
   }
 
+  fields.includeRecordings.checked = dataset.includeRecordings !== false;
+  document.querySelector("#recording-fields").hidden = dataset.includeRecordings === false;
   fields.datasetId.value = dataset.datasetId || "";
   setPendingSelectValue(fields.studyId, dataset.studyId || "");
   fields.participantAssociated.value = String(dataset.participantAssociated !== false);
   setPendingSelectValue(fields.participantId, dataset.participantId || "");
   syncParticipantAssociationControls();
+  fields.recordingDuration.value = dataset.recordingDuration ?? "";
+  fields.recordingDurationUnit.value = dataset.recordingDurationUnit ?? "";
+  fields.recordingContiguity.value = dataset.recordingContiguity ?? "";
   fields.datasetTimezone.value = dataset.datasetTimezone || "";
   fields.latitude.value = dataset.latitude || "";
   fields.longitude.value = dataset.longitude || "";
@@ -918,6 +937,7 @@ function clearStudyPage() {
   });
 
   state.studyGroups = [];
+  state.summaryStatistics = [];
   state.contributors = [];
   studyImport.value = "";
   contributorsImport.value = "";
@@ -929,16 +949,17 @@ function clearStudyPage() {
   contributorsImportSummary.className = "import-summary";
 
   renderStudyGroups();
+  renderSummaryStatistics();
   renderContributors();
   updateCrossrefOptions();
   updatePreview();
 }
 
-function syncActiveSchemaPill(schemaVersion = fields.schemaVersion.value || "3.0.2") {
+function syncActiveSchemaPill(schemaVersion = fields.schemaVersion.value || "3.1.0") {
   const pill = document.querySelector("#active-schema-pill");
   if (!pill) return;
-  const isCurrentSchema = schemaVersion === "3.0.2";
-  const profileFilename = schemaVersion === "3.0.2"
+  const isCurrentSchema = schemaVersion === "3.1.0";
+  const profileFilename = String(schemaVersion).startsWith("3.")
     ? "glc-dp-profile.json"
     : "gleam-dp-profile.json";
   pill.textContent = `Schema ${schemaVersion}`;
@@ -953,12 +974,12 @@ function syncActiveSchemaPill(schemaVersion = fields.schemaVersion.value || "3.0
 
 function normalizeBuilderSchemaVersion(schemaVersion) {
   const version = String(schemaVersion || "").trim();
-  if (version === "2.0.0" || version === "3.0.0" || version === "3.0.1") return "3.0.2";
-  if (version === "3.0.2") return version;
-  return "3.0.2";
+  if (version === "2.0.0" || version === "3.0.0" || version === "3.0.1" || version === "3.0.2") return "3.1.0";
+  if (version === "3.1.0") return version;
+  return "3.1.0";
 }
 
-async function loadSchemaHelp(schemaVersion = fields.schemaVersion.value || "3.0.2") {
+async function loadSchemaHelp(schemaVersion = fields.schemaVersion.value || "3.1.0") {
   syncActiveSchemaPill(schemaVersion);
   try {
     const [studySchema, contributorSchema, participantsSchema, characteristicsSchema, deviceSchema, datasheetSchema, datasetSchema] = await Promise.all([
@@ -1041,6 +1062,7 @@ function applyStudyGroupSchemaHelp(schema) {
   const properties = schema?.properties?.study_groups?.items?.properties || {};
   state.studyGroupHelp = properties;
   renderStudyGroups();
+  renderSummaryStatistics();
 }
 
 function applyTabularSchemaHelp(schema, stateKey) {
@@ -1073,6 +1095,9 @@ function applyDatasetSchemaHelp(schema) {
   const datetime = datasetFile.dataset_file_datetime?.properties || properties.dataset_datetime?.properties || {};
   applySchemaHelp(schema, {
     "dataset-id": "dataset_internal_id",
+    "recording-duration": "dataset_recording_duration",
+    "recording-duration-unit": "dataset_recording_duration_unit",
+    "recording-contiguity": "dataset_recording_contiguity",
     "dataset-timezone": "dataset_timezone",
   });
 
@@ -1197,6 +1222,7 @@ async function handleStudyImport(event) {
     populateStudyFromSchema(study);
 
     renderStudyGroups();
+    renderSummaryStatistics();
     renderContributors();
     updateCrossrefOptions();
     updatePreview();
@@ -1218,7 +1244,7 @@ function populateStudyFromSchema(study) {
   }
 
   fields.schemaVersion.value = normalizeBuilderSchemaVersion(
-    study.schema_version || fields.schemaVersion.value || "3.0.2",
+    study.schema_version || fields.schemaVersion.value || "3.1.0",
   );
   fields.studyInternalId.value = study.study_internal_id || "";
   fields.studyTitle.value = study.study_title || "";
@@ -1228,6 +1254,8 @@ function populateStudyFromSchema(study) {
   fields.studyType.value = study.study_type || "";
   fields.studyShortDescription.value = study.study_short_description || "";
   fields.studySample.value = study.study_sample || "";
+  state.summaryStatistics = cloneJson(study.summary_statistics || []);
+  renderSummaryStatistics();
   fields.studySetting.value = study.study_setting || "";
   fields.studyGeographicalLocation.value = study.study_geographical_location || "";
   fields.studyIntervention.value = study.study_intervention || "";
@@ -1496,6 +1524,56 @@ function normalizeContributorRoles(roles) {
   return roles || "";
 }
 
+function buildSummaryStatistics() {
+  return state.summaryStatistics.map((entry) => ({
+    ...entry,
+    value: typeof entry.value === "string" && entry.value.trim() !== "" ? Number(entry.value) : entry.value,
+  }));
+}
+
+function renderSummaryStatistics() {
+  const list = document.querySelector("#summary-statistics-list");
+  list.innerHTML = "";
+  state.summaryStatistics.forEach((entry, index) => {
+    const row = document.createElement("div");
+    row.className = "participant-card";
+    const help = state.entitySchemas.study?.properties?.summary_statistics?.items?.properties || {};
+    const input = (key, label, type = "text") => `<label>${label} <span class="required">*</span>
+      <input data-summary-field="${key}" type="${type}" ${type === "number" ? 'step="any"' : ""} value="${escapeHtml(entry[key] ?? "")}" title="${escapeHtml(help[key]?.description || label)}" /></label>`;
+    row.innerHTML = `<div class="record-card-heading"><h3>Summary statistic ${index + 1}</h3>
+      <button type="button" data-remove-summary>Remove statistic</button></div><div class="participant-fields">
+      ${input("variable", "Variable")}${input("statistic", "Statistic (mean, median, SD, count, …)")}
+      ${input("value", "Value", "number")}${input("unit", "Unit (1 for counts)")}
+      <label>Population <span class="required">*</span><select data-summary-field="population">
+      <option value="study" ${entry.population === "study" ? "selected" : ""}>Whole study</option>
+      <option value="study_group" ${entry.population === "study_group" ? "selected" : ""}>Study group</option></select></label>
+      ${entry.population === "study_group" ? input("study_group_name", "Exact study group name") : ""}
+      <label class="wide">Aggregation method<textarea data-summary-field="aggregation_method" title="${escapeHtml(help.aggregation_method?.description || "How was this result calculated?")}">${escapeHtml(entry.aggregation_method || "")}</textarea></label></div>`;
+    row.querySelectorAll("[data-summary-field]").forEach((control) => {
+      control.addEventListener(control.tagName === "SELECT" ? "change" : "input", () => {
+        entry[control.dataset.summaryField] = control.value;
+        if (control.dataset.summaryField === "population") {
+          if (entry.population === "study") delete entry.study_group_name;
+          renderSummaryStatistics();
+        }
+        updatePreview();
+      });
+    });
+    row.querySelector("[data-remove-summary]").addEventListener("click", () => {
+      state.summaryStatistics.splice(index, 1);
+      renderSummaryStatistics();
+      updatePreview();
+    });
+    list.appendChild(row);
+  });
+}
+
+document.querySelector("#add-summary-statistic").addEventListener("click", () => {
+  state.summaryStatistics.push({ variable: "", statistic: "", value: "", unit: "", population: "study" });
+  renderSummaryStatistics();
+  updatePreview();
+});
+
 function renderStudyGroups() {
   studyGroupsList.innerHTML = "";
   const datasetIds = getDatasetIdOptions();
@@ -1593,18 +1671,21 @@ function renderStudyGroups() {
       }
       group.datasets = [...group.datasets, datasetId];
       renderStudyGroups();
+  renderSummaryStatistics();
       updatePreview();
     });
     row.querySelectorAll("[data-remove-dataset-id]").forEach((button) => {
       button.addEventListener("click", () => {
         group.datasets = group.datasets.filter((datasetId) => datasetId !== button.dataset.removeDatasetId);
         renderStudyGroups();
+  renderSummaryStatistics();
         updatePreview();
       });
     });
     row.querySelector("button").addEventListener("click", () => {
       state.studyGroups.splice(index, 1);
       renderStudyGroups();
+  renderSummaryStatistics();
       updatePreview();
     });
     studyGroupsList.appendChild(row);
@@ -1614,6 +1695,7 @@ function renderStudyGroups() {
 function addStudyGroup() {
   state.studyGroups.push(createStudyGroup());
   renderStudyGroups();
+  renderSummaryStatistics();
   updatePreview();
 }
 
@@ -1630,6 +1712,7 @@ function refreshStudyGroupsForDatasetOptions() {
   }
   studyGroupDatasetOptionsSignature = signature;
   renderStudyGroups();
+  renderSummaryStatistics();
 }
 
 function renderContributors() {
@@ -2219,7 +2302,7 @@ async function importDatasetFile(file) {
     const rows = datasetRowsFromJson(await file.text());
 
     fields.schemaVersion.value = normalizeBuilderSchemaVersion(
-      rows.find((row) => row?.schema_version)?.schema_version || fields.schemaVersion.value || "3.0.2",
+      rows.find((row) => row?.schema_version)?.schema_version || fields.schemaVersion.value || "3.1.0",
     );
     loadSchemaHelp(fields.schemaVersion.value);
     state.datasets = rows.map(datasetRecordFromSchema);
@@ -2261,7 +2344,7 @@ function populateDatasetFromSchema(dataset) {
   state.activeDatasetIndex = 0;
   state.activeGroupIndex = 0;
   fields.schemaVersion.value = normalizeBuilderSchemaVersion(
-    dataset.schema_version || fields.schemaVersion.value || "3.0.2",
+    dataset.schema_version || fields.schemaVersion.value || "3.1.0",
   );
   loadSchemaHelp(fields.schemaVersion.value);
   syncControlsFromActiveDataset();
@@ -2270,6 +2353,7 @@ function populateDatasetFromSchema(dataset) {
 
 function datasetRecordFromSchema(dataset) {
   const record = createDatasetRecord();
+  record.includeRecordings = Array.isArray(dataset.dataset_file) && dataset.dataset_file.length > 0;
   record.datasetId = dataset.dataset_internal_id || "";
   record.studyId = dataset.dataset_crossref?.dataset_crossref_study_id || "";
   record.participantAssociated = typeof dataset.dataset_participant_associated === "boolean"
@@ -2280,6 +2364,9 @@ function datasetRecordFromSchema(dataset) {
   record.deviceId = dataset.dataset_crossref?.dataset_crossref_device_id || "";
   record.deviceLocation = dataset.dataset_device_location || "";
   record.samplingInterval = dataset.dataset_sampling_interval ?? "";
+  record.recordingDuration = dataset.dataset_recording_duration ?? "";
+  record.recordingDurationUnit = dataset.dataset_recording_duration_unit ?? "";
+  record.recordingContiguity = dataset.dataset_recording_contiguity ?? "";
   record.datasetTimezone = dataset.dataset_timezone || "";
   record.latitude = Array.isArray(dataset.dataset_location) ? dataset.dataset_location[0] || "" : "";
   record.longitude = Array.isArray(dataset.dataset_location) ? dataset.dataset_location[1] || "" : "";
@@ -2750,7 +2837,7 @@ function deviceSensorRowsToText(rows) {
 
 function renderDatasheets() {
   datasheetsList.innerHTML = "";
-  const schema3 = String(fields.schemaVersion.value || "3.0.2").startsWith("3.");
+  const schema3 = String(fields.schemaVersion.value || "3.1.0").startsWith("3.");
   const datasheetRequired = new Set(state.entitySchemas.datasheet?.required || []);
   const modalityOptions = ["light", "accelerometer", "temperature", "other"];
   state.datasheets.forEach((datasheet, index) => {
@@ -3417,7 +3504,7 @@ function restoreExcludedTemplateGroup() {
 }
 
 function renderDatasetTemplateTools() {
-  const schema3 = String(fields.schemaVersion.value || "3.0.2").startsWith("3.");
+  const schema3 = String(fields.schemaVersion.value || "3.1.0").startsWith("3.");
   document.querySelector("#dataset-template-tools").hidden = !DATASET_TEMPLATES_ENABLED || !schema3 || state.activeStep !== "datasets";
   document.querySelector("#dataset-template-save-tools").hidden = !DATASET_TEMPLATES_ENABLED || !schema3 || state.activeStep !== "templates";
   const selected = datasetTemplateSelect.value;
@@ -3656,7 +3743,7 @@ function syncActiveGroupFromControls() {
   group.name = group.role === "supporting" || group.auxiliary === true
     ? "Supporting file group"
     : "Primary file group";
-  group.preprocessingBol = (fields.schemaVersion.value || "3.0.2") === "3.0.2"
+  group.preprocessingBol = (fields.schemaVersion.value || "3.1.0") === "3.1.0"
     ? group.dataState === "" ? "" : group.dataState === "processed"
     : fields.preprocessingBol.value === "" ? "" : fields.preprocessingBol.value === "true";
   group.preprocessingDesc = fields.preprocessingDesc.value || "";
@@ -3692,7 +3779,7 @@ function selectedFileModalities() {
 }
 
 function syncFileModalityControls() {
-  const schema3 = (fields.schemaVersion.value || "3.0.2") === "3.0.2";
+  const schema3 = (fields.schemaVersion.value || "3.1.0") === "3.1.0";
   const modalities = selectedFileModalities();
   const includesOther = modalities.includes("other");
   const includesSensor = modalities.some((modality) => FILE_SENSOR_MODALITIES.has(modality));
@@ -3776,7 +3863,7 @@ function syncFileModalityControls() {
 }
 
 function syncFileRoleDataStateControls() {
-  const schema3 = (fields.schemaVersion.value || "3.0.2") === "3.0.2";
+  const schema3 = (fields.schemaVersion.value || "3.1.0") === "3.1.0";
   const descriptionField = document.querySelector("#preprocessing-description-field");
   document.querySelector("#legacy-auxiliary-field").hidden = schema3;
   document.querySelector("#legacy-preprocessing-status-field").hidden = schema3;
@@ -3801,7 +3888,7 @@ function syncFileRoleDataStateControls() {
 }
 
 function syncTemporalResolutionControls() {
-  const schema3 = (fields.schemaVersion.value || "3.0.2") === "3.0.2";
+  const schema3 = (fields.schemaVersion.value || "3.1.0") === "3.1.0";
   if (!schema3 && fields.temporalResolutionType?.value !== "fixed_interval") {
     fields.temporalResolutionType.value = "fixed_interval";
   }
@@ -3929,7 +4016,7 @@ function renderVariables() {
     .filter((entry) => entry.term)
     .map((entry) => `<option value="${escapeHtml(entry.term)}">${escapeHtml(entry.term)}</option>`)
     .join("");
-  const schema3 = (fields.schemaVersion.value || "3.0.2") === "3.0.2";
+  const schema3 = (fields.schemaVersion.value || "3.1.0") === "3.1.0";
   const factorTypeGuidance = "Select Factor only for categorical variables with a finite set of defined levels, such as 0 = No and 1 = Yes. A numerical factor, coefficient, ratio, proportion, percentage, score, count, or other quantitatively meaningful value must be Numeric or Integer.";
 
   if (schema3) {
@@ -4142,7 +4229,7 @@ function getVariableMetadata(group, schemaVersion) {
       dataset_file_variables_calibration: saved.calibration || null,
       dataset_file_variables_term: termObject,
     };
-    if (schemaVersion === "3.0.2") {
+    if (schemaVersion === "3.1.0") {
       metadata.dataset_file_variables_type = saved.type || "";
       if (saved.description) {
         metadata.dataset_file_variables_description = saved.description;
@@ -4173,17 +4260,17 @@ function buildDatasetFile(group, schemaVersion) {
     dataset_file_timezone: group.fileTimezone || "",
     dataset_file_header_row: group.headerRow === "" ? null : Number(group.headerRow),
     dataset_file_preprocessing: {
-      dataset_file_preprocessing_bol: schemaVersion === "3.0.2"
+      dataset_file_preprocessing_bol: schemaVersion === "3.1.0"
         ? group.dataState === "processed"
         : group.preprocessingBol === "" ? null : Boolean(group.preprocessingBol),
-      dataset_file_preprocessing_desc: schemaVersion === "3.0.2"
+      dataset_file_preprocessing_desc: schemaVersion === "3.1.0"
         ? group.dataState === "processed" ? preprocessingDesc : null
         : group.preprocessingBol === true ? preprocessingDesc : null,
     },
     dataset_file_variables: getVariableMetadata(group, schemaVersion),
   };
 
-  if (schemaVersion === "3.0.2") {
+  if (schemaVersion === "3.1.0") {
     datasetFile.dataset_file_modality = [...(group.modalities || [])];
     if ((group.modalities || []).includes("other")) {
       datasetFile.dataset_file_modality_other = group.modalityOther || "";
@@ -4236,14 +4323,14 @@ function buildDatasetFile(group, schemaVersion) {
     );
   }
 
-  if (schemaVersion !== "3.0.2") {
+  if (schemaVersion !== "3.1.0") {
     datasetFile.dataset_file_auxiliary = group.auxiliary === "" ? null : Boolean(group.auxiliary);
   }
 
   const primaryVariables = getPrimaryVariables(group);
   if (
-    (schemaVersion === "3.0.2" && (group.role === "primary" || primaryVariables.length > 0))
-    || (schemaVersion !== "3.0.2" && group.auxiliary !== true)
+    (schemaVersion === "3.1.0" && (group.role === "primary" || primaryVariables.length > 0))
+    || (schemaVersion !== "3.1.0" && group.auxiliary !== true)
   ) {
     datasetFile.primary_variables = primaryVariables;
   }
@@ -4253,7 +4340,7 @@ function buildDatasetFile(group, schemaVersion) {
 
 function buildDatasetRecordDraft(record) {
   const fileGroups = record.fileGroups?.length ? record.fileGroups : [createFileGroup()];
-  const schemaVersion = fields.schemaVersion.value || "3.0.2";
+  const schemaVersion = fields.schemaVersion.value || "3.1.0";
   const datetimeGroup = fileGroups.find((group) => !group.auxiliary) || fileGroups[0];
 
   const datasetDatetime = {
@@ -4272,27 +4359,29 @@ function buildDatasetRecordDraft(record) {
   const datasetRecord = {
     schema_version: schemaVersion,
     dataset_internal_id: record.datasetId || "",
-    ...(schemaVersion === "3.0.2" ? {
+    ...(schemaVersion === "3.1.0" ? {
       dataset_participant_associated: record.participantAssociated !== false,
     } : {}),
     dataset_crossref: {
       dataset_crossref_study_id: record.studyId || "",
-      ...(schemaVersion === "3.0.2" && record.participantAssociated === false
+      ...(schemaVersion === "3.1.0" && record.participantAssociated === false
         ? {}
         : { dataset_crossref_participant_id: record.participantId || "" }),
     },
     dataset_timezone: record.datasetTimezone || "",
-    dataset_location: schemaVersion === "3.0.2"
+    dataset_location: schemaVersion === "3.1.0"
       ? [
           record.latitude === "" ? null : Number(record.latitude),
           record.longitude === "" ? null : Number(record.longitude),
         ]
       : [record.latitude || "", record.longitude || ""],
-    dataset_variable_terms: getDatasetVariableTerms(fileGroups),
-    dataset_file: fileGroups.map((group) => buildDatasetFile(group, schemaVersion)),
+    ...(schemaVersion === "3.1.0" && record.includeRecordings === false ? {} : {
+      dataset_variable_terms: getDatasetVariableTerms(fileGroups),
+      dataset_file: fileGroups.map((group) => buildDatasetFile(group, schemaVersion)),
+    }),
   };
 
-  if (schemaVersion !== "3.0.2") {
+  if (schemaVersion !== "3.1.0") {
     datasetRecord.dataset_instructions = record.instructions || "";
     datasetRecord.dataset_crossref.dataset_crossref_device_id = record.deviceId || "";
     datasetRecord.dataset_device_location = record.deviceLocation || "";
@@ -4300,6 +4389,11 @@ function buildDatasetRecordDraft(record) {
     datasetRecord.dataset_datetime = datasetDatetime;
   }
 
+  if (schemaVersion === "3.1.0") {
+    if (!isBlank(record.recordingDuration)) datasetRecord.dataset_recording_duration = Number(record.recordingDuration);
+    if (!isBlank(record.recordingDurationUnit)) datasetRecord.dataset_recording_duration_unit = record.recordingDurationUnit;
+    if (!isBlank(record.recordingContiguity)) datasetRecord.dataset_recording_contiguity = record.recordingContiguity;
+  }
   return datasetRecord;
 }
 
@@ -4354,7 +4448,7 @@ function buildStudyDraft() {
   }
   return omitEmptyOptionalEntities([
     {
-      schema_version: fields.schemaVersion.value || "3.0.2",
+      schema_version: fields.schemaVersion.value || "3.1.0",
       study_internal_id: getStudyId(),
       study_title: fields.studyTitle.value || "",
       study_preregistration: fields.studyPreregistration.value || null,
@@ -4363,6 +4457,7 @@ function buildStudyDraft() {
       study_short_description: fields.studyShortDescription.value || "",
       study_sample: fields.studySample.value || "",
       study_groups: buildStudyGroups(),
+      summary_statistics: buildSummaryStatistics(),
       study_intervention: fields.studyIntervention.value || null,
       study_setting: fields.studySetting.value || "",
       study_geographical_location: fields.studyGeographicalLocation.value || "",
@@ -4451,7 +4546,7 @@ function buildDevicesDraft({ includeEmpty = false } = {}) {
   const rows = devices
     .filter((entry) => includeEmpty || entry.id || entry.manufacturer || entry.model || entry.serialNumber)
     .map((entry) => ({
-      schema_version: fields.schemaVersion.value || "3.0.2",
+      schema_version: fields.schemaVersion.value || "3.1.0",
       device_internal_id: entry.id,
       device_manufacturer: entry.manufacturer,
       device_model: entry.model,
@@ -4466,7 +4561,7 @@ function buildDevicesDraft({ includeEmpty = false } = {}) {
 
 function buildDatasheetsDraft({ includeEmpty = false } = {}) {
   const datasheets = includeEmpty && state.datasheets.length === 0 ? [createDatasheet()] : state.datasheets;
-  const schemaVersion = fields.schemaVersion.value || "3.0.2";
+  const schemaVersion = fields.schemaVersion.value || "3.1.0";
   const schema3 = String(schemaVersion).startsWith("3.");
   const rows = datasheets
     .filter((entry) => includeEmpty || entry.id || entry.manufacturer || entry.model)
@@ -4513,7 +4608,7 @@ function buildDatasheetsDraft({ includeEmpty = false } = {}) {
 }
 
 function buildDataPackage() {
-  const schemaVersion = fields.schemaVersion.value || "3.0.2";
+  const schemaVersion = fields.schemaVersion.value || "3.1.0";
   const schemaBase = `schemas/${schemaVersion}`;
   const includeCharacteristics = buildCharacteristicsRows().length > 0;
   const resources = [
@@ -4567,7 +4662,7 @@ function buildDataPackage() {
   }
 
   return {
-    profile: `${schemaBase}/${schemaVersion === "3.0.2" ? "glc-dp-profile.json" : "gleam-dp-profile.json"}`,
+    profile: `${schemaBase}/${schemaVersion === "3.1.0" ? "glc-dp-profile.json" : "gleam-dp-profile.json"}`,
     schema_version: schemaVersion,
     name: fields.packageName.value,
     title: fields.packageTitle.value,
@@ -4966,6 +5061,9 @@ function datasetHasUserContent(dataset) {
     dataset.deviceId,
     dataset.deviceLocation,
     dataset.samplingInterval,
+    dataset.recordingDuration,
+    dataset.recordingDurationUnit,
+    dataset.recordingContiguity,
     dataset.datasetTimezone,
     dataset.latitude,
     dataset.longitude,
@@ -5100,6 +5198,24 @@ function validateStudyForExport() {
         }
       });
     });
+  state.summaryStatistics.forEach((entry, index) => {
+    const label = `Summary statistic ${index + 1}`;
+    ["variable", "statistic", "unit", "population"].forEach((key) => {
+      if (isBlank(entry[key])) issues.push(validationIssue("Study", `${label}: ${key} is required.`));
+    });
+    if (isBlank(entry.value) || !["number", "string"].includes(typeof entry.value) || !Number.isFinite(Number(entry.value))) {
+      issues.push(validationIssue("Study", `${label}: a finite numerical value is required.`));
+    }
+    if (!["study", "study_group"].includes(entry.population)) {
+      issues.push(validationIssue("Study", `${label}: population must be study or study_group.`));
+    }
+    if (entry.population === "study_group" && (!entry.study_group_name || state.studyGroups.filter((group) => group.name === entry.study_group_name).length !== 1)) {
+      issues.push(validationIssue("Study", `${label}: group name must identify exactly one study group.`));
+    }
+    if (entry.population === "study" && entry.study_group_name != null) {
+      issues.push(validationIssue("Study", `${label}: a whole-study summary must omit the group name.`));
+    }
+  });
   state.contributors
     .filter((entry) => hasAnyValue([
       entry.fullName,
@@ -5273,7 +5389,7 @@ function validateDevicesForExport() {
 
 function validateDatasheetsForExport() {
   const issues = [];
-  const schema3 = String(fields.schemaVersion.value || "3.0.2").startsWith("3.");
+  const schema3 = String(fields.schemaVersion.value || "3.1.0").startsWith("3.");
   const datasheetIds = new Set();
   const datasheetIdProperty = state.entitySchemas.datasheet?.properties?.datasheet_id;
   const datasheets = state.datasheets.filter((entry) => hasAnyValue([
@@ -5395,7 +5511,7 @@ function validateDatasetsForExport() {
   const deviceIds = new Set(getDeviceIds());
   const studyId = getStudyId();
   const datasetIds = new Set();
-  const schemaVersion = fields.schemaVersion.value || "3.0.2";
+  const schemaVersion = fields.schemaVersion.value || "3.1.0";
 
   const datasetsWithContent = state.datasets.filter(datasetHasUserContent);
   if (datasetsWithContent.length === 0) {
@@ -5404,17 +5520,26 @@ function validateDatasetsForExport() {
 
   datasetsWithContent.forEach((dataset, datasetIndex) => {
     const label = dataset.datasetId || `record ${datasetIndex + 1}`;
+    if (schemaVersion === "3.1.0") {
+      const recording = [dataset.recordingDuration, dataset.recordingDurationUnit, dataset.recordingContiguity];
+      if (recording.some((value) => !isBlank(value)) && recording.some(isBlank)) {
+        issues.push(validationIssue("Datasets", `Dataset ${label}: recording duration, unit, and contiguity must be supplied together or all omitted.`));
+      }
+      if (!isBlank(dataset.recordingDuration) && (!Number.isFinite(Number(dataset.recordingDuration)) || Number(dataset.recordingDuration) <= 0)) {
+        issues.push(validationIssue("Datasets", `Dataset ${label}: recording duration must be a positive number.`));
+      }
+    }
 
     [
       [dataset.datasetId, "dataset ID"],
       [dataset.studyId, "study ID"],
-      ...(schemaVersion !== "3.0.2" || dataset.participantAssociated !== false
+      ...(schemaVersion !== "3.1.0" || dataset.participantAssociated !== false
         ? [[dataset.participantId, "participant ID"]]
         : []),
       [dataset.datasetTimezone, "dataset timezone"],
       [dataset.latitude, "dataset location latitude"],
       [dataset.longitude, "dataset location longitude"],
-      ...(schemaVersion === "3.0.2" ? [] : [
+      ...(schemaVersion === "3.1.0" ? [] : [
         [dataset.deviceId, "device ID"],
         [dataset.deviceLocation, "device location"],
         [dataset.samplingInterval, "sampling interval"],
@@ -5439,30 +5564,31 @@ function validateDatasetsForExport() {
     if (!isBlank(dataset.datasetTimezone) && !isRecognizedTimeZone(dataset.datasetTimezone)) {
       issues.push(validationIssue("Datasets", `Dataset ${label}: ${timeZoneIssueMessage("dataset timezone", dataset.datasetTimezone)}`));
     }
-    if (schemaVersion === "3.0.2" && !isBlank(dataset.latitude) && !isFiniteNumberValue(dataset.latitude)) {
+    if (schemaVersion === "3.1.0" && !isBlank(dataset.latitude) && !isFiniteNumberValue(dataset.latitude)) {
       issues.push(validationIssue("Datasets", `Dataset ${label}: dataset location latitude must be numeric.`));
     }
-    if (schemaVersion === "3.0.2" && !isBlank(dataset.longitude) && !isFiniteNumberValue(dataset.longitude)) {
+    if (schemaVersion === "3.1.0" && !isBlank(dataset.longitude) && !isFiniteNumberValue(dataset.longitude)) {
       issues.push(validationIssue("Datasets", `Dataset ${label}: dataset location longitude must be numeric.`));
     }
     if (!isBlank(dataset.participantId) && !participantIds.has(dataset.participantId)) {
       issues.push(validationIssue("Datasets", `Dataset ${label}: participant ID does not match any participant row.`));
     }
-    if (schemaVersion === "3.0.2" && dataset.participantAssociated === false && !isBlank(dataset.participantId)) {
+    if (schemaVersion === "3.1.0" && dataset.participantAssociated === false && !isBlank(dataset.participantId)) {
       issues.push(validationIssue("Datasets", `Dataset ${label}: participant ID must be empty when no participant is associated.`));
     }
     if (!isBlank(dataset.participantId)) {
       referencedParticipantIds.add(dataset.participantId);
     }
-    if (schemaVersion !== "3.0.2" && !isBlank(dataset.deviceId) && !deviceIds.has(dataset.deviceId)) {
+    if (schemaVersion !== "3.1.0" && !isBlank(dataset.deviceId) && !deviceIds.has(dataset.deviceId)) {
       issues.push(validationIssue("Datasets", `Dataset ${label}: device ID does not match any device record.`));
     }
-    if (schemaVersion !== "3.0.2"
+    if (schemaVersion !== "3.1.0"
       && !isBlank(dataset.samplingInterval)
       && (!isFiniteNumberValue(dataset.samplingInterval) || Number(dataset.samplingInterval) < 0)) {
       issues.push(validationIssue("Datasets", `Dataset ${label}: sampling interval must be a non-negative number.`));
     }
 
+    if (schemaVersion === "3.1.0" && dataset.includeRecordings === false) return;
     const fileGroups = dataset.fileGroups || [];
     if (fileGroups.length === 0) {
       issues.push(validationIssue("Datasets", `Dataset ${label}: at least one file group is missing.`));
@@ -5472,7 +5598,7 @@ function validateDatasetsForExport() {
     fileGroups.forEach((group, groupIndex) => {
       const groupLabel = `Dataset ${label}, file group ${groupIndex + 1}`;
       [
-        ...(schemaVersion === "3.0.2" ? [
+        ...(schemaVersion === "3.1.0" ? [
           [group.modalities?.length ? group.modalities : "", "file modality"],
           ...(fileGroupRequiresDevice(group) ? [
             [group.deviceId, "device ID"],
@@ -5485,7 +5611,7 @@ function validateDatasetsForExport() {
         [group.fileFormat, "file format"],
         [group.encoding, "encoding"],
         [group.fileTimezone, "file timezone"],
-        ...(schemaVersion === "3.0.2" ? [
+        ...(schemaVersion === "3.1.0" ? [
           [group.role, "file role"],
           [group.dataState, "data state"],
         ] : [[group.auxiliary, "auxiliary file status"]]),
@@ -5497,10 +5623,10 @@ function validateDatasetsForExport() {
         }
       });
 
-      if (schemaVersion === "3.0.2" && !isBlank(group.deviceId) && !deviceIds.has(group.deviceId)) {
+      if (schemaVersion === "3.1.0" && !isBlank(group.deviceId) && !deviceIds.has(group.deviceId)) {
         issues.push(validationIssue("Datasets", `${groupLabel}: device ID does not match any device record.`));
       }
-      if (schemaVersion === "3.0.2") {
+      if (schemaVersion === "3.1.0") {
         const modalities = group.modalities || [];
         if (dataset.participantAssociated === false
           && ["body_worn", "participant_proximal"].includes(group.deviceLocationType)) {
@@ -5554,7 +5680,7 @@ function validateDatasetsForExport() {
           issues.push(validationIssue("Datasets", `${groupLabel}: optional device metadata must include device ID, location, and location type as a complete set.`));
         }
       }
-      if (schemaVersion === "3.0.2" && group.temporalResolutionType === "fixed_interval") {
+      if (schemaVersion === "3.1.0" && group.temporalResolutionType === "fixed_interval") {
         if (isBlank(group.samplingInterval) || !isFiniteNumberValue(group.samplingInterval) || Number(group.samplingInterval) <= 0) {
           issues.push(validationIssue("Datasets", `${groupLabel}: temporal resolution value must be a positive number.`));
         }
@@ -5576,7 +5702,7 @@ function validateDatasetsForExport() {
       if (!group.columns || group.columns.length === 0) {
         issues.push(validationIssue("Datasets", `${groupLabel}: no variables/columns are listed.`));
       }
-      if (schemaVersion === "3.0.2") {
+      if (schemaVersion === "3.1.0") {
         (group.columns || []).forEach((column) => {
           const variable = group.variableState?.[column] || {};
           if (isBlank(variable.type)) {
@@ -5615,19 +5741,19 @@ function validateDatasetsForExport() {
       if (group.datetimeTime && isBlank(group.datetimeTimeformat)) {
         issues.push(validationIssue("Datasets", `${groupLabel}: time format is missing for the separate time column.`));
       }
-      if (schemaVersion === "3.0.2" && group.dataState === "processed" && isBlank(group.preprocessingDesc)) {
+      if (schemaVersion === "3.1.0" && group.dataState === "processed" && isBlank(group.preprocessingDesc)) {
         issues.push(validationIssue("Datasets", `${groupLabel}: preprocessing/provenance description is missing for processed data.`));
       }
-      if (schemaVersion !== "3.0.2" && group.preprocessingBol === true && isBlank(group.preprocessingDesc)) {
+      if (schemaVersion !== "3.1.0" && group.preprocessingBol === true && isBlank(group.preprocessingDesc)) {
         issues.push(validationIssue("Datasets", `${groupLabel}: preprocessing description is missing.`));
       }
-      if (schemaVersion === "3.0.2" && group.role === "primary" && getPrimaryVariables(group).length === 0) {
+      if (schemaVersion === "3.1.0" && group.role === "primary" && getPrimaryVariables(group).length === 0) {
         issues.push(validationIssue("Datasets", `${groupLabel}: select at least one primary variable. A primary variable is a principal or default variable used to analyse this file group.`));
       }
       if (getPrimaryVariables(group).length > 4) {
         issues.push(validationIssue("Datasets", `${groupLabel}: no more than four primary variables are allowed.`));
       }
-      if (schemaVersion !== "3.0.2" && group.auxiliary !== true && getPrimaryVariables(group).length === 0) {
+      if (schemaVersion !== "3.1.0" && group.auxiliary !== true && getPrimaryVariables(group).length === 0) {
         issues.push(validationIssue("Datasets", `${groupLabel}: at least one primary variable should be selected.`));
       }
     });
@@ -5734,7 +5860,7 @@ async function importPackageFolder(files) {
     if (found.datasets) {
       const datasetRows = datasetRowsFromJson(await found.datasets.text());
       fields.schemaVersion.value = normalizeBuilderSchemaVersion(
-        datasetRows.find((row) => row?.schema_version)?.schema_version || fields.schemaVersion.value || "3.0.2",
+        datasetRows.find((row) => row?.schema_version)?.schema_version || fields.schemaVersion.value || "3.1.0",
       );
       state.datasets = datasetRows.map(datasetRecordFromSchema);
       state.activeDatasetIndex = 0;
@@ -5777,7 +5903,7 @@ async function importPackageFolder(files) {
 }
 
 function clearPackageFolderImport() {
-  fields.schemaVersion.value = "3.0.2";
+  fields.schemaVersion.value = "3.1.0";
   fields.packageName.value = "";
   fields.packageTitle.value = "";
 
@@ -5796,6 +5922,7 @@ function clearPackageFolderImport() {
   fields.studyKeywords.value = "";
 
   state.studyGroups = [];
+  state.summaryStatistics = [];
   state.contributors = [];
   state.participants = [createParticipant()];
   state.characteristics = [];
@@ -5841,7 +5968,7 @@ function populatePackageFieldsFromDataPackage(datapackage) {
   }
 
   fields.schemaVersion.value = normalizeBuilderSchemaVersion(
-    datapackage.schema_version || fields.schemaVersion.value || "3.0.2",
+    datapackage.schema_version || fields.schemaVersion.value || "3.1.0",
   );
   loadSchemaHelp(fields.schemaVersion.value);
   fields.packageName.value = datapackage.name || "";
@@ -5885,6 +6012,7 @@ function isJsonLikeFile(file) {
 
 function renderAllMetadataSections() {
   renderStudyGroups();
+  renderSummaryStatistics();
   renderContributors();
   renderParticipants();
   renderCharacteristics();
@@ -5937,12 +6065,13 @@ function buildBuilderProject() {
   return {
     builder_project_version: "2.0.0",
     saved_at: new Date().toISOString(),
-    schema_version: fields.schemaVersion.value || "3.0.2",
+    schema_version: fields.schemaVersion.value || "3.1.0",
     form_values: Object.fromEntries(PROJECT_FIELD_KEYS.map((key) => [key, fields[key]?.value || ""])),
     active_step: state.activeStep,
     active_dataset_index: state.activeDatasetIndex,
     active_group_index: state.activeGroupIndex,
     study_groups: cloneJson(state.studyGroups),
+    summary_statistics: cloneJson(state.summaryStatistics),
     contributors: cloneJson(state.contributors),
     participants: cloneJson(state.participants),
     characteristics: cloneJson(state.characteristics),
@@ -5968,10 +6097,11 @@ function restoreBuilderProject(project) {
     if (fields[key] && Object.hasOwn(values, key)) fields[key].value = values[key] ?? "";
   });
   fields.schemaVersion.value = normalizeBuilderSchemaVersion(
-    project.schema_version || values.schemaVersion || "3.0.2",
+    project.schema_version || values.schemaVersion || "3.1.0",
   );
 
   state.studyGroups = cloneJson(project.study_groups || []);
+  state.summaryStatistics = cloneJson(project.summary_statistics || []);
   state.contributors = cloneJson(project.contributors || []);
   state.participants = cloneJson(project.participants || [createParticipant()]);
   state.characteristics = cloneJson(project.characteristics || []);
@@ -6033,6 +6163,7 @@ function projectSnapshotHasMeaningfulContent(project) {
     Array.isArray(value) ? value.length > 0 : String(value || "").trim() !== ""
   ));
   if ((project.study_groups || []).some(rowHasValue)) return true;
+  if ((project.summary_statistics || []).length) return true;
   if ((project.contributors || []).some(rowHasValue)) return true;
   if ((project.participants || []).some(rowHasValue)) return true;
   if ((project.characteristics || []).some(rowHasValue)) return true;
@@ -6047,6 +6178,9 @@ function projectSnapshotHasMeaningfulContent(project) {
       dataset.deviceId,
       dataset.deviceLocation,
       dataset.samplingInterval,
+      dataset.recordingDuration,
+      dataset.recordingDurationUnit,
+      dataset.recordingContiguity,
       dataset.datasetTimezone,
       dataset.latitude,
       dataset.longitude,
@@ -6177,7 +6311,7 @@ document.addEventListener("click", (event) => {
 });
 
 async function buildPackageZipFiles() {
-  const schemaVersion = fields.schemaVersion.value || "3.0.2";
+  const schemaVersion = fields.schemaVersion.value || "3.1.0";
   const files = [
     {
       path: "datapackage.json",
@@ -6210,7 +6344,9 @@ async function buildPackageZipFiles() {
         "",
         "This zip contains generated metadata files and the schema bundle referenced by datapackage.json.",
         "It does not include the original data files selected in the dataset file assistant.",
-        "Before running the full validator, add referenced data files under the paths declared in data/datasets.json.",
+        "If recordings are declared in data/datasets.json, add EVERY referenced file at its declared path before validation. Missing declared files are errors, even when none are supplied.",
+        "GLC prioritises openly shared recordings. Metadata-only packages are accepted where ethical, consent-related or legal constraints prevent public sharing. Registry inclusion requires maintainer review.",
+        "For metadata-only validation, turn off Include recording files for this dataset for every dataset. This omits dataset_file; the exported metadata contain no validation-mode flag. Metadata-only entries support discovery but do not provide openly reusable recordings; only metadata are validated.",
       ].join("\n"),
     },
   ];
@@ -6222,7 +6358,7 @@ async function buildPackageZipFiles() {
     });
   }
 
-  const profileFilename = schemaVersion === "3.0.2"
+  const profileFilename = schemaVersion === "3.1.0"
     ? "glc-dp-profile.json"
     : "gleam-dp-profile.json";
   const schemaFiles = await Promise.all([...ZIP_SCHEMA_FILES, profileFilename].map(async (filename) => {
@@ -6356,7 +6492,7 @@ function downloadBlob(filename, blob) {
 }
 
 async function downloadSchema(filename) {
-  const schemaVersion = fields.schemaVersion.value || "3.0.2";
+  const schemaVersion = fields.schemaVersion.value || "3.1.0";
   const response = await fetch(`schemas/${schemaVersion}/${filename}`);
   const text = await response.text();
   downloadText(filename, text, "application/json");

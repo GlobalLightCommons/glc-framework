@@ -1,0 +1,79 @@
+name: Verify released validator image
+on:
+  pull_request:
+    paths: [".github/workflows/validate.yml", ".github/workflows/validator-release-check.yml"]
+  push:
+    branches: [main]
+    paths: [".github/workflows/validate.yml", ".github/workflows/validator-release-check.yml"]
+  workflow_dispatch:
+    inputs:
+      image:
+        description: Exact ghcr.io/globallightcommons/glc-validator@sha256 digest; blank checks the workflow pin.
+        required: false
+        type: string
+      expected_version:
+        description: Expected validator version; blank uses the version embedded in the image.
+        required: false
+        type: string
+permissions:
+  contents: read
+jobs:
+  released-image:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        architecture: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - name: Select the immutable released image
+        env:
+          REQUESTED_IMAGE: ${{ inputs.image }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          from pathlib import Path
+          image = os.environ.get('REQUESTED_IMAGE', '').strip()
+          if not image:
+              match = re.search(r'^      VALIDATOR_IMAGE_TAG: (\S+)$', Path('.github/workflows/validate.yml').read_text(), re.M)
+              if not match:
+                  raise SystemExit('Missing workflow image pin')
+              image = match.group(1)
+          if not re.fullmatch(r'ghcr\.io/globallightcommons/glc-validator@sha256:[0-9a-f]{64}', image):
+              raise SystemExit('Expected an immutable GlobalLightCommons validator image digest')
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write(f'IMAGE_REF={image}\n')
+          PY
+      - name: Pull publicly without registry credentials
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/anonymous-docker"
+          DOCKER_CONFIG="$RUNNER_TEMP/anonymous-docker" docker pull --platform "linux/$ARCHITECTURE" "$IMAGE_REF"
+      - name: Verify release version and normal entrypoint
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+          REQUESTED_VERSION: ${{ inputs.expected_version }}
+        run: |
+          set -euo pipefail
+          docker run --rm --platform "linux/$ARCHITECTURE" --entrypoint cat "$IMAGE_REF" /repo/VERSION > "$RUNNER_TEMP/image-version.txt"
+          mkdir -p "$RUNNER_TEMP/release-output"
+          docker run --rm --platform "linux/$ARCHITECTURE" \
+            -v "$RUNNER_TEMP/release-output:/out" \
+            -v "$PWD/validator/tests/fixtures/schema-3.0.2/pass:/data:ro" -w /data \
+            -e VALIDATION_JSON=/out/validation.json \
+            -e VALIDATION_MANIFEST=/out/validated-files-manifest.json \
+            -e VALIDATOR_IMAGE="$IMAGE_REF" "$IMAGE_REF" datapackage.json
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          version = (root / 'image-version.txt').read_text().strip()
+          expected = os.environ.get('REQUESTED_VERSION', '').strip()
+          if expected:
+              assert version == expected, (version, expected)
+          report = json.loads((root / 'release-output/validation.json').read_text())
+          assert report['status'] == 'pass', report
+          assert report['validator_version'] == version, report
+          assert report['validator_image'] == os.environ['IMAGE_REF'], report
+          PY

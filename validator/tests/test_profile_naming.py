@@ -8,6 +8,7 @@ class ProfileNamingTests(unittest.TestCase):
         self.assertEqual(get_profile_path("3.0.0").name, "glc-dp-profile.json")
         self.assertEqual(get_profile_path("3.0.1").name, "glc-dp-profile.json")
         self.assertEqual(get_profile_path("3.0.2").name, "glc-dp-profile.json")
+        self.assertEqual(get_profile_path("3.1.0").name, "glc-dp-profile.json")
 
     def test_legacy_gleam_profile_name_is_preserved(self):
         self.assertEqual(get_profile_path("1.0.0").name, "gleam-dp-profile.json")

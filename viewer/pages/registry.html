@@ -8,10 +8,21 @@ permalink: /registry/
 <h1>GLC Registry</h1>
 
 <p>
+  <strong>GLC prioritises openly shared recordings.</strong> Metadata-only packages
+  are accepted where ethical, consent-related or legal constraints prevent public
+  sharing. These entries support study discovery but do not provide openly reusable
+  recordings. They are labelled <strong>Metadata only — recordings not provided</strong>,
+  and validation covers metadata requirements only. Registry inclusion requires
+  maintainer review; passing validation alone does not establish eligibility.
+</p>
+
+<p>
   The GLC registry lists dataset repositories that have run the trusted GLC
-  validation workflow. A passing entry conforms to the displayed GLC schema
-  version at the specified commit; it does not imply conformance to later
-  schema versions.
+  validation workflow. Read status together with validation scope: an orange
+  Metadata only badge means recording contents were not assessed. A passing
+  entry covers the reported scope and schema version at the specified commit;
+  it does not imply conformance to later schema versions. Expand warning counts
+  to inspect messages for that run.
 </p>
 
 <details>
@@ -110,6 +121,9 @@ permalink: /registry/
   .unrecognized-schema { background:#f2f2f2; color:#555; }
   .rename-warning { display:block; margin-top:6px; color:#8a5700; }
   .schema-note { display:block; margin-top:6px; color:#8a5700; max-width:260px; }
+  .metadata-only { background:#fff1d6; color:#8a5700; }
+  .warnings-count { background:#fff7cc; color:#705100; padding:2px 8px; border-radius:12px; cursor:pointer; }
+  .warning-details { min-width:140px; max-width:320px; }
 
   .muted { opacity: 0.75; }
 
@@ -136,6 +150,73 @@ permalink: /registry/
       : s === "unverified" ? "unverified"
       : "unknown";
     return `<span class="pill ${cls}">${s}</span>`;
+  }
+
+  function escapeText(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    })[char]);
+  }
+
+  function scopePill(validation) {
+    if (validation?.validation_scope === "metadata_only") {
+      return '<span class="pill metadata-only" title="Recording files were not provided. Only metadata were validated.">Metadata only</span>';
+    }
+    if (validation?.validation_scope === "metadata_and_data") {
+      const completed = validation.coverage?.recordings === "pass";
+      return `<span class="pill ${completed ? "pass" : "unknown"}">${completed ? "Metadata + data" : "Data checks incomplete or failed"}</span>`;
+    }
+    return '<span class="muted">Scope not recorded</span>';
+  }
+
+  function groupWarnings(warnings) {
+    const labels = {
+      empty_values: 'Empty values', row_width: 'Rows with extra or missing cells',
+      extra_columns: 'Columns not described in metadata',
+      unreferenced_participants: 'Participants without linked datasets',
+      unchecked_resource: 'Additional resources not assessed',
+      profile_override: 'Declared profile replaced by canonical profile',
+      legacy_sampling: 'Legacy sampling or file-classification notices', other: 'Other warnings'
+    };
+    const rules = [
+      ['empty values', 'empty_values'], ['cells than the', 'row_width'],
+      ['undeclared extra columns', 'extra_columns'],
+      ['not referenced by any dataset', 'unreferenced_participants'],
+      ['resource not validated', 'unchecked_resource'],
+      ['canonical validator profile is enforced', 'profile_override'],
+      ['appears irregular', 'legacy_sampling'], ['appears highly regular', 'legacy_sampling'],
+      ['has very few rows', 'legacy_sampling']
+    ];
+    const groups = new Map();
+    warnings.forEach(warning => {
+      const message = String(warning.message || warning);
+      const category = Object.hasOwn(labels, warning.type) ? warning.type
+        : (rules.find(([text]) => message.includes(text))?.[1] || 'other');
+      if (!groups.has(category)) groups.set(category, {label: labels[category], messages: []});
+      groups.get(category).messages.push(message);
+    });
+    return [...groups.values()];
+  }
+
+  function warningDetails(validation) {
+    const count = validation?.warning_count;
+    if (!Number.isInteger(count) || count < 0) return '<span class="muted">Unavailable</span>';
+    if (!count) return '0';
+    const warnings = validation.warnings || [];
+    const runLink = /^https:\/\/github\.com\/[^/]+\/[^/]+\/actions\/runs\/\d+$/.test(validation.run_url || "")
+      ? `<a href="${escapeText(validation.run_url)}" target="_blank" rel="noopener noreferrer">View validation run</a>` : '';
+    if (!warnings.length) {
+      return runLink
+        ? `<a class="warnings-count" href="${escapeText(validation.run_url)}" target="_blank" rel="noopener noreferrer" title="Open the run to download its report">${count} warning${count === 1 ? "" : "s"}</a>`
+        : `<span class="warnings-count" title="Warning messages were not included in this registry snapshot">${count}</span>`;
+    }
+    const details = groupWarnings(warnings).map(group =>
+      `<details><summary>${escapeText(group.label)}: ${group.messages.length} instance${group.messages.length === 1 ? '' : 's'}</summary>`
+      + `<ul>${group.messages.slice(0, 20).map(message => `<li>${escapeText(message)}</li>`).join('')}</ul>`
+      + (group.messages.length > 20 ? `<p>Showing the first 20 instances. ${runLink}</p>` : '')
+      + '</details>'
+    ).join('');
+    return `<details class="warning-details"><summary class="warnings-count">${count} warning${count === 1 ? "" : "s"}</summary>${details}</details>`;
   }
 
   function schemaVersion(validation, currentVersion) {
@@ -209,6 +290,8 @@ permalink: /registry/
             <th class="name-col">Dataset</th>
             <th>State</th>
             <th>Status</th>
+            <th>Validation scope</th>
+            <th>Warnings</th>
             <th>Schema</th>
             <th>Commit</th>
             <th class="when-col">Validated at</th>
@@ -262,6 +345,8 @@ permalink: /registry/
                     <td><span class="rowtag">Latest pass</span></td>
 
                     <td>${pill(lpStatus)}</td>
+                    <td>${scopePill(lp)}</td>
+                    <td>${warningDetails(lp)}</td>
 
                     <td>${schemaVersion(lp, currentSchemaVersion)}</td>
 
@@ -286,6 +371,8 @@ permalink: /registry/
                     <td><span class="rowtag">Current</span></td>
 
                     <td>${pill(curStatus)}</td>
+                    <td>${scopePill(cur)}</td>
+                    <td>${warningDetails(cur)}</td>
 
                     <td>${schemaVersion(cur, currentSchemaVersion)}</td>
 

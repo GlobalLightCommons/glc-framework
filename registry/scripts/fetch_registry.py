@@ -17,7 +17,7 @@ from validation_artifacts import (
     verify_validation_artifact,
 )
 
-CURRENT_GLC_SCHEMA_VERSION = os.getenv("CURRENT_GLC_SCHEMA_VERSION", "3.0.2")
+CURRENT_GLC_SCHEMA_VERSION = os.getenv("CURRENT_GLC_SCHEMA_VERSION", "3.1.0")
 
 
 def load_cfg(path: str):
@@ -65,6 +65,10 @@ def validation_summary(result, current_schema_version=CURRENT_GLC_SCHEMA_VERSION
         "timestamp_utc": report.get("timestamp_utc"),
         "error_count": report.get("error_count"),
         "warning_count": report.get("warning_count"),
+        "warnings": report.get("warnings", []),
+        "warning_groups": report.get("warning_groups", []),
+        "validation_scope": report.get("validation_scope"),
+        "coverage": report.get("coverage"),
         "file_manifest": report.get("file_manifest"),
         "manifest_file_count": len(manifest.get("files", [])),
         "run_id": result.get("run_id"),
