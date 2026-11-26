@@ -31,6 +31,11 @@ class FrameworkSitePathsTests(unittest.TestCase):
         self.assertIn("location.search + location.hash", redirect)
         self.assertIn('href="/glc-framework/docs/schemas/"', redirect)
 
+    def test_monorepo_registry_feed_uses_combined_site_base_path(self):
+        source = "https://globallightcommons.github.io/glc-framework/registry/registry.json"
+        for prefix in ("", "/glc-framework"):
+            self.assertEqual(local_links(source, prefix), f"{prefix}/registry/registry.json")
+
 
 if __name__ == "__main__":
     unittest.main()
