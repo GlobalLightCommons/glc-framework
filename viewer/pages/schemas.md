@@ -22,6 +22,10 @@ Resources marked with `*` are required.
 
 [How to prepare and validate a data package]({{ '/validate/#prepare' | relative_url }}).
 
+Before filling in dataset metadata, read
+[Organizing datasets and file groups]({{ '/organizing-datasets/' | relative_url }})
+to decide which recordings belong in each record and which files can share metadata.
+
 <details markdown="1">
 <summary>Package requirements and validation coverage</summary>
 

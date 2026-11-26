@@ -14,9 +14,10 @@ class FrameworkSitePathsTests(unittest.TestCase):
                          ("https://globallightcommons.github.io", "/glc-framework"))
 
     def test_documentation_routes_do_not_rewrite_schema_or_repository_identities(self):
-        text = "{{ '/schemas/' | relative_url }} https://github.com/owner/repo/schemas/3.0.2/schema.json"
+        text = "{{ '/schemas/' | relative_url }} {{ '/organizing-datasets/' | relative_url }} https://github.com/owner/repo/schemas/3.0.2/schema.json"
         converted = documentation_links(text)
         self.assertIn("'/docs/schemas/'", converted)
+        self.assertIn("'/docs/organizing-datasets/'", converted)
         self.assertIn("https://github.com/owner/repo/schemas/3.0.2/schema.json", converted)
         self.assertEqual(documentation_links('"schemas/3.0.2/schema.json"'), '"schemas/3.0.2/schema.json"')
 

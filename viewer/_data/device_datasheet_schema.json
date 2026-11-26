@@ -252,9 +252,9 @@
           },
           "datasheet_channel_description": {
             "type": "string",
-            "description": "Description of channel",
+            "description": "Description of channel; specify whether a channel is physical (sensor output) or virtual (derived quantity).",
             "examples": [
-              "Photopic illuminance channel."
+              "Photopic illuminance channel (virtual)"
             ]
           }
         },
@@ -269,7 +269,7 @@
             "datasheet_channel_nr": 1,
             "datasheet_channel_name": "LIGHT",
             "datasheet_channel_unit": "lx",
-            "datasheet_channel_description": "Photopic illuminance channel."
+            "datasheet_channel_description": "Photopic illuminance channel (virtual)"
           }
         ]
       ]
