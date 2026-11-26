@@ -100,6 +100,8 @@ but do not contain or retain browser access to the original measurement files.
 
 ## Dataset model
 
+User-facing guidance is available in [Organizing datasets and file groups](https://globallightcommons.github.io/glc-framework/docs/organizing-datasets/).
+
 For participant-associated data, the builder normally treats one dataset record as the collection of file groups associated with one participant in the relevant study period.
 
 Use a new dataset record when the participant or the relevant study period or measurement context changes. Non-participant data can be represented explicitly by setting the participant association to false.

@@ -288,7 +288,7 @@ them. The short tables below explain key links, not every required field.
 
 ### Project setup
 
-Select **Get started**, choose schema **3.0.2**, and provide a package name
+Select **Get started**, use the current schema **3.1.0**, and provide a package name
 and title. Use a descriptive package name, such as `your-study-light-package`.
 Save a builder draft as you work. Browser autosave is local to that browser and
 device; it is not a substitute for an exported draft or a backup.
@@ -323,6 +323,11 @@ satisfy a required field. Ask the device or study expert if information is missi
 
 ### Dataset records and file groups
 
+Before adding records, read
+[Organizing datasets and file groups](https://globallightcommons.github.io/glc-framework/docs/organizing-datasets/).
+It explains participant associations, repeated study periods, multiple devices,
+and the metadata that files must share to belong to one group.
+
 For a participant's recording, add a dataset record, select the Study ID,
 set **Participant associated** to **Yes**, and select the participant.
 Use **No** only for measurements without participant-associated data, such as
@@ -331,6 +336,25 @@ purely environmental monitoring.
 A **file group** describes files with shared structure and acquisition metadata.
 Add different structures as separate groups. Questionnaires, diaries, and wear
 logs use their own groups rather than being combined with sensor modalities.
+
+For example, with 20 participants and one light file plus one activity file per
+participant, create 20 dataset records with two file groups each: light and
+accelerometry. For `P01`, create `DS_P01` and add their two files as separate
+groups. Repeat with the correct participant and device references for `P02`
+through `P20`. A change of device or body/device location within the same
+measurement context needs a separate group, not automatically a new dataset.
+
+If `P01` has seven daily light files with the same structure and acquisition
+metadata, list those files in one light group and describe the variables once.
+Files from other participants belong in those participants' dataset records.
+Distinct baseline and follow-up visits can have separate records linked to the
+same participant; a related questionnaire can be a separate supporting group.
+
+The builder detects column names from headers and can save a draft so you can
+resume later. Reusable dataset template controls are not currently available.
+For many participants, a colleague can help generate repeated metadata from a
+reviewed example and import the resulting JSON, checking all IDs, file paths,
+device references, and participant-specific differences before validation.
 
 For a cleaned file like the exercise, the important settings would be:
 

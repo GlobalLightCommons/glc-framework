@@ -18,6 +18,8 @@ for other researchers to understand and reuse.
 2. **Create metadata.** Use the
    [Metadata Builder](https://builder.globallightcommons.org/) to describe
    your study, participants, devices, and files, then export the package.
+   Before adding dataset records, read
+   [Organizing datasets and file groups]({{ '/organizing-datasets/' | relative_url }}).
 3. **Validate your data package.** Follow the
    [validation guide]({{ '/validate/' | relative_url }}) to add your measurement
    files, run the checks, and correct errors.

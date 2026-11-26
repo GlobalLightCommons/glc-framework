@@ -9,7 +9,7 @@ from urllib.parse import urlsplit
 
 import yaml
 
-DOC_ROUTES = ("profile", "schemas", "example-package", "tools", "validate")
+DOC_ROUTES = ("profile", "schemas", "example-package", "tools", "validate", "organizing-datasets")
 
 
 def site_address(base_url):

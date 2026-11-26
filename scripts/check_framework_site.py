@@ -24,7 +24,7 @@ class Links(HTMLParser):
 def check_site(output, base_url):
     origin, base_path = site_address(base_url)
     errors = []
-    for route in ("", "docs", "viewer", "builder", "registry", "docs/profile", "docs/schemas", "docs/validate", "docs/example-package"):
+    for route in ("", "docs", "viewer", "builder", "registry", "docs/profile", "docs/schemas", "docs/validate", "docs/example-package", "docs/organizing-datasets"):
         if not (output / route / "index.html").is_file():
             errors.append(f"Missing route: /{route}")
     for path in output.rglob("*.html"):
