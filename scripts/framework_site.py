@@ -24,6 +24,7 @@ def site_address(base_url):
 
 def local_links(text, base_path):
     replacements = {
+        "https://globallightcommons.github.io/glc-framework/registry/": base_path + "/registry/",
         "https://docs.globallightcommons.org/registry/": base_path + "/registry/",
         "https://docs.globallightcommons.org/assets/": base_path + "/assets/",
         "https://docs.globallightcommons.org/example/": base_path + "/example/",

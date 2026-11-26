@@ -4,6 +4,18 @@ Current status (2026-10-30): all three sites publish monorepo source through the
 
 Prepared on 22 October 2026 for `GlobalLightCommons/glc-framework`.
 
+## Registry feed cutover (2026-11-26)
+
+The public documentation registry now loads the monorepo Pages feed at
+`https://globallightcommons.github.io/glc-framework/registry/registry.json`.
+The combined framework build rewrites that address to its own registry route,
+including its configured base path. Registry results are collected, archived,
+and published by the monorepo workflows; the legacy `glc-registry` publisher is
+retired after verifying the documentation deployment. Documentation HTML and
+its custom domain remain hosted by `glc-dp-viewer`; this feed cutover does not
+move that domain or the builder domain. The hosting design below records the
+earlier transition.
+
 ## Scope and original sources
 
 The viewer and its documentation move together. The `GlobalLightCommons/globallightcommons` website repository and all dataset repositories stay separate. All original repositories remain available with their source, history, tags, and settings preserved until an explicit deployment cutover.
