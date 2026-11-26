@@ -137,9 +137,30 @@ permalink: /registry/
     white-space: nowrap;
     cursor: pointer;
   }
-  .registry-page .warning-details { margin:0; padding:0; max-width:320px; }
+  /* The theme gives summaries heading-sized text; scope the entire warning
+     panel so opening either disclosure keeps the same compact typography. */
+  .registry-page .warning-details { margin:0; padding:0; max-width:320px; font-size:12px; line-height:1.4; }
+  .registry-page .warning-details summary,
+  .registry-page .warning-details ul,
+  .registry-page .warning-details li,
+  .registry-page .warning-details p,
+  .registry-page .warning-details a {
+    font-size: 12px !important;
+    line-height: 1.4;
+  }
+  .registry-page .warning-details details { margin:6px 0 0; padding:0; }
+  .registry-page .warning-details details > summary {
+    margin: 0;
+    padding: 0;
+    font-weight: 600;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+  }
+  .registry-page .warning-details ul { margin:6px 0; padding-left:18px; }
+  .registry-page .warning-details li { margin:0 0 4px; font-weight:400; overflow-wrap:anywhere; }
+  .registry-page .warning-details p { margin:6px 0; font-weight:400; }
   .registry-page .warning-details > summary.warnings-count { display:list-item; list-style-position:inside; }
-  .registry-page .warning-details > summary::marker { font-size:0.8em; }
+  .registry-page .warning-details summary::marker { font-size:0.8em; }
 
   .muted { opacity: 0.75; }
 
