@@ -43,7 +43,7 @@
     },
     "device_calibration_date": {
       "type": "string",
-      "description": "Required applicable calibration date in YYYY-MM-DD format, or the exact value uncalibrated when no applicable date can be supplied. Under GLC policy, uncalibrated includes unavailable historical calibration records and does not establish that the device was never calibrated. An uncalibrated declaration produces a validation warning, not a validation failure.",
+      "description": "Required applicable calibration date in `YYYY-MM-DD` format, or `uncalibrated` when no applicable date can be supplied. Under GLC policy, `uncalibrated` includes unavailable historical calibration records and does not establish that the device was never calibrated. An `uncalibrated` declaration produces a validation warning, not a validation failure.",
       "examples": [
         "2026-01-15",
         "uncalibrated"
