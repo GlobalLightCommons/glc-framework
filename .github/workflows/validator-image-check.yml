@@ -34,12 +34,12 @@ jobs:
             -v "$PWD/validator/tests:/repo/tests:ro" -w /repo \
             --entrypoint python glc-validator:proposed \
             -m unittest discover -s tests -v
-      - name: Validate complete 3.0.2 and 3.1.0 packages with the container entrypoint
+      - name: Validate complete 3.0.2, 3.1.0, and 3.2.0 packages with the container entrypoint
         env:
           ARCHITECTURE: ${{ matrix.architecture }}
         run: |
           set -euo pipefail
-          for schema in 3.0.2 3.1.0; do
+          for schema in 3.0.2 3.1.0 3.2.0; do
             mkdir -p "$RUNNER_TEMP/validator-output/$schema"
             docker run --rm --platform "linux/$ARCHITECTURE" \
               -v "$RUNNER_TEMP/validator-output/$schema:/out" \
@@ -52,7 +52,7 @@ jobs:
           python3 - <<'PY'
           import json, os
           from pathlib import Path
-          for schema in ('3.0.2', '3.1.0'):
+          for schema in ('3.0.2', '3.1.0', '3.2.0'):
               report = json.loads((Path(os.environ['RUNNER_TEMP']) / 'validator-output' / schema / 'validation.json').read_text())
               assert report['status'] == 'pass', report
               assert report['schema_version'] == schema, report
@@ -66,7 +66,11 @@ jobs:
           import json, os, shutil
           from pathlib import Path
           package = Path(os.environ['RUNNER_TEMP']) / 'metadata-only'
-          shutil.copytree('validator/tests/fixtures/schema-3.1.0/pass', package)
+          shutil.copytree('validator/tests/fixtures/schema-3.2.0/pass', package)
+          devices_path = package / 'data/devices.json'
+          devices = json.loads(devices_path.read_text())
+          devices[0]['device_calibration_date'] = 'uncalibrated'
+          devices_path.write_text(json.dumps(devices))
           path = package / 'data/datasets.json'
           rows = json.loads(path.read_text())
           for row in rows:
@@ -95,4 +99,5 @@ jobs:
           assert report['validation_scope'] == 'metadata_only', report
           assert report['coverage']['metadata'] == 'pass', report
           assert report['coverage']['recordings'] == 'not_assessed', report
+          assert any(w['type'] == 'uncalibrated_devices' for w in report['warnings']), report
           PY

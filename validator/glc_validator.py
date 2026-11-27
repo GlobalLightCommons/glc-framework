@@ -11,6 +11,7 @@ import html
 from pathlib import Path
 from referencing import Registry, Resource as RefResource
 from jsonschema.validators import validator_for
+from jsonschema import FormatChecker
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse, unquote
 from collections import Counter
@@ -296,7 +297,11 @@ def validate_against_json_schema(data, schema_path, resource_label):
     registry = Registry(retrieve=load_ref)
     validator_cls = validator_for(schema)
     validator_cls.check_schema(schema)
-    validator = validator_cls(schema, registry=registry)
+    validator = validator_cls(
+        schema, registry=registry,
+        format_checker=FormatChecker() if schema.get("version") == "3.2.0"
+        and os.path.basename(schema_path) == "device.schema.json" else None,
+    )
 
     errors = []
 
@@ -1488,6 +1493,7 @@ VALIDATION_LIMITS = (
 
 
 WARNING_TYPES = {
+    "uncalibrated_devices": "Uncalibrated devices",
     "empty_values": "Empty values",
     "row_width": "Rows with extra or missing cells",
     "extra_columns": "Columns not described in metadata",
@@ -1499,9 +1505,28 @@ WARNING_TYPES = {
 }
 
 
+def warn_uncalibrated_devices(devices):
+    """Report the declared calibration limitation once per physical device."""
+    rows = devices if isinstance(devices, list) else [devices]
+    return [
+        {
+            "message": (
+                f"Device {device.get('device_internal_id', '<unknown>')} is declared uncalibrated. "
+                "No applicable calibration date was supplied. Under GLC policy, this includes "
+                "devices whose calibration records are unavailable. Consider this limitation "
+                "when assessing measurement accuracy."
+            ),
+            "path": [index, "device_calibration_date"],
+        }
+        for index, device in enumerate(rows)
+        if isinstance(device, dict) and device.get("device_calibration_date") == "uncalibrated"
+    ]
+
+
 def warning_type(warning):
     message = warning.get("message", "") if isinstance(warning, dict) else str(warning)
     for text, category in (
+        ("is declared uncalibrated", "uncalibrated_devices"),
         ("empty values", "empty_values"),
         ("cells than the", "row_width"),
         ("undeclared extra columns", "extra_columns"),
@@ -1913,7 +1938,7 @@ def validate_dataset_file_content(dataset_rows, package: Package, base_path: str
 # ----------------------------
 VALIDATOR_ROOT = Path(__file__).parent.resolve()
 CANONICAL_SCHEMAS_DIR = VALIDATOR_ROOT / "schemas"
-SCHEMA_3_VERSIONS = {"3.0.0", "3.0.1", "3.0.2", "3.1.0"}
+SCHEMA_3_VERSIONS = {"3.0.0", "3.0.1", "3.0.2", "3.1.0", "3.2.0"}
 SUPPORTED_SCHEMA_VERSIONS = {"1.0.0", "2.0.0"} | SCHEMA_3_VERSIONS
 
 CORE_JSON_RESOURCES = {"study", "datasets", "devices", "device_datasheets"}
@@ -2204,10 +2229,10 @@ def validate_crossrefs(datapackage_path: str):
                         }
                     )
                 else:
-                    (errors if schema_version == "3.1.0" else warnings).append(
+                    (errors if schema_version in {"3.1.0", "3.2.0"} else warnings).append(
                         {
                             "message": (f"[{name}] Missing required schema for declared additional tabular resource"
-                                        if schema_version == "3.1.0" else
+                                        if schema_version in {"3.1.0", "3.2.0"} else
                                         f"[{name}] No Table Schema declared; additional tabular resource not validated"),
                             "path": ["resources", name],
                         }
@@ -2278,10 +2303,10 @@ def validate_crossrefs(datapackage_path: str):
                             }
                         )
                     else:
-                        (errors if schema_version == "3.1.0" else warnings).append(
+                        (errors if schema_version in {"3.1.0", "3.2.0"} else warnings).append(
                             {
                                 "message": (f"[{name}] Missing required jsonSchema for declared additional JSON resource"
-                                            if schema_version == "3.1.0" else
+                                            if schema_version in {"3.1.0", "3.2.0"} else
                                             f"[{name}] No JSON Schema declared; additional JSON resource not validated"),
                                 "path": ["resources", name],
                             }
@@ -2442,6 +2467,9 @@ def validate_crossrefs(datapackage_path: str):
         # ----------------------------
         # Phase 2: Cross-resource validations (only if inputs exist)
         # ----------------------------
+        if devices_data is not None and schema_version == "3.2.0":
+            warnings += warn_uncalibrated_devices(devices_data)
+
         if datasets_data is not None and participants_table is not None:
             errors += validate_dataset_participant_ids(datasets_data, participants_table)
             warnings += warn_unreferenced_participant_ids(datasets_data, participants_table)
@@ -2452,7 +2480,7 @@ def validate_crossrefs(datapackage_path: str):
         if datasets_data is not None and study_data is not None:
             errors += validate_dataset_study_ids(datasets_data, study_data)
         
-        if study_data is not None and schema_version == "3.1.0":
+        if study_data is not None and schema_version in {"3.1.0", "3.2.0"}:
             errors += validate_summary_statistics_groups(study_data)
 
         # Study to datasets cross-reference
@@ -2485,7 +2513,7 @@ def validate_crossrefs(datapackage_path: str):
         metadata_outcome = coverage["metadata"]
         if datasets_data is not None and not errors:
             validation_scope, coverage, presence_errors = recording_submission(
-                datasets_data, package, base_path, allow_metadata_only=schema_version == "3.1.0",
+                datasets_data, package, base_path, allow_metadata_only=schema_version in {"3.1.0", "3.2.0"},
             )
             coverage["metadata"] = metadata_outcome
             errors += presence_errors
