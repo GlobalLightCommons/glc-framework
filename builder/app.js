@@ -1169,7 +1169,8 @@ function schemaHelpTitle(property, fallback) {
   if (!property) {
     return fallback;
   }
-  return `${property.description || fallback}. Type: ${formatSchemaType(property)}.`;
+  const description = String(property.description || fallback).replace(/`([^`]+)`/g, "$1");
+  return `${description}. Type: ${formatSchemaType(property)}.`;
 }
 
 function helpMarker(helpText) {
