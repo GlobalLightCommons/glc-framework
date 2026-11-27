@@ -57,23 +57,68 @@ jobs:
         run: |
           set -euo pipefail
           docker run --rm --platform "linux/$ARCHITECTURE" --entrypoint cat "$IMAGE_REF" /repo/VERSION > "$RUNNER_TEMP/image-version.txt"
-          mkdir -p "$RUNNER_TEMP/release-output"
-          docker run --rm --platform "linux/$ARCHITECTURE" \
-            -v "$RUNNER_TEMP/release-output:/out" \
-            -v "$PWD/validator/tests/fixtures/schema-3.0.2/pass:/data:ro" -w /data \
-            -e VALIDATION_JSON=/out/validation.json \
-            -e VALIDATION_MANIFEST=/out/validated-files-manifest.json \
-            -e VALIDATOR_IMAGE="$IMAGE_REF" "$IMAGE_REF" datapackage.json
-          python3 - <<'PY'
+          for schema in 3.0.2 3.1.0 3.2.0; do
+            mkdir -p "$RUNNER_TEMP/release-output/$schema"
+            docker run --rm --platform "linux/$ARCHITECTURE" \
+              -v "$RUNNER_TEMP/release-output/$schema:/out" \
+              -v "$PWD/validator/tests/fixtures/schema-$schema/pass:/data:ro" -w /data \
+              -e VALIDATION_JSON=/out/validation.json \
+              -e VALIDATION_MANIFEST=/out/validated-files-manifest.json \
+              -e VALIDATOR_IMAGE="$IMAGE_REF" "$IMAGE_REF" datapackage.json
+          done
+          python3 - <<'PYCODE'
           import json, os
           from pathlib import Path
           root = Path(os.environ['RUNNER_TEMP'])
           version = (root / 'image-version.txt').read_text().strip()
-          expected = os.environ.get('REQUESTED_VERSION', '').strip()
-          if expected:
-              assert version == expected, (version, expected)
-          report = json.loads((root / 'release-output/validation.json').read_text())
+          expected = os.environ.get('REQUESTED_VERSION', '').strip() or Path('validator/VERSION').read_text().strip()
+          assert version == expected, (version, expected)
+          for schema in ('3.0.2', '3.1.0', '3.2.0'):
+              report = json.loads((root / 'release-output' / schema / 'validation.json').read_text())
+              assert report['status'] == 'pass', report
+              assert report['schema_version'] == schema, report
+              assert report['validator_version'] == version, report
+              assert report['validator_image'] == os.environ['IMAGE_REF'], report
+          PYCODE
+      - name: Prepare calibrated and uncalibrated release checks
+        run: |
+          python3 - <<'PYCODE'
+          import json, os, shutil
+          from pathlib import Path
+          for name, value in (('uncalibrated', 'uncalibrated'), ('invalid-date', '9999-99-99')):
+              package = Path(os.environ['RUNNER_TEMP']) / name
+              shutil.copytree('validator/tests/fixtures/schema-3.2.0/pass', package)
+              path = package / 'data/devices.json'
+              devices = json.loads(path.read_text())
+              devices[0]['device_calibration_date'] = value
+              path.write_text(json.dumps(devices))
+          PYCODE
+      - name: Verify published image calibration behaviour
+        env:
+          ARCHITECTURE: ${{ matrix.architecture }}
+        run: |
+          set -euo pipefail
+          for name in uncalibrated invalid-date; do
+            mkdir -p "$RUNNER_TEMP/release-output/$name"
+            exit_code=0
+            docker run --rm --platform "linux/$ARCHITECTURE" \
+              -v "$RUNNER_TEMP/release-output/$name:/out" \
+              -v "$RUNNER_TEMP/$name:/data:ro" -w /data \
+              -e VALIDATION_JSON=/out/validation.json \
+              -e VALIDATION_MANIFEST=/out/validated-files-manifest.json \
+              -e VALIDATOR_IMAGE="$IMAGE_REF" "$IMAGE_REF" datapackage.json || exit_code=$?
+            if [[ "$name" == uncalibrated ]]; then test "$exit_code" = 0; else test "$exit_code" != 0; fi
+          done
+          python3 - <<'PYCODE'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP']) / 'release-output'
+          report = json.loads((root / 'uncalibrated/validation.json').read_text())
           assert report['status'] == 'pass', report
-          assert report['validator_version'] == version, report
-          assert report['validator_image'] == os.environ['IMAGE_REF'], report
-          PY
+          warnings = [w for w in report['warnings'] if w['type'] == 'uncalibrated_devices']
+          assert len(warnings) == 1, report
+          assert warnings[0]['message'] in (root / 'uncalibrated/validation.html').read_text()
+          invalid = json.loads((root / 'invalid-date/validation.json').read_text())
+          assert invalid['status'] == 'fail', invalid
+          assert any('device_calibration_date' in str(error['path']) for error in invalid['errors']), invalid
+          PYCODE

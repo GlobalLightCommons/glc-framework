@@ -8,7 +8,7 @@ function declaration(name) {
   return source.slice(start, source.indexOf('\nfunction ', start + 1));
 }
 const context = vm.createContext({
-  fields: {schemaVersion: {value: '3.1.0'}},
+  fields: {schemaVersion: {value: '3.2.0'}},
   state: {activeStep: 'export', datasets: []},
   createDatasetRecord: () => ({}), createFileGroup: () => ({}),
   normalizeDatasetTerms: () => [], fileGroupFromSchema: group => group,
@@ -20,7 +20,7 @@ const context = vm.createContext({
 });
 ['isBlank', 'normalizeBuilderSchemaVersion', 'datasetRecordFromSchema', 'buildDatasetRecordDraft', 'validateDatasetsForExport'].forEach(name => vm.runInContext(declaration(name), context));
 context.metadata = {
-  schema_version: '3.1.0', dataset_internal_id: 'metadata-only',
+  schema_version: '3.2.0', dataset_internal_id: 'metadata-only',
   dataset_participant_associated: false,
   dataset_crossref: {dataset_crossref_study_id: 'study'},
   dataset_timezone: 'UTC', dataset_location: [1, 2],

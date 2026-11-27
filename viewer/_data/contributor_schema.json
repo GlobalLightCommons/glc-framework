@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.1.0/contributor.schema.json",
-  "version": "3.1.0",
+  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.2.0/contributor.schema.json",
+  "version": "3.2.0",
   "title": "Contributor Schema",
   "type": "object",
   "properties": {

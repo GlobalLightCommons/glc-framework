@@ -5,7 +5,7 @@ permalink: /schemas/
 toc: true
 ---
 
-The GLC 3.1.0 schemas define the structure, constraints, and relationships of
+The GLC 3.2.0 schemas define the structure, constraints, and relationships of
 metadata used to describe light-exposure and optical-measurement studies.
 The schemas are maintained in the
 [GLC framework repository](https://github.com/GlobalLightCommons/glc-framework).
@@ -16,8 +16,8 @@ structured resources use JSON Schema. The tables below show required fields
 
 Resources marked with `*` are required.
 
-<a class="glc-download-button" href="{{ '/assets/downloads/glc-schemas-3.1.0.zip' | relative_url }}" download>
-  Download the GLC 3.1.0 schema bundle (.zip)
+<a class="glc-download-button" href="{{ '/assets/downloads/glc-schemas-3.2.0.zip' | relative_url }}" download>
+  Download the GLC 3.2.0 schema bundle (.zip)
 </a>
 
 [How to prepare and validate a data package]({{ '/validate/#prepare' | relative_url }}).
@@ -58,8 +58,22 @@ levels or a metadata-only flag to their metadata. An orange **Metadata only**
 registry badge means recording contents were not assessed, not that the
 metadata failed validation.
 
-These submission rules apply to schema 3.1.0 with validator 0.6.0 or later.
+These submission rules apply to schema 3.2.0 with validator 0.7.0 or later.
 
 </details>
+
+## Device calibration declarations
+
+In schema **3.2.0**, the required `device_calibration_date` accepts either an
+applicable date in `YYYY-MM-DD` format or the exact string `uncalibrated`.
+Choose **Uncalibrated / calibration date unavailable** in the builder when no
+applicable date can be supplied, including missing historical calibration records.
+Under GLC policy these devices are declared uncalibrated; this does not establish
+that they were never calibrated. Do not invent a date or enter `unknown`.
+
+Validator **0.7.0 or later** reports one calibration warning per uncalibrated device
+in its JSON and HTML reports. An otherwise valid package can pass. Impossible
+calendar dates, missing declarations, blank values, and null remain errors.
+Schema 3.1.0 and earlier retain their original rules and do not accept this option.
 
 ## Resource schemas

@@ -51,7 +51,7 @@ your-package/
 ├── datapackage.json
 ├── README.txt
 ├── schemas/
-│   └── 3.1.0/
+│   └── 3.2.0/
 │       ├── glc-dp-profile.json
 │       └── … resource schemas
 └── data/
@@ -108,8 +108,8 @@ If some records supply recordings and others do not, all metadata are still
 checked and every recording actually listed must be supplied. Recording results
 cover listed files only, not the entire study's collected data.
 
-These rules require schema 3.1.0 and validator 0.6.0 or later. The workflow
-template below selects the validator 0.6.0 workflow release.
+These rules require schema 3.2.0 and validator 0.7.0 or later. The workflow
+template below selects the validator 0.7.0 workflow release.
 
 Folders below `data/datasets/` may use descriptive names such as `light/`,
 `questionnaires/` or `longitudinal-reports/`. These are organizational
@@ -181,7 +181,7 @@ that should be reviewed.
 
 <h2 id="results"><span class="step-number">4</span>Review errors and warnings</h2>
 
-### Metadata-only or metadata and data (3.1.0, validator 0.6.0)
+### Metadata-only or metadata and data (3.2.0, validator 0.7.0)
 
 For metadata-only submission, omit `dataset_file` from every dataset record.
 An empty `dataset_file: []` is also accepted; incomplete file-group objects are not.
@@ -212,7 +212,7 @@ summary statistics, confirm preprocessing or calibration, verify usable
 recording duration or contiguity, or compare declared sampling intervals with
 observed timestamp spacing. Timestamp checks test declared formats, not spacing.
 
-The workflow template selects validator 0.6.0 using a versioned workflow release
+The workflow template selects validator 0.7.0 using a versioned workflow release
 and an immutable container digest. Existing repositories pinned to older workflow
 releases must update their workflow reference to use the new validator. Updating
 the validator does not change a package's declared schema version.
@@ -229,7 +229,7 @@ the results:
 
 <div class="validation-files">
   <article>
-    <h3><code>validation.html</code> (validator 0.6.0)</h3>
+    <h3><code>validation.html</code> (validator 0.7.0)</h3>
     <p>Open this downloaded report in a browser for scope, metadata and recording
       outcomes, per-file coverage, errors, warnings and the submitted-file inventory.
       A submission scope is not itself a passing result.</p>

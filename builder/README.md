@@ -25,7 +25,7 @@ The builder helps data owners create a draft GLC metadata package by guiding the
 - dataset file groups and variables
 - export and soft validation
 
-It creates packages using the current schema release, `3.1.0`.
+It creates packages using the current schema release, `3.2.0`.
 
 ## What it exports
 
@@ -67,7 +67,7 @@ Additional supporting resources, such as scripts, README files, raw-data folders
 
 ## Key features
 
-For a metadata-only 3.1.0 package, turn off **Include recording files for this dataset**
+For a metadata-only 3.2.0 package, turn off **Include recording files for this dataset**
 for every dataset. The builder omits `dataset_file` and its variable-term
 vocabulary from metadata, while preserving file-group edits in local drafts.
 Every listed recording must be added at its exported path before validator
@@ -76,8 +76,8 @@ files; recording results cover only the files listed. The metadata zip does
 not contain original recordings. No access labels or validation-mode fields
 are exported.
 
-- Schema `3.1.0` is the only new-package option
-- Existing `2.0.0`, `3.0.0`, `3.0.1`, or `3.0.2` packages and builder drafts open in the corrected `3.1.0` workflow
+- Schema `3.2.0` is the only new-package option
+- Existing `2.0.0`, `3.0.0`, `3.0.1`, `3.0.2`, or `3.1.0` packages and builder drafts open in the corrected `3.2.0` workflow
 - Required fields marked with red asterisks
 - Hover help from local schema descriptions
 - JSON/CSV/TSV imports where practical
@@ -88,7 +88,7 @@ are exported.
 - Auto-detected dataset variables from file headers
 - File-group-level variable terms, labels, units, calibration notes, semantic-term dropdowns, and primary-variable selection
 - Concise variable labels with an optional description field for full questionnaire prompts, source wording, instructions, and interpretation
-- Schema 3.1.0 variable units are required for `numeric` and `integer` variables and omitted for `string`, `boolean`, and `factor` variables. The builder suggests common UCUM codes while permitting a precise custom unit; placeholder values such as `N/A` and `Unknown` are rejected.
+- Schema 3.2.0 variable units are required for `numeric` and `integer` variables and omitted for `string`, `boolean`, and `factor` variables. The builder suggests common UCUM codes while permitting a precise custom unit; placeholder values such as `N/A` and `Unknown` are rejected.
 - Soft validation panel on the Export page
 - Browser-local draft autosave with resume and start-over controls
 - Downloadable and re-importable builder drafts (`glc-builder-project.json`)
@@ -97,6 +97,21 @@ are exported.
 Autosave remains on the current device in the browser's local storage. Saved
 builder drafts preserve metadata entries, detected headers, and selected file names,
 but do not contain or retain browser access to the original measurement files.
+
+## Device calibration declarations
+
+In Device Inventory, explicitly select **Provide calibration date** or
+**Uncalibrated / calibration date unavailable**. Supply the most recent
+calibration date applicable to the measurements, or select uncalibrated when
+no applicable date can be provided, including unavailable historical records.
+A blank date is not silently converted. The exported `device_calibration_date`
+contains a real `YYYY-MM-DD` date or the exact string `uncalibrated`.
+
+An uncalibrated declaration produces a warning in the full validator's JSON and
+HTML reports; an otherwise valid package can pass. This declaration does not
+establish that the device was never calibrated. Invented or impossible dates,
+`unknown`, null, and missing declarations are invalid. This requires schema
+3.2.0 and validator 0.7.0 or later. Older imported dates are preserved.
 
 ## Dataset model
 
@@ -136,7 +151,7 @@ The Python validator remains the authoritative validation step.
 A local copy of the current schema bundle is included at:
 
 ```text
-schemas/3.1.0/
+schemas/3.2.0/
 ```
 
 This lets the builder show schema descriptions as hover help and lets users download schema files directly from the UI.
@@ -158,4 +173,4 @@ http://localhost:8766
 If changes do not appear immediately, hard refresh the browser.
 ## Dataset templates
 
-Dataset templates are deferred while schema 3.1.0 metadata creation and validation are stabilized. The current testing build creates dataset records manually and does not expose template controls or include builder-specific project state in exported packages. The preserved implementation and remaining work are documented in `docs/dataset-template-backlog.md`.
+Dataset templates are deferred while schema 3.2.0 metadata creation and validation are stabilized. The current testing build creates dataset records manually and does not expose template controls or include builder-specific project state in exported packages. The preserved implementation and remaining work are documented in `docs/dataset-template-backlog.md`.

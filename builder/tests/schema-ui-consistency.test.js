@@ -16,13 +16,13 @@ const schema2 = {
   datasheet: readJson("schemas/2.0.0/device_datasheet.schema.json"),
 };
 const schema3 = {
-  contributor: readJson("schemas/3.1.0/contributor.schema.json"),
-  device: readJson("schemas/3.1.0/device.schema.json"),
-  datasheet: readJson("schemas/3.1.0/device_datasheet.schema.json"),
+  contributor: readJson("schemas/3.2.0/contributor.schema.json"),
+  device: readJson("schemas/3.2.0/device.schema.json"),
+  datasheet: readJson("schemas/3.2.0/device_datasheet.schema.json"),
 };
 
 assert(schema2.contributor.required.includes("contributor_orcid"), "2.0.0 must require contributor ORCID.");
-assert(!schema3.contributor.required.includes("contributor_orcid"), "3.1.0 must leave contributor ORCID optional.");
+assert(!schema3.contributor.required.includes("contributor_orcid"), "3.2.0 must leave contributor ORCID optional.");
 assert(
   app.includes('contributorRequired.has("contributor_orcid")'),
   "Contributor ORCID requiredness must be read from the active schema.",
@@ -43,23 +43,23 @@ assert(
 
 assert(
   !schema3.datasheet.required.includes("datasheet_calibration_spectral_sensitivity"),
-  "3.1.0 spectral sensitivity must remain optional.",
+  "3.2.0 spectral sensitivity must remain optional.",
 );
 assert(
   !schema3.datasheet.required.includes("datasheet_calibration_linearity"),
-  "3.1.0 linearity must remain optional.",
+  "3.2.0 linearity must remain optional.",
 );
 assert(
   !schema3.datasheet.required.includes("datasheet_calibration_directional_response"),
-  "3.1.0 directional response must remain optional.",
+  "3.2.0 directional response must remain optional.",
 );
 assert(
   schema3.datasheet.required.includes("datasheet_channel"),
-  "3.1.0 channels must remain required.",
+  "3.2.0 channels must remain required.",
 );
 assert(
   schema3.datasheet.properties.datasheet_channel.minItems === 1,
-  "3.1.0 must require at least one datasheet channel.",
+  "3.2.0 must require at least one datasheet channel.",
 );
 assert(
   !schema2.datasheet.required.includes("datasheet_channel"),
@@ -91,18 +91,18 @@ assert(
 assert(
   schema3.device.properties.device_calibration_date
     && schema3.device.required.includes("device_calibration_date"),
-  "3.1.0 calibration date must remain required.",
+  "3.2.0 calibration date must remain required.",
 );
 
 assert(
-  html.includes('<option value="3.1.0" selected>3.1.0</option>')
+  html.includes('<option value="3.2.0" selected>3.2.0</option>')
     && !html.includes('<option value="3.0.0"')
     && !html.includes('<option value="2.0.0"'),
-  "The builder must offer only schema 3.1.0 for new packages.",
+  "The builder must offer only schema 3.2.0 for new packages.",
 );
 assert(
-  app.includes('if (version === "2.0.0" || version === "3.0.0" || version === "3.0.1" || version === "3.0.2") return "3.1.0";'),
-  "Imported schema 2.0.0, 3.0.0, and 3.0.1 work must be upgraded into the 3.1.0 builder workflow.",
+  app.includes('if (version === "2.0.0" || version === "3.0.0" || version === "3.0.1" || version === "3.0.2" || version === "3.1.0") return "3.2.0";'),
+  "Imported schema 2.0.0, 3.0.0, and 3.0.1 work must be upgraded into the 3.2.0 builder workflow.",
 );
 assert(
   html.includes('href="https://docs.globallightcommons.org/validate/"'),

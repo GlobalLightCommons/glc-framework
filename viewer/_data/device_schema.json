@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.1.0/device.schema.json",
-  "version": "3.1.0",
+  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.2.0/device.schema.json",
+  "version": "3.2.0",
   "title": "Device Schema",
   "type": "object",
   "additionalProperties": false,
@@ -10,7 +10,7 @@
       "type": "string",
       "description": "Version of the metadata schema used by this device record",
       "examples": [
-        "3.1.0"
+        "3.2.0"
       ]
     },
     "device_internal_id": {
@@ -43,11 +43,20 @@
     },
     "device_calibration_date": {
       "type": "string",
-      "format": "date",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
-      "description": "Required date of the device's most recent applicable calibration (format YYYY-MM-DD).",
+      "description": "Required applicable calibration date in YYYY-MM-DD format, or the exact value uncalibrated when no applicable date can be supplied. Under GLC policy, uncalibrated includes unavailable historical calibration records and does not establish that the device was never calibrated. An uncalibrated declaration produces a validation warning, not a validation failure.",
       "examples": [
-        "2026-01-15"
+        "2026-01-15",
+        "uncalibrated"
+      ],
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        {
+          "const": "uncalibrated"
+        }
       ]
     },
     "device_firmware_version": {
@@ -68,9 +77,7 @@
     "device_sensors": {
       "type": "array",
       "description": "List of sensors contained within the device",
-      "default": [
-
-      ],
+      "default": [],
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -82,13 +89,13 @@
               "photopic light sensor"
             ]
           },
-      "device_sensor_datasheet_id": {
-        "type": "string",
-        "pattern": "^[a-z0-9][a-z0-9._-]*(-v[0-9]+(\\.[0-9]+)*)?$",
-        "description": "Optional reference to a separate detailed datasheet for this sensor component. Omit when the required whole-device datasheet covers the integrated sensor.",
-        "examples": [
-          "example-instruments-ls100-v1"
-        ]
+          "device_sensor_datasheet_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*(-v[0-9]+(\\.[0-9]+)*)?$",
+            "description": "Optional reference to a separate detailed datasheet for this sensor component. Omit when the required whole-device datasheet covers the integrated sensor.",
+            "examples": [
+              "example-instruments-ls100-v1"
+            ]
           }
         },
         "required": [

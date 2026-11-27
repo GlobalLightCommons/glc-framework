@@ -1,10 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.1.0/glc-dp-profile.json",
+  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.2.0/glc-dp-profile.json",
   "name": "glc-dp-profile",
   "title": "GLC Data Package Profile",
   "description": "Frictionless profile for GLC data packages. Requires core resources and allows additional resources.",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "type": "object",
   "allOf": [
     {
@@ -20,10 +20,10 @@
       "properties": {
         "schema_version": {
           "type": "string",
-          "const": "3.1.0",
+          "const": "3.2.0",
           "description": "Release version of the GLC metadata standard used by this package.",
           "examples": [
-            "3.1.0"
+            "3.2.0"
           ]
         },
         "profile": {
@@ -33,7 +33,7 @@
               "const": "data-package"
             },
             {
-              "pattern": "^schemas/3\\.1\\.0/glc-dp-profile\\.json$"
+              "pattern": "^schemas/3\\.2\\.0/glc-dp-profile\\.json$"
             },
             {
               "pattern": "^glc-dp-profile\\.json$"
@@ -44,7 +44,7 @@
           ],
           "description": "Path/URL to the package profile, or the canonical 'data-package' alias.",
           "examples": [
-            "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.1.0/glc-dp-profile.json"
+            "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.2.0/glc-dp-profile.json"
           ]
         },
         "resources": {
@@ -111,14 +111,14 @@
                     ],
                     "description": "Table Schema — for tabular resources only.",
                     "examples": [
-                      "schemas/3.1.0/participants.schema.json"
+                      "schemas/3.2.0/participants.schema.json"
                     ]
                   },
                   "jsonSchema": {
                     "type": "string",
                     "description": "JSON Schema — for non-tabular resources only.",
                     "examples": [
-                      "schemas/3.1.0/study.schema.json"
+                      "schemas/3.2.0/study.schema.json"
                     ]
                   }
                 },
@@ -350,7 +350,7 @@
               {
                 "name": "study",
                 "path": "data/study.json",
-                "jsonSchema": "schemas/3.1.0/study.schema.json"
+                "jsonSchema": "schemas/3.2.0/study.schema.json"
               }
             ]
           ]
