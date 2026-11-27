@@ -7,7 +7,7 @@ description: Decide how to group participants, recording sessions, devices, and 
 
 Before creating dataset records in the [Metadata Builder](https://builder.globallightcommons.org/),
 decide which recordings belong together and which files can share metadata.
-This guide describes the GLC 3.1.0 model. For individual field requirements,
+This guide describes the GLC 3.2.0 model. For individual field requirements,
 see the [resource schemas]({{ '/schemas/' | relative_url }}).
 
 ## Dataset records and file groups

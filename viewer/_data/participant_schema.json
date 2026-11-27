@@ -1,7 +1,7 @@
 {
   "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
-  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.1.0/participants.schema.json",
-  "version": "3.1.0",
+  "$id": "https://raw.githubusercontent.com/GlobalLightCommons/glc-framework/main/validator/schemas/3.2.0/participants.schema.json",
+  "version": "3.2.0",
   "fields": [
     {
       "name": "participant_internal_id",

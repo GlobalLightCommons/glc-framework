@@ -19,6 +19,7 @@ jobs:
       - run: |
           node --check app.js
           node --check datetime-metadata.js
+          node tests/calibration.test.js
           node tests/datetime-metadata.test.js
           node tests/schema-ui-consistency.test.js
           node tests/summary-statistics.test.js

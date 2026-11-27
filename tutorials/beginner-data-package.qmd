@@ -288,7 +288,7 @@ them. The short tables below explain key links, not every required field.
 
 ### Project setup
 
-Select **Get started**, use the current schema **3.1.0**, and provide a package name
+Select **Get started**, use the current schema **3.2.0**, and provide a package name
 and title. Use a descriptive package name, such as `your-study-light-package`.
 Save a builder draft as you work. Browser autosave is local to that browser and
 device; it is not a substitute for an exported draft or a backup.
@@ -318,7 +318,13 @@ physical devices of the same model can refer to one datasheet. Record a device
 replacement as separate physical devices, not as a silent change to one record.
 
 Use documented measurement channels, units, model information, and calibration
-information. Do not copy technical specifications from an example merely to
+information. For each device, choose **Provide calibration date** and enter the
+applicable date, or explicitly choose **Uncalibrated / calibration date unavailable**
+if no applicable date can be supplied. This includes missing historical records.
+The latter choice exports `uncalibrated` and produces a calibration warning;
+an otherwise valid package can pass. Do not invent a date or enter `unknown`.
+
+Do not copy technical specifications from an example merely to
 satisfy a required field. Ask the device or study expert if information is missing.
 
 ### Dataset records and file groups

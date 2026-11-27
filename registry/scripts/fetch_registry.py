@@ -17,7 +17,7 @@ from validation_artifacts import (
     verify_validation_artifact,
 )
 
-CURRENT_GLC_SCHEMA_VERSION = os.getenv("CURRENT_GLC_SCHEMA_VERSION", "3.1.0")
+CURRENT_GLC_SCHEMA_VERSION = os.getenv("CURRENT_GLC_SCHEMA_VERSION", "3.2.0")
 
 
 def load_cfg(path: str):

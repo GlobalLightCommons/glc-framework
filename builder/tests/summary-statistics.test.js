@@ -16,7 +16,7 @@ assert.equal(exported[1].study_group_name, 'main');
 assert.equal(state.summaryStatistics[1].value, '12.5');
 const savedSource = source.slice(source.indexOf('function buildBuilderProject()'), source.indexOf('function downloadBuilderProjectBackup()'));
 Object.assign(context, {
-  fields: { schemaVersion: { value: '3.1.0' } }, PROJECT_FIELD_KEYS: [],
+  fields: { schemaVersion: { value: '3.2.0' } }, PROJECT_FIELD_KEYS: [],
   cloneJson: value => value === undefined ? undefined : JSON.parse(JSON.stringify(value)),
   normalizeBuilderSchemaVersion: value => value,
   renderAllMetadataSections() {}, syncControlsFromActiveDataset() {}, updateCrossrefOptions() {},

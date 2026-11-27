@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      VALIDATOR_IMAGE_TAG: ghcr.io/globallightcommons/glc-validator@sha256:e7072f4793029f97b38011e55c3979b951a9a431af8f3992b16b06017e613c00
+      VALIDATOR_IMAGE_TAG: ghcr.io/globallightcommons/glc-validator@sha256:c406ff18d840f13f193f468479430614a334c08edb65c27fb97dcc82403a6202
 
     steps:
       - name: Checkout dataset repository

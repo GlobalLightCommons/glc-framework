@@ -25,6 +25,6 @@ GLC metadata are expressed in a `datapackage.json` descriptor and linked core
 resources. The package follows the
 [Frictionless Data Package](https://specs.frictionlessdata.io/data-package/#specification)
 specification with GLC-specific constraints. Properties marked with `*` are
-required. GLC 3.1.0 defines the core resources `study`, `participants`,
+required. GLC 3.2.0 defines the core resources `study`, `participants`,
 `datasets`, `devices`, and `device_datasheets`; `participant_characteristics`
 is optional.
