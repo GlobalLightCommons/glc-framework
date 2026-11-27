@@ -10,7 +10,7 @@ This repository contains the GLC metadata validator for GLC Frictionless data pa
 - `Dockerfile`: a containerized runtime for running validation consistently in local development and CI.
 - `requirements.txt`: pinned Python dependencies used by the validator.
 - `VERSION`: the validator release version.
-- `schemas/1.0.0/`, `schemas/2.0.0/`, `schemas/3.0.0/`, `schemas/3.0.1/`, `schemas/3.0.2/`, and `schemas/3.1.0/`: supported GLC schema bundles, including the Frictionless data package profile and JSON/Table Schema files for core resources.
+- `schemas/1.0.0/`, `schemas/2.0.0/`, `schemas/3.0.0/`, `schemas/3.0.1/`, `schemas/3.0.2/`, `schemas/3.1.0/`, and `schemas/3.2.0/`: supported GLC schema bundles, including the Frictionless data package profile and JSON/Table Schema files for core resources.
 - `docs/schema-3.0.1-development.md`: the corrective-release checklist for coordinating schema, validator, builder, viewer, and dataset changes.
 - `.github/workflows/validate.yml`: a reusable trusted validation workflow that runs the validator container, uploads reports, and attests the validation outputs.
 - `templates/github-actions/validate-glc-dataset.yml`: a ready-to-copy caller workflow for dataset repositories.
@@ -125,7 +125,7 @@ docker run --rm \
 
 ## Expected package shape
 
-The metadata repository should include a `datapackage.json` with a supported `schema_version`, currently `1.0.0`, `2.0.0`, `3.0.0`, `3.0.1`, `3.0.2`, or `3.1.0`. New packages should use `3.1.0`; earlier versions remain supported for reproducibility of packages validated against published releases. The package must declare the required core resources using the canonical resource names:
+The metadata repository should include a `datapackage.json` with a supported `schema_version`, currently `1.0.0`, `2.0.0`, `3.0.0`, `3.0.1`, `3.0.2`, `3.1.0`, or `3.2.0`. New packages should use `3.2.0`; earlier versions remain supported for reproducibility of packages validated against published releases. The package must declare the required core resources using the canonical resource names:
 
 - `study`
 - `participants`
@@ -138,9 +138,22 @@ The optional canonical resource is:
 - `participant_characteristics`
 
 Additional resources may be included. If an additional tabular resource declares a Table Schema, or an additional JSON resource declares a local `jsonSchema`, the validator will validate it. Remote schemas are not supported by the validator container.
-For 3.1.0, an explicitly declared additional tabular or JSON entity resource
+For 3.1.0 and 3.2.0, an explicitly declared additional tabular or JSON entity resource
 must supply its applicable schema; omission is a metadata error. Unlisted
 repository files are not package resources and are not scanned for validation.
+
+## Device calibration (schema 3.2.0; validator 0.7.0)
+
+`device_calibration_date` is required and accepts a valid `YYYY-MM-DD` date or
+`uncalibrated`. Declare uncalibrated when no applicable calibration date can be
+supplied, including missing historical records. This policy does not establish
+that a device was never calibrated. Missing, null, blank, `unknown`, and
+impossible dates such as `9999-99-99` fail metadata validation.
+
+Each uncalibrated device generates one `uncalibrated_devices` warning in JSON and
+HTML reports. The warning identifies the device and explains the measurement
+accuracy limitation; an otherwise valid package passes. Historical versions
+remain unchanged. See [the 3.2.0 release notes](docs/schema-3.2.0-release.md).
 
 ## Binary validation scope (3.1.0; validator 0.6.0)
 
@@ -172,7 +185,7 @@ Declared sampling intervals, usable duration and summary statistics are not
 recalculated or compared with recording contents.
 
 The deployed reusable workflow remains pinned to the existing image until
-0.6.0 is published and its digest is reviewed and updated. Build the local
+0.7.0 is published and its digest is reviewed and updated. Build the local
 container to exercise these changes before publication.
 
 ## Configuration
